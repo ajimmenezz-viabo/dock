@@ -5,11 +5,11 @@ namespace App\Models\Person;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PersonSetup extends Model
+class PersonsSetup extends Model
 {
     use HasFactory;
 
-    protected $table = 'person_setup';
+    protected $table = 'persons_setup';
     protected $primaryKey = 'Id';
     protected $fillable = [
         'ExternalId',

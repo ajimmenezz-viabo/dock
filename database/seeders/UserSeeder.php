@@ -17,7 +17,8 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Viabo',
             'email' => 'viabo@viabo.com',
-            'password' => Hash::make('l8On@Ims^zWJ')
+            'password' => Hash::make('l8On@Ims^zWJ'),
+            'profile' => 'admin_account'
         ]);
     }
 }

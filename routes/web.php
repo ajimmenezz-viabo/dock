@@ -23,19 +23,14 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         // $router->post('register', 'Authentication\AuthController@register');
     });
 
-    $router->group(['prefix' => 'test'], function () use ($router) {
-        $router->post('/', 'TestController@test');
-    });
+    $router->group(["middleware" => "auth:api", 'prefix' => 'v1'], function () use ($router) {
 
-    $router->group(["middleware" => "auth:api"], function () use ($router) {
         $router->group(['prefix' => 'person_management'], function () use ($router) {
-            $router->group(['prefix' => 'legal'], function () use ($router) {
-                $router->get('/', 'PersonManagement\LegalPersonController@index');
-                $router->get('/{id}', 'PersonManagement\LegalPersonController@show');
-                $router->post('/', 'PersonManagement\LegalPersonController@store');
-                $router->put('/{id}', 'PersonManagement\LegalPersonController@update');
-                $router->delete('/{id}', 'PersonManagement\LegalPersonController@destroy');
-            });
+            $router->get('/', 'PersonManagement\PersonController@index');
+            $router->get('/{id}', 'PersonManagement\PersonController@show');
+            $router->post('/', 'PersonManagement\PersonController@store');
+            $router->put('/{id}', 'PersonManagement\PersonController@update');
+            $router->delete('/{id}', 'PersonManagement\PersonController@destroy');
 
 
             $router->group(['prefix' => 'setup'], function () use ($router) {
@@ -49,5 +44,39 @@ $router->group(['prefix' => 'api'], function () use ($router) {
                 $router->get('/document', 'PersonManagement\SetupController@document');
             });
         });
+
+        $router->group(['prefix' => 'cards_management'], function () use ($router) {
+            $router->get('/', 'CardsManagement\CardsController@index');
+            $router->get('/{id}', 'CardsManagement\CardsController@show');
+            $router->post('/', 'CardsManagement\CardsController@store');
+            $router->put('/{id}', 'CardsManagement\CardsController@update');
+            $router->delete('/{id}', 'CardsManagement\CardsController@destroy');
+        });
+
+        $router->group(['prefix' => 'card_profiles'], function () use ($router) {
+            $router->post('/update_all', 'CardsManagement\ProfileController@updateAll');
+            $router->get('/', 'CardsManagement\ProfileController@index');
+            $router->get('/{id}', 'CardsManagement\ProfileController@show');
+        });
+
+        $router->group(['prefix' => 'embossing'], function () use ($router) {
+            $router->group(['prefix' => 'setup'], function () use ($router) {
+                $router->post('/update_all', 'EmbossingManagement\EmbossingController@updateAll');
+                $router->get('/', 'EmbossingManagement\EmbossingController@index');
+                $router->get('/{id}', 'EmbossingManagement\EmbossingController@show');
+            });
+        });
+
+        $router->group(['prefix' => 'rsa'], function () use ($router) {
+            $router->post('/generate', 'Caradhras\Security\RsaController@generate');
+            $router->post('/upload', 'Caradhras\Security\RsaController@upload');
+            $router->post('/update', 'Caradhras\Security\RsaController@update');
+        });
+
+        $router->group(['prefix' => 'aes'], function () use ($router) {
+            $router->post('/generate', 'Caradhras\Security\AesController@generate');
+            $router->get('/', 'Caradhras\Security\AesController@find');
+        });
+
     });
 });

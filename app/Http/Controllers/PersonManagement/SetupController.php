@@ -4,7 +4,7 @@ namespace App\Http\Controllers\PersonManagement;
 
 use App\Http\Controllers\Controller;
 use App\Services\DockApiService;
-use App\Models\Person\PersonSetup;
+use App\Models\Person\PersonsSetup;
 use Exception;
 
 class SetupController extends Controller
@@ -22,7 +22,7 @@ class SetupController extends Controller
             $this->updateDocument();
             return response()->json(['message' => 'Setup updated successfully'], 200);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Error updating setup', 'error' => $e->getMessage()], 500);
+            return self::error('Error updating setup, try again later', 500, $e);
         }
     }
 
@@ -63,7 +63,7 @@ class SetupController extends Controller
 
     private function baseQuery($setup_type)
     {
-        return PersonSetup::where('Category', $setup_type)
+        return PersonsSetup::where('Category', $setup_type)
             ->select(
                 'ExternalId as Id',
                 'Description as Label'
@@ -82,13 +82,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'STATUS')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'STATUS')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -110,13 +110,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'GENDER')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'GENDER')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -138,13 +138,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'ADDRESS')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'ADDRESS')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -166,13 +166,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'PHONE')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'PHONE')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -194,13 +194,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'MARITAL_STATUS')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'MARITAL_STATUS')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -222,13 +222,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'EMAIL')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'EMAIL')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;
@@ -250,13 +250,13 @@ class SetupController extends Controller
             'bearer'
         );
 
-        $status = json_decode($response)->content;
+        $status = $response->content;
         foreach ($status as $s) {
-            $setup = PersonSetup::where('Category', 'DOCUMENT')->where('ExternalId', $s->id)->first();
+            $setup = PersonsSetup::where('Category', 'DOCUMENT')->where('ExternalId', $s->id)->first();
             if (!$setup) {
                 $date = new \DateTime($s->creation_date);
 
-                $setup = new PersonSetup();
+                $setup = new PersonsSetup();
                 $setup->ExternalId = $s->id;
                 $setup->Category = $s->category;
                 $setup->Description = $s->description;

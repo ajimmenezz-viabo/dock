@@ -55,7 +55,7 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-            return response()->json(['error' => 'Not Found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['error' => $exception->getMessage() ?? "Not found"], Response::HTTP_NOT_FOUND);
         }
 
         if ($exception instanceof MethodNotAllowedHttpException) {
@@ -78,6 +78,10 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'Error while decoding the token'], 401);
         }
 
+        if($exception instanceof HttpException) {
+            return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
         return parent::render($request, $exception);
     }
 
@@ -91,8 +95,15 @@ class Handler extends ExceptionHandler
     {
         $errors = $exception->validator->getMessageBag()->toArray();
 
-        return response()->json([
-            'error' => 'The given data was invalid. Please check the documentation for more information',
-        ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (env('APP_ENV') !== 'production') {
+            return response()->json([
+                'error' => 'The given data was invalid. Please check the documentation for more information',
+                'dev_errors' => $errors,
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } else {
+            return response()->json([
+                'error' => 'The given data was invalid. Please check the documentation for more information',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 }

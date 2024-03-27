@@ -7,7 +7,9 @@ use App\Services\DockApiService;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Carbon\Carbon;
 use Exception;
-
+use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\RequestOptions;
 
 class TokenController extends BaseController
 {
@@ -38,20 +40,47 @@ class TokenController extends BaseController
 
     static private function getDockToken()
     {
-        $response = DockApiService::request(
-            ((env('APP_ENV') === 'production') ? env('PRODUCTION_AUTH_URL') : env('STAGING_AUTH_URL')) . 'oauth2/token?grant_type=client_credentials',
-            'POST',
-            [],
-            [],
-            'basic'
-        );
+        try {
+            $client_options = [];
+            if(env('APP_ENV') !== 'production') {
+                $client_options = [
+                    RequestOptions::PROXY => [
+                        'http'  => env('PROXY'),
+                        'https' => env('PROXY')
+                    ],
+                    RequestOptions::VERIFY => false,
+                    RequestOptions::TIMEOUT => 30
+                ];
+            }
 
-        $response_decoded = json_decode($response);
+            $client = new \GuzzleHttp\Client($client_options);
 
-        if (isset($response_decoded->access_token)) {
-            self::updateToken($response_decoded->access_token);
-            return $response_decoded->access_token;
-        } else {
+            $headers = [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Authorization' => 'Basic ' . base64_encode(env('DOCK_API_CLIENT_U') . ':' . env('DOCK_API_CLIENT_P'))
+            ];
+
+            $response = $client->request('POST', ((env('APP_ENV') === 'production') ? env('PRODUCTION_AUTH_URL') : env('STAGING_AUTH_URL')) . 'oauth2/token?grant_type=client_credentials', [
+                'headers' => $headers
+            ]);
+
+            if ($response->getStatusCode() != 200) {
+                return '';
+            }
+
+            $response = $response->getBody()->getContents();
+            $response = json_decode($response);
+
+            self::updateToken($response->access_token);
+            return $response->access_token;
+        } catch (ClientException $e) {
+            Log::error('***** ERROR API AUTH*****');
+            Log::error($e->getMessage());
+            Log::error("Data", ['response' => $e->getResponse()->getBody()->getContents(), 'headers' => $headers]);
+            return json_encode(['error' => 'Communication error with Dock API']);
+        } catch (Exception $e) {
+            Log::error('Error obtaining Dock Token ' . $e->getMessage());
             return '';
         }
     }
