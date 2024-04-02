@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\Caradhras\Auth\TokenController;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Message;
-use Exception;
-use GuzzleHttp\Psr7\Request;
-use Illuminate\Support\Facades\Log;
 use GuzzleHttp\RequestOptions;
-use PhpParser\Node\Expr\Throw_;
+
+use App\Http\Controllers\Caradhras\Auth\TokenController;
+use App\Models\Shared\DockRequests;
+use Illuminate\Support\Facades\Log;
+
+use Exception;
 
 class DockApiService
 {
@@ -28,7 +28,6 @@ class DockApiService
                 ];
             }
 
-
             $client = new \GuzzleHttp\Client($client_options);
 
             $headers = array_merge($headers, self::setAuthHeaders($authType));
@@ -44,24 +43,52 @@ class DockApiService
 
             $response = $client->request($method, $url, [
                 'headers' => $headers,
+                'cert' => storage_path('cert\certificate.pem'),
+                'ssl_key' => storage_path('cert\certificate.key'),
                 'body' => $body ?? null
             ]);
 
-            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-                return json_decode($response->getBody()->getContents());
+            $api_response = json_decode($response->getBody()->getContents());
+
+            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {    
+
+                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), null);
+                return $api_response;
+
             } else {
-                Log::error('Communication error with Dock API ' . $response->getBody()->getContents());
+                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), "HTTP status code: " . $response->getStatusCode());
                 return json_encode(['error' => 'Communication error with Dock API']);
             }
         } catch (ClientException $e) {
-            Log::error('***** ERROR API *****');
-            Log::error($e->getMessage());
-            Log::error("Data", ['response' => $e->getResponse()->getBody()->getContents()]);
+            self::saveRequest($url, $method, $authType, $body, json_encode($headers), $e->getResponse()->getBody()->getContents(), $e->getMessage());
             return json_encode(['error' => 'Communication error with Dock API']);
         } catch (Exception $e) {
-            Log::error('Communication error with Dock API ' . $e->getMessage());
+            self::saveRequest($url, $method, $authType, $body, json_encode($headers), null, $e->getMessage());
             return json_encode(['error' => 'Communication error with Dock API']);
         }
+    }
+
+    static private function saveRequest($url, $method, $authType, $body, $headers, $response, $error)
+    {
+        Log::info('Dock API Request', [
+            'Endpoint' => $url,
+            'Method' => $method,
+            'AuthType' => $authType,
+            'Body' => $body,
+            'Headers' => $headers,
+            'Response' => $response,
+            'Error' => $error
+        ]);
+
+        DockRequests::create([
+            'Endpoint' => $url,
+            'Method' => $method,
+            'AuthType' => $authType,
+            'Body' => $body,
+            'Headers' => $headers,
+            'Response' => $response,
+            'Error' => $error
+        ]);
     }
 
     static private function setAuthHeaders($authType)

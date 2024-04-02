@@ -17,6 +17,7 @@ use App\Models\Person\PersonPhone;
 use App\Models\Person\PersonAddress;
 use App\Models\Person\PersonEmail;
 use App\Models\Person\PersonsSetup;
+use App\Models\Person\PersonAccount;
 use Exception;
 
 class PersonController extends Controller
@@ -43,7 +44,7 @@ class PersonController extends Controller
                 'persons' => $object,
                 'page' => $page,
                 'total_pages' => ceil(Person::where('UserId', auth()->user()->Id)->count() / $limit),
-                'total_persons' => Person::where('UserId', auth()->user()->Id)->count()
+                'total_records' => Person::where('UserId', auth()->user()->Id)->count()
             ], 200);
         } catch (Exception $e) {
             return self::error('Error getting legal persons', 400, $e);
@@ -157,6 +158,8 @@ class PersonController extends Controller
             PersonPhone::where('Id', $person_phone->Id)->update(['ExternalId' => $response->phones_ids[0]]);
             PersonAddress::where('Id', $person_address->Id)->update(['ExternalId' => $response->addresses_ids[0]]);
             PersonEmail::where('Id', $person_email->Id)->update(['ExternalId' => $response->emails_ids[0]]);
+
+            PersonAccountController::store($person, $response->person_id);
 
             DB::commit();
 
@@ -314,11 +317,18 @@ class PersonController extends Controller
         $person_phones = PersonPhone::where('PersonId', $id)->get();
         $person_addresses = PersonAddress::where('PersonId', $id)->get();
         $person_emails = PersonEmail::where('PersonId', $id)->get();
+        $person_account = PersonAccount::where('PersonId', $id)->first();
 
         $object = [
             'person_id' => $person->Id,
             'person_type' => $person->PersonType == 1 ? 'legal' : 'natural',
             'status' => $person->Active == 1 ? 'active' : 'inactive',
+            'person_account' => [
+                'account_id' => $person_account->Id ?? null,
+                'external_id' => $person_account->ExternalId ?? null,
+                'client_id' => $person_account->ClientId ?? null,
+                'book_id' => $person_account->BookId ?? null
+            ],
             'legal_person_data' => [
                 'legal_name' => $person->LegalName,
                 'trade_name' => $person->TradeName,
@@ -429,5 +439,49 @@ class PersonController extends Controller
         }
 
         return $object;
+    }
+
+    private function personObjectShort($id)
+    {
+        $person = Person::where('Id', $id)->first();
+        $person_account = PersonAccount::where('PersonId', $id)->first();
+
+        $object = [
+            'person_id' => $person->Id,
+            'person_external_id' => $person->ExternalId,
+            'person_type' => $person->PersonType == 1 ? 'legal' : 'natural',
+            'status' => $person->Active == 1 ? 'active' : 'inactive',
+            'person_account' => [
+                'account_id' => $person_account->Id ?? null,
+                'external_id' => $person_account->ExternalId ?? null,
+                'client_id' => $person_account->ClientId ?? null,
+                'book_id' => $person_account->BookId ?? null
+            ]
+        ];
+
+        if ($person->PersonType == 1) {
+            $object['legal_person_data'] = [
+                'legal_name' => $person->LegalName,
+                'trade_name' => $person->TradeName,
+                'rfc' => $person->RFC,
+            ];
+        } else if ($person->PersonType == 2) {
+            $object['natural_person_data'] = [
+                'full_name' => $person->FullName,
+                'preferred_name' => $person->PreferredName
+            ];
+        }
+
+        return $object;
+    }
+
+    public static function getPersonObject($id)
+    {
+        return (new self)->personObject($id);
+    }
+
+    public static function getPersonObjectShort($id)
+    {
+        return (new self)->personObjectShort($id);
     }
 }

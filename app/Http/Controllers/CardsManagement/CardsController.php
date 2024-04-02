@@ -15,13 +15,42 @@ use App\Models\Person\Person;
 use App\Models\Person\PersonAddress;
 use App\Models\Shared\Country;
 use App\Http\Controllers\Caradhras\Security\Encryption;
-
+use App\Http\Controllers\PersonManagement\PersonController;
+use App\Models\Person\PersonAccountAlias;
 use Exception;
 
 class CardsController extends Controller
 {
     public function index(Request $request)
     {
+        try {
+            $page = $request['page'] ?? 1;
+            $limit = 100;
+            $offset = ($page - 1) * $limit;
+
+            $cards = Card::where('CreatorId', auth()->user()->Id)
+                ->orWhere('PersonId', auth()->user()->Id)
+                ->offset($offset)
+                ->limit($limit)
+                ->get();
+
+            $count = Card::where('CreatorId', auth()->user()->Id)->orWhere('PersonId', auth()->user()->Id)->count();
+
+            $cards_array = [];
+
+            foreach ($cards as $card) {
+                array_push($cards_array, $this->cardObject($card->Id));
+            }
+
+            return response()->json([
+                'cards' => $cards_array,
+                'page' => $page,
+                'total_pages' => ceil($count / $limit),
+                'total_records' => $count
+            ], 200);
+        } catch (Exception $e) {
+            return self::error('Error getting cards', 400, $e);
+        }
     }
 
     public function show($id)
@@ -43,9 +72,7 @@ class CardsController extends Controller
                 null
             );
 
-            var_dump($response);
-
-            $decrypted = Encryption::decrypt($response->aes, $response->iv, $response->pan);
+            // $decrypted = Encryption::decrypt($response->aes, $response->iv, $response->pan);
 
 
             return response()->json(['card' => $this->cardObject($id)], 200);
@@ -194,22 +221,55 @@ class CardsController extends Controller
         return array_merge($array_part, $base);
     }
 
-    private function cardObject($id, $external_data = null)
+    private function cardObject($id)
     {
         $card = Card::where('Id', $id)->first();
+        $person = PersonController::getPersonObjectShort($card->PersonId);
+        $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
+        if (!$alias) {
+            $alias = $this->fixNonAlias($card, $person['person_account']);
+        }
 
         $object = [
             'card_id' => $card->UUID,
             'card_type' => $card->Type,
             'active_function' => $card->ActiveFunction,
             'brand' => $card->Brand,
-            'masked_pan' => $card->MaskedPan
+            'masked_pan' => $card->MaskedPan,
+            'person' => $person,
+            'alias_account' => $alias
         ];
 
-        if ($external_data) {
-            $object['external_data'] = $external_data;
-        }
-
         return $object;
+    }
+
+    private function fixNonAlias($card, $person_account)
+    {
+        $dockRaw = [
+            'account_id' => $person_account['external_id'],
+            'alias_provider_id' => env('DOCK_ALIAS_PROVIDER_ID'),
+            'alias' => [
+                'card_id' => $card->ExternalId,
+                'card_rail' => $card->ActiveFunction,
+                'card_issuer' => "CARDS"
+            ],
+        ];
+
+        $response = DockApiService::request(
+            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'account-services/alias-core/v1/alias/ecosystems/MASTERCARD/schemas/CARDS',
+            'POST',
+            [],
+            ['trace_id' => ""],
+            'bearer',
+            $dockRaw
+        );
+
+        return PersonAccountAlias::create([
+            'CardId' => $card->Id,
+            'PersonAccountId' => $person_account['external_id'],
+            'ExternalId' => $response->alias_id,
+            'ClientId' => $response->client_id,
+            'BookId' => $response->book_id
+        ]);
     }
 }

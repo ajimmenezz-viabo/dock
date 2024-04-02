@@ -77,6 +77,5 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/generate', 'Caradhras\Security\AesController@generate');
             $router->get('/', 'Caradhras\Security\AesController@find');
         });
-
     });
 });
