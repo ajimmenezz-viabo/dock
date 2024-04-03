@@ -16,6 +16,7 @@ use App\Models\Person\PersonAddress;
 use App\Models\Shared\Country;
 use App\Http\Controllers\Caradhras\Security\Encryption;
 use App\Http\Controllers\PersonManagement\PersonController;
+use App\Models\Person\PersonAccount;
 use App\Models\Person\PersonAccountAlias;
 use Exception;
 
@@ -266,8 +267,8 @@ class CardsController extends Controller
 
         return PersonAccountAlias::create([
             'CardId' => $card->Id,
-            'PersonAccountId' => $person_account['external_id'],
-            'ExternalId' => $response->alias_id,
+            'PersonAccountId' => PersonAccount::where('ExternalId', $person_account['external_id'])->first()->Id,
+            'ExternalId' => $response->id,
             'ClientId' => $response->client_id,
             'BookId' => $response->book_id
         ]);

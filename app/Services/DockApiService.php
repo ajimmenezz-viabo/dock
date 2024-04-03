@@ -43,8 +43,8 @@ class DockApiService
 
             $response = $client->request($method, $url, [
                 'headers' => $headers,
-                'cert' => storage_path('cert\certificate.pem'),
-                'ssl_key' => storage_path('cert\certificate.key'),
+                'cert' => storage_path('cert/certificate.pem'),
+                'ssl_key' => storage_path('cert/certificate.key'),
                 'body' => $body ?? null
             ]);
 
@@ -63,7 +63,7 @@ class DockApiService
             self::saveRequest($url, $method, $authType, $body, json_encode($headers), $e->getResponse()->getBody()->getContents(), $e->getMessage());
             return json_encode(['error' => 'Communication error with Dock API']);
         } catch (Exception $e) {
-            self::saveRequest($url, $method, $authType, $body, json_encode($headers), null, $e->getMessage());
+            self::saveRequest($url, $method, $authType, "", json_encode($headers), null, $e->getMessage());
             return json_encode(['error' => 'Communication error with Dock API']);
         }
     }
