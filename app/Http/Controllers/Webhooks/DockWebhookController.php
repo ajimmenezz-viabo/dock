@@ -12,30 +12,12 @@ class DockWebhookController extends Controller
     public function store(Request $request)
     {
         try {
-
-            $aesKey = env("WEBHOOK_AES_KEY");
-            $encryptedMessage = $request->getContent();
-
-            $key = base64_decode($aesKey);
-            $messageBytes = base64_decode($encryptedMessage);
-            $nonce = substr($messageBytes, 0, 12);
-            $ciphertext = substr($messageBytes, 12, -16);
-            $tag = substr($messageBytes, -16);
-
-            $decrypted = openssl_decrypt(
-                $ciphertext,
-                'aes-256-gcm',
-                $key,
-                OPENSSL_RAW_DATA,
-                $nonce,
-                $tag
-            );
-
             $decryptedText = "Error";
 
+            $decrypted = $this->decrypt($request->getContent());
             if ($decrypted === false) {
-                Log::error('Failed to decrypt message'); 
-            }else{
+                Log::error('Failed to decrypt message');
+            } else {
                 $decryptedText = $decrypted;
             }
 
@@ -48,9 +30,50 @@ class DockWebhookController extends Controller
                 'DecryptedBody' => $decryptedText
             ]);
 
+            $this->tryDecryptErrors();
+
             return response()->json(['message' => 'Request registered'], 200);
         } catch (\Exception $e) {
             return self::error('Error registering request', 500, $e);
         }
+    }
+
+    public function tryDecryptErrors()
+    {
+        try {
+            $errors = WebhookRequest::where('DecryptedBody', 'Error')->get();
+            foreach ($errors as $error) {
+                $decrypted = $this->decrypt($error->Body);
+                if ($decrypted === false) {
+                    $decryptedText = "Error";
+                } else {
+                    $decryptedText = $decrypted;
+                }
+
+                WebhookRequest::where('Id', $error->Id)->update(['DecryptedBody' => $decryptedText]);
+            }
+        } catch (\Exception $e) {
+        }
+    }
+
+    private function decrypt($encryptedMessage)
+    {
+        $aesKey = env("WEBHOOK_AES_KEY");
+        $key = base64_decode($aesKey);
+        $messageBytes = base64_decode($encryptedMessage);
+        $nonce = substr($messageBytes, 0, 12);
+        $ciphertext = substr($messageBytes, 12, -16);
+        $tag = substr($messageBytes, -16);
+
+        $decrypted = openssl_decrypt(
+            $ciphertext,
+            'aes-256-gcm',
+            $key,
+            OPENSSL_RAW_DATA,
+            $nonce,
+            $tag
+        );
+
+        return $decrypted;
     }
 }
