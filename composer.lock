@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c42b63e7653078d031e757f669c75fe3",
+    "content-hash": "8f90d51cd75a24a2cde11082de784700",
     "packages": [
         {
             "name": "brick/math",
@@ -972,7 +972,7 @@
         },
         {
             "name": "illuminate/auth",
-            "version": "v10.47.0",
+            "version": "v10.48.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/auth.git",

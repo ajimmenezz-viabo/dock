@@ -13,6 +13,12 @@
 |
 */
 
+$router->group(['prefix' => 'wh'], function () use ($router) {
+    $router->group(['prefix' => 'v1', 'middleware' => 'auth_basic'], function () use ($router) {
+        $router->post('dock_events', 'Webhooks\DockWebhookController@store');
+    });
+});
+
 $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->group(['prefix' => 'auth'], function () use ($router) {
@@ -20,10 +26,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->post('logout', 'Authentication\AuthController@logout');
         $router->post('refresh', 'Authentication\AuthController@refresh');
         $router->post('me', 'Authentication\AuthController@me');
-        // $router->post('register', 'Authentication\AuthController@register');
     });
 
     $router->group(["middleware" => "auth:api", 'prefix' => 'v1'], function () use ($router) {
+
+        $router->group(['prefix' => 'dock_webhook_register'], function () use ($router) {
+            $router->post('/', 'Webhooks\DockRegisterController@store');
+        });
 
         $router->group(['prefix' => 'person_management'], function () use ($router) {
             $router->get('/', 'PersonManagement\PersonController@index');
