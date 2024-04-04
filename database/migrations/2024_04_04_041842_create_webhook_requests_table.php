@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('webhook_requests', function (Blueprint $table) {
             $table->id('Id');
-            $table->string('Url');
+            $table->text('Url');
             $table->string('Method');
-            $table->string('Headers');
+            $table->text('Headers');
             $table->text('QueryParams')->nullable();
             $table->text('Body')->nullable();
+            $table->text('DecryptedBody')->nullable();
             $table->timestamps();
         });
     }

@@ -17,7 +17,8 @@ class WebhookRequest extends Model
         'Method',
         'Headers',
         'QueryParams',
-        'Body'
+        'Body',
+        'DecryptedBody'
     ];
 
     protected $hidden = [
