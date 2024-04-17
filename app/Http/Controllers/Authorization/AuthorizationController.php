@@ -131,12 +131,12 @@ class AuthorizationController extends Controller
         if (!$profile) {
             ProfileCard::create([
                 'CardId' => $card->Id,
-                'ProfileId' => $profile->Id
+                'AuthorizationProfileId' => 1
             ]);
             $profile = ProfileCard::where('CardId', $card->Id)->first();
         }
 
-        $auth_profile = ProfileAuthorization::where('Id', $profile->ProfileId)->first();
+        $auth_profile = ProfileAuthorization::where('Id', $profile->AuthorizationProfileId)->first();
 
         switch ($type) {
             case 'PURCHASE':
