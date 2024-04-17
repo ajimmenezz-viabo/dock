@@ -30,7 +30,7 @@ $router->group(['prefix' => 'authorizations'], function () use ($router) {
     $router->post('reversal', 'Authorization\AuthorizationReversal@reversal');
     $router->post('withdraw', 'Authorization\AuthorizationWithdraw@withdraw');
     $router->post('payment',  'Authorization\AuthorizationPayment@payment');
-    $router->post('advice',  'Authorization\AuthorizationAdvice@advice');
+    $router->post('advice',  'Authorization\AuthorizationAdvice@advice'); 
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
