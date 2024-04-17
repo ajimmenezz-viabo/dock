@@ -203,14 +203,14 @@ class AuthorizationController extends Controller
             $cont++;
         }
 
-        if (abs($total) + $amount > $profile->MaxMonthlyAmountTPV) {
+        if (abs($total) + $amount > $profile->MaxAmountMonthlyTPV) {
             return [
                 'response' => 'INVALID_TRANSACTION',
                 'reason' => 'Transaction amount exceeds the maximum monthly allowed'
             ];
         }
 
-        if ($cont + 1 > $profile->MaxMonthlyOperationsTPV) {
+        if ($cont + 1 > $profile->MaxOperationsMonthlyTPV) {
             return [
                 'response' => 'INVALID_TRANSACTION',
                 'reason' => 'Number of transactions exceeds the maximum monthly allowed'
@@ -273,14 +273,14 @@ class AuthorizationController extends Controller
             $cont++;
         }
 
-        if (abs($total) + $amount > $profile->MaxMonthlyAmountATM) {
+        if (abs($total) + $amount > $profile->MaxAmountMonthlyATM) {
             return [
                 'response' => 'INVALID_TRANSACTION',
                 'reason' => 'Transaction amount exceeds the maximum monthly allowed'
             ];
         }
 
-        if ($cont + 1 > $profile->MaxMonthlyOperationsATM) {
+        if ($cont + 1 > $profile->MaxOperationsMonthlyATM) {
             return [
                 'response' => 'INVALID_TRANSACTION',
                 'reason' => 'Number of transactions exceeds the maximum monthly allowed'
