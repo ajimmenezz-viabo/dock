@@ -22,6 +22,14 @@ use Exception;
 
 class CardsController extends Controller
 {
+    private $dock_encrypter;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->dock_encrypter = new Encryption();
+    }
+
     public function index(Request $request)
     {
         try {
@@ -57,24 +65,8 @@ class CardsController extends Controller
     public function show($id)
     {
         try {
-            $card = Card::where('Id', $id)
-                ->where(function ($query) {
-                    $query->where('CreatorId', auth()->user()->Id)
-                        ->orWhere('PersonId', auth()->user()->Id);
-                })->first();
-            if (!$card) return response()->json(['message' => 'Card not found or you don\'t have permission to access it'], 404);
-
-            $response = DockApiService::request(
-                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/data',
-                'GET',
-                [],
-                [],
-                'bearer',
-                null
-            );
-
-            // $decrypted = Encryption::decrypt($response->aes, $response->iv, $response->pan);
-
+            $card = $this->validateCardPermission($id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             return response()->json(['card' => $this->cardObject($id)], 200);
         } catch (Exception $e) {
@@ -134,14 +126,71 @@ class CardsController extends Controller
         }
     }
 
-    public function update($id)
+    public function block($id)
     {
-        return 'LegalPersonController@update';
+        try {
+            $card = $this->validateCardPermission($id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
+
+            $dockRaw = [
+                'status' => 'BLOCKED',
+                'status_reason' => 'OTHER'
+            ];
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/status',
+                'PUT',
+                [],
+                [],
+                'bearer',
+                $dockRaw
+            );
+
+            if (isset($response->response->description))
+                return response()->json(['message' => $response->response->description], 400);
+
+            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($id)], 200);
+        } catch (Exception $e) {
+            return self::error('Error blocking card', 400, $e);
+        }
     }
 
-    public function destroy($id)
+    public function unblock($id)
     {
-        return 'LegalPersonController@destroy';
+        try {
+            $card = $this->validateCardPermission($id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
+
+            $dockRaw = [
+                'status' => 'BLOCKED',
+                'status_reason' => 'OTHER'
+            ];
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/status',
+                'PUT',
+                [],
+                [],
+                'bearer',
+                $dockRaw
+            );
+
+            if (isset($response->response->description))
+                return response()->json(['message' => $response->response->description], 400);
+
+            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($id)], 200);
+        } catch (Exception $e) {
+            return self::error('Error blocking card', 400, $e);
+        }
+    }
+
+    private function validateCardPermission($id)
+    {
+        return Card::where('Id', $id)
+            ->where(function ($query) {
+                $query->where('CreatorId', auth()->user()->Id)
+                    ->orWhere('PersonId', auth()->user()->Id);
+            })->first();
     }
 
     private function validateCardData($request)
@@ -153,33 +202,6 @@ class CardsController extends Controller
             'card_profile_id' => 'required|int'
         ]);
     }
-
-    private function validateCardDataExist($request)
-    {
-
-        $person = Person::where('Id', $request['person_id'])->where('UserId', auth()->user()->Id)->first();
-        $card_profile = Profile::where('Id', $request['card_profile_id'])->first();
-        $embossing_setup = Embossing::where('Id', $request['embossing_setup_id'])->first();
-
-        if (!$person)
-            abort(404, 'Person not found or you do not have permission to access it');
-
-        if (!in_array($request['type'], ['physical', 'virtual']))
-            abort(400, 'The card type must be physical or virtual');
-
-        if (!$card_profile)
-            abort(404, 'The card profile does not exist or you do not have permission to access it');
-
-        if (!$embossing_setup)
-            abort(404, 'The embossing setup does not exist or you do not have permission to access it');
-
-        return [
-            'person' => $person,
-            'profile' => $card_profile,
-            'embossing' => $embossing_setup
-        ];
-    }
-
 
     private function cardDockRaw($request)
     {
@@ -224,24 +246,60 @@ class CardsController extends Controller
 
     private function cardObject($id)
     {
-        $card = Card::where('Id', $id)->first();
+        $card = $this->fillSensitiveData(Card::where('Id', $id)->first());
         $person = PersonController::getPersonObjectShort($card->PersonId);
         $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
         if (!$alias) {
             $alias = $this->fixNonAlias($card, $person['person_account']);
         }
 
+        if ($card->Balance == null) {
+            $card->Balance = $this->encrypter->encrypt("0.00");
+            $card->save();
+        }
+
         $object = [
-            'card_id' => $card->UUID,
+            'card_id' => $card->Id,
             'card_type' => $card->Type,
             'active_function' => $card->ActiveFunction,
             'brand' => $card->Brand,
             'masked_pan' => $card->MaskedPan,
-            'person' => $person,
-            'alias_account' => $alias
+            'balance' => $this->encrypter->decrypt($card->Balance),
+            'sensitive_data' => $this->sensitiveData($card),
         ];
 
+
+        if (env('DEV_MODE') ===  true) {
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId,
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+            $object['person'] = $person;
+            $object['alias_account'] = $alias;
+            $object['external'] = $response;
+            $object['sensitive_data_raw'] = [
+                'pan' => $this->encrypter->decrypt($card->Pan),
+                'cvv' => $this->encrypter->decrypt($card->CVV),
+                'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate)
+            ];
+        }
+
         return $object;
+    }
+
+    private function sensitiveData($card)
+    {
+        $sensitive = [
+            'pan' => $this->encrypter->decrypt($card->Pan),
+            'cvv' => $this->encrypter->decrypt($card->CVV),
+            'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate)
+        ];
+
+        return $this->encrypter->encrypt(json_encode($sensitive));
     }
 
     private function fixNonAlias($card, $person_account)
@@ -272,5 +330,55 @@ class CardsController extends Controller
             'ClientId' => $response->client_id,
             'BookId' => $response->book_id
         ]);
+    }
+
+    private function validateCardDataExist($request)
+    {
+
+        $person = Person::where('Id', $request['person_id'])->where('UserId', auth()->user()->Id)->first();
+        $card_profile = Profile::where('Id', $request['card_profile_id'])->first();
+        $embossing_setup = Embossing::where('Id', $request['embossing_setup_id'])->first();
+
+        if (!$person)
+            abort(404, 'Person not found or you do not have permission to access it');
+
+        if (!$card_profile)
+            abort(404, 'The card profile does not exist or you do not have permission to access it');
+
+        if (!$embossing_setup)
+            abort(404, 'The embossing setup does not exist or you do not have permission to access it');
+
+        return [
+            'person' => $person,
+            'profile' => $card_profile,
+            'embossing' => $embossing_setup
+        ];
+    }
+
+    private function fillSensitiveData(Card $card)
+    {
+        try {
+            if ($card->Pan == null || $card->Pan == "") {
+                $response = DockApiService::request(
+                    ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/data',
+                    'GET',
+                    [],
+                    [],
+                    'bearer',
+                    null
+                );
+
+                Card::where('Id', $card->Id)->update([
+                    'Pan' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pan)),
+                    'CVV' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv)),
+                    'ExpirationDate' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->expiration_date))
+                ]);
+
+                $card = Card::where('Id', $card->Id)->first();
+            }
+            return $card;
+        } catch (Exception $e) {
+            return $card;
+        }
     }
 }

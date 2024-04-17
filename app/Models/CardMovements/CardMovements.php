@@ -1,29 +1,20 @@
 <?php
 
-namespace App\Models\Card;
+namespace App\Models\CardMovements;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Card extends Model
+class CardMovements extends Model
 {
     use HasFactory;
 
-    protected $table = 'cards';
+    protected $table = 'card_movements';
     protected $primaryKey = 'Id';
     protected $fillable = [
-        'UUID',
-        'BatchId',
-        'CreatorId',
-        'PersonId',
+        'CardId',
         'Type',
-        'ActiveFunction',
-        'ExternalId',
-        'Brand',
-        'MaskedPan',
-        'Pan',
-        'ExpirationDate',
-        'CVV',
+        'Amount',
         'Balance'
     ];
     protected $hidden = [

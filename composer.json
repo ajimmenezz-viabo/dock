@@ -13,6 +13,7 @@
         "guzzlehttp/guzzle": "^7.8",
         "illuminate/auth": "^10.48",
         "laravel/lumen-framework": "^10.0",
+        "phpseclib/phpseclib": "^3.0",
         "ramsey/uuid": "^4.7",
         "tymon/jwt-auth": "*"
     },

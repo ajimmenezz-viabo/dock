@@ -1,31 +1,29 @@
 <?php
 
-namespace App\Models\Card;
+
+namespace App\Models\Shared;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Card extends Model
+class AuthorizationRequest extends Model
 {
     use HasFactory;
 
-    protected $table = 'cards';
+    protected $table = 'authorization_requests';
     protected $primaryKey = 'Id';
     protected $fillable = [
         'UUID',
-        'BatchId',
-        'CreatorId',
-        'PersonId',
-        'Type',
-        'ActiveFunction',
         'ExternalId',
-        'Brand',
-        'MaskedPan',
-        'Pan',
-        'ExpirationDate',
-        'CVV',
-        'Balance'
+        'AuthorizationCode',
+        'Endpoint',
+        'Headers',
+        'Body',
+        'Response',
+        'Error',
+        'Code'
     ];
+
     protected $hidden = [
         'created_at',
         'updated_at'

@@ -18,7 +18,7 @@ class DockApiService
     {
         try {
             $client_options = [];
-            if (env('APP_ENV') !== 'production') {
+            if (env('APP_ENV') === 'local') {
                 $client_options = [
                     RequestOptions::PROXY => [
                         'http'  => env('PROXY'),
@@ -53,16 +53,16 @@ class DockApiService
             $api_response = json_decode($response->getBody()->getContents());
 
             if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-
                 self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), null);
                 return $api_response;
             } else {
                 self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), "HTTP status code: " . $response->getStatusCode());
-                return json_encode(['error' => 'Communication error with Dock API']);
+                return json_encode(['error' => "Communication error with Dock API"]);
             }
         } catch (ClientException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents());
             self::saveRequest($url, $method, $authType, $body, json_encode($headers), $e->getResponse()->getBody()->getContents(), $e->getMessage());
-            return json_encode(['error' => 'Communication error with Dock API']);
+            return json_decode(json_encode(['error' => 'Communication error with Dock APIs', "response" => $response->error ?? []]));
         } catch (Exception $e) {
             // self::saveRequest($url, $method, $authType, "", json_encode($headers), null, $e->getMessage());
             return Controller::error('Communication error with Dock API', 500, $e);
@@ -92,7 +92,6 @@ class DockApiService
                 'Error' => $error
             ]);
         } catch (Exception $e) {
-            
         }
     }
 

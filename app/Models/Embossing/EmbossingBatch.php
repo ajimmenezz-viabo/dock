@@ -1,35 +1,30 @@
 <?php
 
-namespace App\Models\Card;
+namespace App\Models\Embossing;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Card extends Model
+class EmbossingBatch extends Model
 {
     use HasFactory;
 
-    protected $table = 'cards';
+    protected $table = 'embossing_batches';
     protected $primaryKey = 'Id';
+
     protected $fillable = [
-        'UUID',
-        'BatchId',
-        'CreatorId',
+        'UserId',
         'PersonId',
-        'Type',
-        'ActiveFunction',
         'ExternalId',
-        'Brand',
-        'MaskedPan',
-        'Pan',
-        'ExpirationDate',
-        'CVV',
-        'Balance'
+        'TotalCards',
+        'Status'
     ];
+
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
 
     public $timestamps = true;
+
 }

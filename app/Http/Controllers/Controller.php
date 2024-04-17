@@ -7,6 +7,14 @@ use Exception;
 
 class Controller extends BaseController
 {
+    public $encrypter;
+
+    public function __construct()
+    {
+        $this->encrypter = new \Illuminate\Encryption\Encrypter(env('APP_KEY'), 'AES-256-CBC');
+    }
+
+
     static public function error($message, $code = 500, Exception $e)
     {
         if (env('APP_ENV') !== 'production')

@@ -19,6 +19,20 @@ $router->group(['prefix' => 'wh'], function () use ($router) {
     });
 });
 
+$router->group(['prefix' => 'dev'], function () use ($router) {
+    $router->get('/decrypt', 'Security\Decrypt@decrypt');
+});
+
+$router->group(['prefix' => 'authorizations'], function () use ($router) {
+    $router->post('consult',  'Authorization\AuthorizationConsult@consult');
+    $router->post('purchase', 'Authorization\AuthorizationPurchase@purchase');
+    $router->post('deposit',  'Authorization\AuthorizationDeposit@deposit');
+    $router->post('reversal', 'Authorization\AuthorizationReversal@reversal');
+    $router->post('withdraw', 'Authorization\AuthorizationWithdraw@withdraw');
+    $router->post('payment',  'Authorization\AuthorizationPayment@payment');
+    $router->post('advice',  'Authorization\AuthorizationAdvice@advice');
+});
+
 $router->group(['prefix' => 'api'], function () use ($router) {
 
     $router->group(['prefix' => 'auth'], function () use ($router) {
@@ -60,6 +74,18 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/', 'CardsManagement\CardsController@store');
             $router->put('/{id}', 'CardsManagement\CardsController@update');
             $router->delete('/{id}', 'CardsManagement\CardsController@destroy');
+
+            $router->post('/{id}/change_status/block', 'CardsManagement\CardsController@block');
+            $router->post('/{id}/change_status/unblock', 'CardsManagement\CardsController@unblock');
+        });
+
+        $router->group(['prefix' => 'embossing_batches'], function () use ($router) {
+            $router->get('/key', 'EmbossingManagement\EmbossingBatchController@getKey');
+            $router->post('/key', 'EmbossingManagement\EmbossingBatchController@generateKey');
+
+            $router->get('/', 'EmbossingManagement\EmbossingBatchController@index');
+            $router->post('/', 'EmbossingManagement\EmbossingBatchController@batchEmbossing');
+            $router->get('/{id}', 'EmbossingManagement\EmbossingBatchController@show');
         });
 
         $router->group(['prefix' => 'card_profiles'], function () use ($router) {
