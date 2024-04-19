@@ -12,7 +12,7 @@ class Encryption
         $goFilePath = realpath(__DIR__ . '/DecryptGo/decrypt.go');
 
         // Construir el comando con los parámetros escapados
-        $command = "go run " . $goFilePath . " " .
+        $command =  env('PREFIX_GO_COMMAND') . "go run " . $goFilePath . " " .
             escapeshellarg(env('RSA_PRIVATE_KEY')) . " " .
             escapeshellarg($aesBase64) . " " .
             escapeshellarg($ivBase64) . " " .

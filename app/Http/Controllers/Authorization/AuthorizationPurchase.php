@@ -37,7 +37,7 @@ class AuthorizationPurchase extends AuthorizationController
             $balance = $this->encrypter->decrypt($card->Balance);
 
             $profile_validation = $this->validateProfileRules($card, $request->all()['values']['billing_value'], 'PURCHASE');
-            if($profile_validation['response'] != 'APPROVED') {
+            if ($profile_validation['response'] != 'APPROVED') {
                 $error = $this->save_error($authorization, $profile_validation['reason']);
                 $response = $this->dock_response($profile_validation['response'], $profile_validation['reason'], $balance);
                 return response()->json($error, 200);
