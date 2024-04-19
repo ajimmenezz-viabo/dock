@@ -99,4 +99,8 @@ class RsaController extends Controller
             return self::error('Error updating RSA keys', 400, $e);
         }
     }
+
+    public function consult(){
+        
+    }
 }

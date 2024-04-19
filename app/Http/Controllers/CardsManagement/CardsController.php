@@ -16,6 +16,7 @@ use App\Models\Person\PersonAddress;
 use App\Models\Shared\Country;
 use App\Http\Controllers\Caradhras\Security\Encryption;
 use App\Http\Controllers\PersonManagement\PersonController;
+use App\Models\CardSetups\CardSetups;
 use App\Models\Person\PersonAccount;
 use App\Models\Person\PersonAccountAlias;
 use Exception;
@@ -258,6 +259,8 @@ class CardsController extends Controller
             $card->save();
         }
 
+        $pin = $this->getPin($card->ExternalId);
+
         $object = [
             'card_id' => $card->Id,
             'card_type' => $card->Type,
@@ -265,11 +268,44 @@ class CardsController extends Controller
             'brand' => $card->Brand,
             'masked_pan' => $card->MaskedPan,
             'balance' => $this->encrypter->decrypt($card->Balance),
-            'sensitive_data' => $this->sensitiveData($card),
+            'sensitive_data' => $this->sensitiveData($card, $pin),
         ];
 
 
         if (env('DEV_MODE') ===  true) {
+
+            $object['person'] = $person;
+            $object['alias_account'] = $alias;
+            $object['external'] = $this->fillSetups($card);
+            $object['sensitive_data_raw'] = [
+                'pan' => $this->encrypter->decrypt($card->Pan),
+                'cvv' => $this->encrypter->decrypt($card->CVV),
+                'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate),
+                'pin' => $pin
+            ];
+        }
+
+        return $object;
+    }
+
+    private function sensitiveData($card, $pin)
+    {
+        $sensitive = [
+            'pan' => $this->encrypter->decrypt($card->Pan),
+            'cvv' => $this->encrypter->decrypt($card->CVV),
+            'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate),
+            'pin' => $pin
+        ];
+
+        return $this->encrypter->encrypt(json_encode($sensitive));
+    }
+
+    private function fillSetups($card)
+    {
+        try {
+            $setups = CardSetups::where('CardId', $card->Id)->first();
+            if ($setups) return $setups;
+
             $response = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId,
                 'GET',
@@ -278,28 +314,25 @@ class CardsController extends Controller
                 'bearer',
                 null
             );
-            $object['person'] = $person;
-            $object['alias_account'] = $alias;
-            $object['external'] = $response;
-            $object['sensitive_data_raw'] = [
-                'pan' => $this->encrypter->decrypt($card->Pan),
-                'cvv' => $this->encrypter->decrypt($card->CVV),
-                'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate)
-            ];
+
+            $setups = CardSetups::create([
+                'CardId' => $card->Id,
+                'Status' => $response->status,
+                'StatusReason' => $response->status_reason,
+                'Ecommerce' => $response->settings->transaction->ecommerce,
+                'International' => $response->settings->transaction->international,
+                'Stripe' => $response->settings->transaction->stripe,
+                'Wallet' => $response->settings->transaction->wallet,
+                'Withdrawal' => $response->settings->transaction->withdrawal,
+                'Contactless' => $response->settings->transaction->contactless,
+                'PinOffline' => $response->settings->security->pin_offline,
+                'PinOnUs' => $response->settings->security->pin_on_us
+            ]);
+
+            return $setups;
+        } catch (Exception $e) {
+            return null;
         }
-
-        return $object;
-    }
-
-    private function sensitiveData($card)
-    {
-        $sensitive = [
-            'pan' => $this->encrypter->decrypt($card->Pan),
-            'cvv' => $this->encrypter->decrypt($card->CVV),
-            'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate)
-        ];
-
-        return $this->encrypter->encrypt(json_encode($sensitive));
     }
 
     private function fixNonAlias($card, $person_account)
@@ -379,6 +412,24 @@ class CardsController extends Controller
             return $card;
         } catch (Exception $e) {
             return $card;
+        }
+    }
+
+    private function getPin($card_id)
+    {
+        try {
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card_id . '/pin',
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+
+            return $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pin);
+        } catch (Exception $e) {
+            return null;
         }
     }
 }
