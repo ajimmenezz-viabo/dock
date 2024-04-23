@@ -36,6 +36,20 @@ class AuthorizationWithdraw extends AuthorizationController
             $card = $this->validateCard($request->all()['card_id'], $request->all()['card_number']);
             $balance = $this->encrypter->decrypt($card->Balance);
 
+            $status_validation = $this->validateCardStatus($card);
+            if ($status_validation['response'] != 'APPROVED') {
+                $error = $this->save_error($authorization, $status_validation['reason']);
+                $response = $this->dock_response($status_validation['response'], $status_validation['reason'], $balance);
+                return response()->json($error, 200);
+            }
+
+            $setup_validation = $this->validateCardSetup($card, $request->all());
+            if ($setup_validation['response'] != 'APPROVED') {
+                $error = $this->save_error($authorization, $setup_validation['reason']);
+                $response = $this->dock_response($setup_validation['response'], $setup_validation['reason'], $balance);
+                return response()->json($error, 200);
+            }
+
             $profile_validation = $this->validateProfileRules($card, $request->all()['values']['billing_value'], 'WITHDRAWAL');
             if ($profile_validation['response'] != 'APPROVED') {
                 $error = $this->save_error($authorization, $profile_validation['reason']);

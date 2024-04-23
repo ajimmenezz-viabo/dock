@@ -18,7 +18,7 @@ class DockApiService
     {
         try {
             $client_options = [];
-            if (env('APP_ENV') === 'local') {
+            if(env('PROXY') != null && env('PROXY') != "") {
                 $client_options = [
                     RequestOptions::PROXY => [
                         'http'  => env('PROXY'),

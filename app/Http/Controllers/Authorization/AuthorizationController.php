@@ -7,6 +7,7 @@ use App\Models\Authorization\ProfileAuthorization;
 use App\Models\Authorization\ProfileCard;
 use App\Models\Card\Card;
 use App\Models\CardMovements\CardMovements;
+use App\Models\CardSetups\CardSetups;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 
@@ -136,6 +137,7 @@ class AuthorizationController extends Controller
             $profile = ProfileCard::where('CardId', $card->Id)->first();
         }
 
+        
         $auth_profile = ProfileAuthorization::where('Id', $profile->AuthorizationProfileId)->first();
 
         switch ($type) {
@@ -143,7 +145,7 @@ class AuthorizationController extends Controller
                 return $this->validatePurchaseRules($card, $auth_profile, $amount);
                 break;
             case 'WITHDRAWAL':
-                $this->validateWithdrawalRules($card, $auth_profile, $amount);
+                return $this->validateWithdrawalRules($card, $auth_profile, $amount);
                 break;
             default:
                 return [
@@ -252,13 +254,6 @@ class AuthorizationController extends Controller
             ];
         }
 
-        if ($cont + 1 > $profile->MaxDailyOperationsATM) {
-            return [
-                'response' => 'INVALID_TRANSACTION',
-                'reason' => 'Number of transactions exceeds the maximum daily allowed'
-            ];
-        }
-
 
         $month = date('m');
         $movementsMonth = CardMovements::where('CardId', $card->Id)
@@ -280,16 +275,86 @@ class AuthorizationController extends Controller
             ];
         }
 
-        if ($cont + 1 > $profile->MaxOperationsMonthlyATM) {
+        return [
+            'response' => 'APPROVED',
+            'reason' => 'Transaction approved'
+        ];
+    }
+
+    public function validateCardStatus($card)
+    {
+        $setup = CardSetups::where('CardId', $card->Id)->first();
+        if (!$setup) {
             return [
                 'response' => 'INVALID_TRANSACTION',
-                'reason' => 'Number of transactions exceeds the maximum monthly allowed'
+                'reason' => 'Card setup not found'
+            ];
+        }
+
+        if ($setup->Status != 'NORMAL') {
+            return [
+                'response' => 'INVALID_TRANSACTION',
+                'reason' => 'Card is blocked or cancelled'
             ];
         }
 
         return [
             'response' => 'APPROVED',
-            'reason' => 'Transaction approved'
+            'reason' => 'Card is active'
+        ];
+    }
+
+    public function validateCardSetup($card, $transaction)
+    {
+        $setup = CardSetups::where('CardId', $card->Id)->first();
+        if (!$setup) {
+            return [
+                'response' => 'INVALID_TRANSACTION',
+                'reason' => 'Card setup not found'
+            ];
+        }
+
+        if (!in_array($transaction['processing']['type'], ["PURCHASE", "WITHDRAWAL"])) {
+            return [
+                'response' => 'INVALID_TRANSACTION',
+                'reason' => 'Invalid transaction type'
+            ];
+        }
+
+        if ($transaction['transaction_indicators']['is_international'] === true && $setup->International == 0) {
+            return [
+                'response' => 'INVALID_TRANSACTION',
+                'reason' => 'International transactions are not allowed'
+            ];
+        }
+
+        if ($transaction['processing']['type'] == 'PURCHASE') {
+            if ($transaction['transaction_indicators']['is_ecommerce'] === true && $setup->Ecommerce == 0) {
+                return [
+                    'response' => 'INVALID_TRANSACTION',
+                    'reason' => 'Ecommerce transactions are not allowed'
+                ];
+            }
+
+            if (in_array($transaction['card_entry']['mode'], ['PAN_AUTO_ENTRY_VIA_CONTACTLESS_M_CHIP', 'PAN_AUTO_ENTRY_VIA_CONTACTLESS_MAGNETIC_STRIPE']) && $setup->Contactless == 0) {
+                return [
+                    'response' => 'INVALID_TRANSACTION',
+                    'reason' => 'Contactless transactions are not allowed'
+                ];
+            }
+        }
+
+        if ($transaction['processing']['type'] == 'WITHDRAWAL' && $setup->Withdrawal == 0) {
+            return [
+                'response' => 'INVALID_TRANSACTION',
+                'reason' => 'Withdrawal transactions are not allowed'
+            ];
+        }
+
+
+        return [
+            'response' => 'APPROVED',
+            'reason' => 'Card pass all setup validations'
         ];
     }
 }

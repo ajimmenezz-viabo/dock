@@ -24,6 +24,7 @@ class Card extends Model
         'Pan',
         'ExpirationDate',
         'CVV',
+        'Pin',
         'Balance'
     ];
     protected $hidden = [

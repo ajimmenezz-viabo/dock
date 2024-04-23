@@ -17,6 +17,7 @@ use App\Models\Shared\Country;
 use App\Http\Controllers\Caradhras\Security\Encryption;
 use App\Http\Controllers\PersonManagement\PersonController;
 use App\Models\CardSetups\CardSetups;
+use App\Models\CardSetups\CardSetupsChange;
 use App\Models\Person\PersonAccount;
 use App\Models\Person\PersonAccountAlias;
 use Exception;
@@ -135,7 +136,7 @@ class CardsController extends Controller
 
             $dockRaw = [
                 'status' => 'BLOCKED',
-                'status_reason' => 'OTHER'
+                'status_reason' => 'OWNER_REQUEST'
             ];
 
             $response = DockApiService::request(
@@ -147,11 +148,29 @@ class CardsController extends Controller
                 $dockRaw
             );
 
-            if (isset($response->response->description))
-                return response()->json(['message' => $response->response->description], 400);
+            DB::beginTransaction();
+
+            $card_setup = CardSetups::where('CardId', $card->Id)->first();
+
+            CardSetupsChange::create([
+                'UserId' => auth()->user()->Id,
+                'CardId' => $card->Id,
+                'Field' => 'Status',
+                'OldValue' => $card_setup->Status,
+                'NewValue' => $response->status,
+                'StatusReason' => $response->status_reason
+            ]);
+
+            CardSetups::where('CardId', $card->Id)->update([
+                'Status' => $response->status,
+                'StatusReason' => $response->status_reason
+            ]);
+
+            DB::commit();
 
             return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($id)], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return self::error('Error blocking card', 400, $e);
         }
     }
@@ -163,8 +182,8 @@ class CardsController extends Controller
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $dockRaw = [
-                'status' => 'BLOCKED',
-                'status_reason' => 'OTHER'
+                'status' => 'NORMAL',
+                'status_reason' => null
             ];
 
             $response = DockApiService::request(
@@ -176,14 +195,167 @@ class CardsController extends Controller
                 $dockRaw
             );
 
-            if (isset($response->response->description))
-                return response()->json(['message' => $response->response->description], 400);
+            DB::beginTransaction();
 
-            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($id)], 200);
+            $card_setup = CardSetups::where('CardId', $card->Id)->first();
+
+            CardSetupsChange::create([
+                'UserId' => auth()->user()->Id,
+                'CardId' => $card->Id,
+                'Field' => 'Status',
+                'OldValue' => $card_setup->Status,
+                'NewValue' => $response->status,
+                'StatusReason' => $response->status_reason
+            ]);
+
+            CardSetups::where('CardId', $card->Id)->update([
+                'Status' => $response->status,
+                'StatusReason' => $response->status_reason ?? ""
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Card unblocked successfully', 'card' => $this->cardObject($id)], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return self::error('Error blocking card', 400, $e);
         }
     }
+
+    public function sensitive($id)
+    {
+        try {
+            $card = $this->validateCardPermission($id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
+
+            $card = $this->fillSensitiveData($card);
+
+            return response()->json($this->sensitiveData($card), 200);
+        } catch (Exception $e) {
+            return self::error('Error getting sensitive data', 400, $e);
+        }
+    }
+
+    public function setSetup($card_id, $setup_name, $action)
+    {
+        try {
+            DB::beginTransaction();
+
+            $card = $this->validateCardPermission($card_id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
+
+            if (!$this->validateSetupName($setup_name)) return response()->json(['message' => 'Invalid setup name'], 400);
+
+            if (!$this->validateSetupAction($action)) return response()->json(['message' => 'Invalid action'], 400);
+
+            $rawLocalSetup = $this->saveSetup($card_id, $setup_name, $action);
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/settings',
+                'PATCH',
+                [],
+                [],
+                'bearer',
+                $rawLocalSetup
+            );
+
+            DB::commit();
+
+            return response()->json(['message' => 'Card setup updated successfully', 'card' => $this->cardObject($card_id)], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return self::error('Error setting card setup', 400, $e);
+        }
+    }
+
+    private function saveSetup($card_id, $setup_name, $action)
+    {
+        $column = $this->getSetupColumnName($setup_name);
+
+        $card_setup = CardSetups::where('CardId', $card_id)->first();
+        $old_value = $card_setup->$column;
+        $new_value = $action == 'enable' ? 1 : 0;
+
+        CardSetupsChange::create([
+            'UserId' => auth()->user()->Id,
+            'CardId' => $card_id,
+            'Field' => $column,
+            'OldValue' => $old_value,
+            'NewValue' => $new_value
+        ]);
+
+        $card_setup->$column = $new_value;
+        $card_setup->save();
+
+        return $this->dockSetupRaw($card_setup);
+    }
+
+    private function dockSetupRaw($card_setup)
+    {
+        return [
+            'settings' => [
+                'transaction' => [
+                    'ecommerce' => $card_setup->Ecommerce == 1 ? true : false,
+                    'international' => $card_setup->International == 1 ? true : false,
+                    'stripe' => $card_setup->Stripe == 1 ? true : false,
+                    'wallet' => $card_setup->Wallet == 1 ? true : false,
+                    'withdrawal' => $card_setup->Withdrawal == 1 ? true : false,
+                    'contactless' => $card_setup->Contactless == 1 ? true : false
+                ],
+                'security' => [
+                    'pin_offline' => $card_setup->PinOffline == 1 ? true : false,
+                    'pin_on_us' => $card_setup->PinOnUs == 1 ? true : false
+                ]
+            ]
+        ];
+    }
+
+    private function getSetupColumnName($setup)
+    {
+        $column_name = '';
+        switch ($setup) {
+            case 'ecommerce':
+                $column_name = 'Ecommerce';
+                break;
+            case 'international':
+                $column_name = 'International';
+                break;
+            case 'stripe':
+                $column_name = 'Stripe';
+                break;
+            case 'wallet':
+                $column_name = 'Wallet';
+                break;
+            case 'withdrawal':
+                $column_name = 'Withdrawal';
+                break;
+            case 'contactless':
+                $column_name = 'Contactless';
+                break;
+            case 'pin_offline':
+                $column_name = 'PinOffline';
+                break;
+            case 'pin_on_us':
+                $column_name = 'PinOnUs';
+                break;
+        }
+        return $column_name;
+    }
+
+    private function validateSetupName($setup_name)
+    {
+        $valid_setups = ['ecommerce', 'international', 'stripe', 'wallet', 'withdrawal', 'contactless', 'pin_offline', 'pin_on_us'];
+        if (!in_array($setup_name, $valid_setups)) return false;
+        return true;
+    }
+
+    private function validateSetupAction($action)
+    {
+        $valid_actions = ['enable', 'disable'];
+        if (!in_array($action, $valid_actions)) return false;
+        return true;
+    }
+
 
     private function validateCardPermission($id)
     {
@@ -245,9 +417,9 @@ class CardsController extends Controller
         return array_merge($array_part, $base);
     }
 
-    private function cardObject($id)
+    private function cardObject(int $id)
     {
-        $card = $this->fillSensitiveData(Card::where('Id', $id)->first());
+        $card = Card::where('Id', $id)->first();
         $person = PersonController::getPersonObjectShort($card->PersonId);
         $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
         if (!$alias) {
@@ -259,7 +431,6 @@ class CardsController extends Controller
             $card->save();
         }
 
-        $pin = $this->getPin($card->ExternalId);
 
         $object = [
             'card_id' => $card->Id,
@@ -268,36 +439,59 @@ class CardsController extends Controller
             'brand' => $card->Brand,
             'masked_pan' => $card->MaskedPan,
             'balance' => $this->encrypter->decrypt($card->Balance),
-            'sensitive_data' => $this->sensitiveData($card, $pin),
+            'setup' => $this->getCardSetup($card)
         ];
 
 
         if (env('DEV_MODE') ===  true) {
-
             $object['person'] = $person;
             $object['alias_account'] = $alias;
-            $object['external'] = $this->fillSetups($card);
-            $object['sensitive_data_raw'] = [
-                'pan' => $this->encrypter->decrypt($card->Pan),
-                'cvv' => $this->encrypter->decrypt($card->CVV),
-                'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate),
-                'pin' => $pin
-            ];
         }
 
         return $object;
     }
 
-    private function sensitiveData($card, $pin)
+    private function sensitiveData($card)
     {
+
         $sensitive = [
             'pan' => $this->encrypter->decrypt($card->Pan),
             'cvv' => $this->encrypter->decrypt($card->CVV),
             'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate),
-            'pin' => $pin
+            'pin' => (is_null($card->Pin)) ? null : $this->encrypter->decrypt($card->Pin)
         ];
 
-        return $this->encrypter->encrypt(json_encode($sensitive));
+        if (env('DEV_MODE') === true) {
+            return [
+                'sensitive_data' => $this->encrypter->encrypt(json_encode($sensitive)),
+                'sensitive_data_raw' => [
+                    'pan' => $sensitive['pan'],
+                    'cvv' => $sensitive['cvv'],
+                    'expiration_date' => $sensitive['expiration_date'],
+                    'pin' => $sensitive['pin']
+                ]
+            ];
+        }
+
+        return [
+            'sensitive_data' => $this->encrypter->encrypt(json_encode($sensitive))
+        ];
+    }
+
+    private function getCardSetup($card)
+    {
+        $setups = $this->fillSetups($card);
+        return [
+            'status' => $setups->Status,
+            'enabled_ecommerce' => $setups->Ecommerce == 1 ? true : false,
+            'enabled_international' => $setups->International == 1 ? true : false,
+            'enabled_stripe' => $setups->Stripe == 1 ? true : false,
+            'enabled_wallet' => $setups->Wallet == 1 ? true : false,
+            'enabled_withdrawal' => $setups->Withdrawal == 1 ? true : false,
+            'enabled_contactless' => $setups->Contactless == 1 ? true : false,
+            'pin_offline' => $setups->PinOffline == 1 ? true : false,
+            'pin_on_us' => $setups->PinOnUs == 1 ? true : false
+        ];
     }
 
     private function fillSetups($card)
@@ -406,10 +600,15 @@ class CardsController extends Controller
                     'CVV' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv)),
                     'ExpirationDate' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->expiration_date))
                 ]);
-
-                $card = Card::where('Id', $card->Id)->first();
             }
-            return $card;
+
+            if ($card->Pin == null || $card->Pin == "") {
+                $pin = $this->getPin($card->ExternalId);
+                Card::where('Id', $card->Id)->update([
+                    'Pin' => !is_null($pin) ? $this->encrypter->encrypt($pin) : null
+                ]);
+            }
+            return Card::where('Id', $card->Id)->first();
         } catch (Exception $e) {
             return $card;
         }
