@@ -31,6 +31,34 @@ $router->group(['prefix' => 'authorizations'], function () use ($router) {
     $router->post('withdrawal', 'Authorization\AuthorizationWithdraw@withdraw');
     $router->post('payment',  'Authorization\AuthorizationPayment@payment');
     $router->post('advice',  'Authorization\AuthorizationAdvice@advice');
+
+    $router->group(['prefix' => 'purchase'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationPurchase@purchase');
+    });
+
+    $router->group(['prefix' => 'deposit'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationDeposit@deposit');
+    });
+
+    $router->group(['prefix' => 'reversal'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationReversal@reversal');
+    });
+
+    $router->group(['prefix' => 'withdrawal'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationWithdraw@withdraw');
+    });
+
+    $router->group(['prefix' => 'payment'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationPayment@payment');
+    });
+
+    $router->group(['prefix' => 'advice'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationAdvice@advice');
+    });
+
+    $router->group(['prefix' => 'consult'], function () use ($router) {
+        $router->post('/', 'Authorization\AuthorizationConsult@consult');
+    });
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {

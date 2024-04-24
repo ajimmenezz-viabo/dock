@@ -14,8 +14,8 @@ class AuthorizationPurchase extends AuthorizationController
     {
         $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0])->first();
         if ($exists) {
-            // $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
-            // return response()->json($error, 400);
+            $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
+            return response()->json($error, 400);
         }
 
         $authorization = AuthorizationRequest::create([
