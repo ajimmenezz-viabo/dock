@@ -5,7 +5,9 @@
 
     RewriteEngine On
 
-    # Handle Authorization Header
+    RewriteRule ^(.*)/$ /$1 [L]
+    
+    # Handle Authorization Headergit
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 

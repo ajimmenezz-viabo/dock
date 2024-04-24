@@ -87,7 +87,7 @@ class AuthorizationController extends Controller
 
     public function validateHeaders($headers)
     {
-        if (!isset($headers['client-id']) || $headers['client-id'][0] != env('DOCK_API_CLIENT_U')) {
+        if (!isset($headers['client-id']) || $headers['client-id'][0] != env('AUTHORIZATION_CLIENT_ID')) {
             throw new Exception('Client-Id header not found or invalid value');
         }
 

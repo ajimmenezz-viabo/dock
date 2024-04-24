@@ -21,7 +21,7 @@ class AuthorizationReversal extends AuthorizationController
         $authorization = AuthorizationRequest::create([
             'UUID' => Uuid::uuid7()->toString(),
             'ExternalId' => $request->headers->all()['uuid'][0] ?? '',
-            'AuthorizationCode' => $this->getAuthorizationCode('DE'),
+            'AuthorizationCode' => $this->getAuthorizationCode('RE'),
             'Endpoint' => $request->getRequestUri(),
             'Headers' => json_encode($request->headers->all()),
             'Body' => json_encode($request->all()),
