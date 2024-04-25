@@ -631,4 +631,29 @@ class CardsController extends Controller
             return null;
         }
     }
+
+    public function getDynamicCVV($id)
+    {
+        try {
+            $card = $this->validateCardPermission($id);
+            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
+
+            if ($card->Type != 'virtual')
+                return response()->json(['message' => 'Dynamic CVV is only available for virtual cards'], 400);
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards​/' . $card->ExternalId . '/dynamic-cvv',
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+
+            return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv)], 200);
+        } catch (Exception $e) {
+            return self::error('Error getting dynamic CVV', 400, $e);
+        } catch (Exception $e) {
+        }
+    }
 }

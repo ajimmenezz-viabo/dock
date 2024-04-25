@@ -12,11 +12,11 @@ class AuthorizationConsult extends AuthorizationController
 {
     public function consult(Request $request)
     {
-        // $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0])->first();
-        // if ($exists) {
-        //     $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
-        //     return response()->json($error, 400);
-        // }
+        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0] ?? 'X')->first();
+        if ($exists) {
+            $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
+            return response()->json($error, 400);
+        }
 
         $authorization = AuthorizationRequest::create([
             'UUID' => Uuid::uuid7()->toString(),

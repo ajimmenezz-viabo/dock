@@ -108,6 +108,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
             $router->group(['prefix' => '{id}/sensitive'], function () use ($router) {
                 $router->get('/', 'CardsManagement\CardsController@sensitive');
+                $router->get('/dynamic-cvv', 'CardsManagement\CardsController@getDynamicCVV');
             });
 
             $router->group(['prefix' => '{card_id}/setup'], function () use ($router) {

@@ -12,7 +12,7 @@ class AuthorizationPurchase extends AuthorizationController
 {
     public function purchase(Request $request)
     {
-        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0])->first();
+        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0] ?? 'X')->first();
         if ($exists) {
             $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
             return response()->json($error, 400);
@@ -80,7 +80,6 @@ class AuthorizationPurchase extends AuthorizationController
             return response()->json($response, 200);
         } catch (Exception $e) {
             $error = $this->save_error($authorization, $e->getMessage());
-            var_dump($e);
             return response()->json($error, 500);
         }
     }
