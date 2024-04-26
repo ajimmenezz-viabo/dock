@@ -2,33 +2,14 @@
 
 namespace App\Http\Controllers\Authorization;
 
+use App\Exceptions\AuthorizationException;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
-
-use App\Models\Shared\AuthorizationRequest;
-use Exception;
 
 class AuthorizationConsult extends AuthorizationController
 {
     public function consult(Request $request)
     {
-        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0] ?? 'X')->first();
-        if ($exists) {
-            $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
-            return response()->json($error, 400);
-        }
-
-        $authorization = AuthorizationRequest::create([
-            'UUID' => Uuid::uuid7()->toString(),
-            'ExternalId' => $request->headers->all()['uuid'][0] ?? '',
-            'AuthorizationCode' => $this->getAuthorizationCode('AC'),
-            'Endpoint' => $request->getRequestUri(),
-            'Headers' => json_encode($request->headers->all()),
-            'Body' => json_encode($request->all()),
-            'Response' => '',
-            'Error' => '',
-            'Code' => 400
-        ]);
+        $authorization = $this->validateRepeatedRequest($request);
 
         try {
             $this->validateHeaders($request->headers->all());
@@ -38,17 +19,16 @@ class AuthorizationConsult extends AuthorizationController
             $this->save_response($authorization, $request, $response);
 
             return response()->json($response, 200);
-        } catch (Exception $e) {
+        } catch (AuthorizationException $e) {
             $error = $this->save_error($authorization, $e->getMessage());
-
-            return response()->json($error, 400);
+            return response()->json($error, 200);
         }
     }
 
     private function validateBodyConsult($body)
     {
         if (!isset($body['card_id'])) {
-            throw new Exception('CardId not found');
+            throw new AuthorizationException('CardId not found');
         }
     }
 }

@@ -10,9 +10,11 @@ use App\Models\CardMovements\CardMovements;
 use App\Models\CardSetups\CardSetups;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Shared\AuthorizationRequest;
-use Exception;
+
+use App\Exceptions\AuthorizationException;
 
 class AuthorizationController extends Controller
 {
@@ -26,6 +28,7 @@ class AuthorizationController extends Controller
             $authorization->CardExternalId = $request->all()['card_id'];
 
         $authorization->ExternalId = $request->headers->all()['uuid'][0];
+        $authorization->Error = '';
         $authorization->Code = 200;
         $authorization->save();
     }
@@ -76,10 +79,10 @@ class AuthorizationController extends Controller
             if ($pan) {
                 $card = Card::where('MaskedPan', $pan)->first();
                 if (!$card)
-                    throw new Exception('Card not found');
+                    throw new AuthorizationException('Card not found', 200, 400);
             }
 
-            throw new Exception('Card not found');
+            throw new AuthorizationException('Card not found', 200, 400);
         }
 
         return $card;
@@ -88,16 +91,16 @@ class AuthorizationController extends Controller
     public function validateHeaders($headers)
     {
         if (!isset($headers['client-id']) || $headers['client-id'][0] != env('AUTHORIZATION_CLIENT_ID')) {
-            throw new Exception('Client-Id header not found or invalid value');
+            throw new AuthorizationException('Client-Id header not found or invalid value');
         }
 
         if (!isset($headers['uuid'])) {
-            throw new Exception('UUID header not found');
+            throw new AuthorizationException('UUID header not found', 200, 400);
         }
 
-        if (!isset($headers['x-apigw-api-id'])) {
-            throw new Exception('X-Apigw-Api-Id header not found');
-        }
+        // if (!isset($headers['x-apigw-api-id'])) {
+        //     throw new Exception('X-Apigw-Api-Id header not found');
+        // }
     }
 
     public function getAuthorizationCode($prefix)
@@ -137,7 +140,7 @@ class AuthorizationController extends Controller
             $profile = ProfileCard::where('CardId', $card->Id)->first();
         }
 
-        
+
         $auth_profile = ProfileAuthorization::where('Id', $profile->AuthorizationProfileId)->first();
 
         switch ($type) {
@@ -356,5 +359,29 @@ class AuthorizationController extends Controller
             'response' => 'APPROVED',
             'reason' => 'Card pass all setup validations'
         ];
+    }
+
+    public function validateRepeatedRequest(Request $request, $type = 'AC')
+    {
+        Log::info('Validating New Request');
+        Log::info(['Headers' => $request->headers->all(), 'Body' => $request->all()]);
+
+        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0] ?? 'X')->first();
+        if ($exists && $exists->Code == 200)
+            throw new AuthorizationException('Request already exists', 400);
+        else if ($exists && $exists->Code != 200)
+            return $exists;
+
+        return AuthorizationRequest::create([
+            'UUID' => Uuid::uuid7()->toString(),
+            'ExternalId' => $request->headers->all()['uuid'][0] ?? '',
+            'AuthorizationCode' => $this->getAuthorizationCode($type),
+            'Endpoint' => $request->getRequestUri(),
+            'Headers' => json_encode($request->headers->all()),
+            'Body' => json_encode($request->all()),
+            'Response' => '',
+            'Error' => '',
+            'Code' => 400
+        ]);
     }
 }

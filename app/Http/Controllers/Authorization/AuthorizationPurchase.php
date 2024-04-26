@@ -3,34 +3,15 @@
 namespace App\Http\Controllers\Authorization;
 
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Uuid;
-
-use App\Models\Shared\AuthorizationRequest;
-use Exception;
+use App\Exceptions\AuthorizationException;
 
 class AuthorizationPurchase extends AuthorizationController
 {
     public function purchase(Request $request)
     {
-        $exists = AuthorizationRequest::where('ExternalId', $request->headers->all()['uuid'][0] ?? 'X')->first();
-        if ($exists) {
-            $error = $this->dock_error($exists->UUID, 'Request already exists', 400);
-            return response()->json($error, 400);
-        }
+        $authorization = $this->validateRepeatedRequest($request, "PU");
 
-        $authorization = AuthorizationRequest::create([
-            'UUID' => Uuid::uuid7()->toString(),
-            'ExternalId' => $request->headers->all()['uuid'][0] ?? '',
-            'AuthorizationCode' => $this->getAuthorizationCode('PU'),
-            'Endpoint' => $request->getRequestUri(),
-            'Headers' => json_encode($request->headers->all()),
-            'Body' => json_encode($request->all()),
-            'Response' => '',
-            'Error' => '',
-            'Code' => 400
-        ]);
         try {
-
             $this->validateHeaders($request->headers->all());
             $this->validateBodyPurchase($request->all());
             $card = $this->validateCard($request->all()['card_id']);
@@ -78,24 +59,24 @@ class AuthorizationPurchase extends AuthorizationController
             $this->save_response($authorization, $request, $response);
 
             return response()->json($response, 200);
-        } catch (Exception $e) {
+        } catch (AuthorizationException $e) {
             $error = $this->save_error($authorization, $e->getMessage());
-            return response()->json($error, 500);
+            return response()->json($error, 200);
         }
     }
 
     private function validateBodyPurchase($body)
     {
         if (!isset($body['card_id'])) {
-            throw new Exception('CardId not found');
+            throw new AuthorizationException('CardId not found', 200);
         }
 
         if (!isset($body['card_expiration_date'])) {
-            throw new Exception('Card expiration date is required');
+            throw new AuthorizationException('Card expiration date is required', 200);
         }
 
         if (!isset($body['values']['billing_value'])) {
-            throw new Exception('Transaction amount must be greater than zero');
+            throw new AuthorizationException('Transaction amount must be greater than zero', 200);
         }
     }
 }

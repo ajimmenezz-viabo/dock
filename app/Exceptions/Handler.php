@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
@@ -12,6 +11,7 @@ use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Http\Response;
+use App\Exceptions\AuthorizationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -78,9 +78,14 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'Error while decoding the token'], 401);
         }
 
-        if($exception instanceof HttpException) {
+        if ($exception instanceof HttpException) {
             return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
+
+        if ($exception instanceof AuthorizationException) {
+            return response()->json($exception->getError(), 200);
+        }
+
 
         return parent::render($request, $exception);
     }
