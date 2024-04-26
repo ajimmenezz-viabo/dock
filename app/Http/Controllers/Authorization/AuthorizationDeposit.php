@@ -24,7 +24,7 @@ class AuthorizationDeposit extends AuthorizationController
             $this->registerMovement($card->Id, $request->all()['values']['billing_value'], $newBalance, 'DEPOSIT');
 
             $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance, [
-                'authorization_code' => $authorization->AuthorizationCode
+                'authorization_code' => substr($authorization->AuthorizationCode, -6)
             ]);
 
             $this->save_response($authorization, $request, $response);

@@ -90,9 +90,9 @@ class AuthorizationController extends Controller
 
     public function validateHeaders($headers)
     {
-        if (!isset($headers['client-id']) || $headers['client-id'][0] != env('AUTHORIZATION_CLIENT_ID')) {
-            throw new AuthorizationException('Client-Id header not found or invalid value');
-        }
+        // if (!isset($headers['client-id']) || $headers['client-id'][0] != env('AUTHORIZATION_CLIENT_ID')) {
+        //     throw new AuthorizationException('Client-Id header not found or invalid value');
+        // }
 
         if (!isset($headers['uuid'])) {
             throw new AuthorizationException('UUID header not found', 200, 400);
