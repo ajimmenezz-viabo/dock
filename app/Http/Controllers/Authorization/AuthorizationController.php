@@ -40,7 +40,7 @@ class AuthorizationController extends Controller
             'reason' => $reason
         ];
 
-        $response = !is_null($limit) ? array_merge($response, ['available_limit' => $limit]) : $response;
+        $response = !is_null($limit) ? array_merge($response, ['available_limit' => number_format($limit,2,'.','')]) : $response;
 
         if ($additional) {
             $response = array_merge($response, $additional);

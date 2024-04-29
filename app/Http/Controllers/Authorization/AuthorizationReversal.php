@@ -16,9 +16,9 @@ class AuthorizationReversal extends AuthorizationController
             $this->validateBodyReversal($request->all());
             $card = $this->validateCard($request->all()['card_id'], $request->all()['card_number']);
             $balance = $this->encrypter->decrypt($card->Balance);
-            $newBalance = $balance + $request->all()['values']['billing_value'];
+            $newBalance = $balance + ($request->all()['values']['billing_value'] - $request->all()['values']['replacement_amounts_final_billing_value']);
 
-            $card->Balance = $this->encrypter->encrypt($newBalance);
+            $card->Balance = $this->encrypter->encrypt(number_format($newBalance, 2, '.', ''));
             $card->save();
 
             $this->registerMovement($card->Id, $request->all()['values']['billing_value'], $newBalance, 'REVERSAL');
