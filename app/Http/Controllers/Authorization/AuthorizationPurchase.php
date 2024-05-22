@@ -32,12 +32,12 @@ class AuthorizationPurchase extends AuthorizationController
                 return response()->json($error, 200);
             }
 
-            $profile_validation = $this->validateProfileRules($card, $request->all()['values']['billing_value'], 'PURCHASE');
-            if ($profile_validation['response'] != 'APPROVED') {
-                $error = $this->save_error($authorization, $profile_validation['reason']);
-                $response = $this->dock_response($profile_validation['response'], $profile_validation['reason'], $balance);
-                return response()->json($error, 200);
-            }
+            // $profile_validation = $this->validateProfileRules($card, $request->all()['values']['billing_value'], 'PURCHASE');
+            // if ($profile_validation['response'] != 'APPROVED') {
+            //     $error = $this->save_error($authorization, $profile_validation['reason']);
+            //     $response = $this->dock_response($profile_validation['response'], $profile_validation['reason'], $balance);
+            //     return response()->json($error, 200);
+            // }
 
             if ($balance < $request->all()['values']['billing_value']) {
                 $error = $this->save_error($authorization, 'Insufficient funds');
