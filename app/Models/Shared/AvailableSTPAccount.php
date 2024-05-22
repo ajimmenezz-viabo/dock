@@ -1,24 +1,22 @@
 <?php
 
-namespace App\Models\CardMovements;
+
+namespace App\Models\Shared;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CardMovements extends Model
+class AvailableSTPAccount extends Model
 {
     use HasFactory;
 
-    protected $table = 'card_movements';
+    protected $table = 'available_stp_accounts';
     protected $primaryKey = 'Id';
     protected $fillable = [
-        'AuthorizationRequestId',
-        'CardId',
-        'Type',
-        'Description',
-        'Amount',
-        'Balance'
+        'STPAccount',
+        'Available'
     ];
+
     protected $hidden = [
         'created_at',
         'updated_at'

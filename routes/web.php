@@ -21,6 +21,7 @@ $router->group(['prefix' => 'wh'], function () use ($router) {
 
 $router->group(['prefix' => 'dev'], function () use ($router) {
     $router->get('/decrypt', 'Security\Decrypt@decrypt');
+    $router->post('/create_usr', 'Security\Dev@create_user');
 });
 
 $router->group(['prefix' => 'authorizations'], function () use ($router) {
@@ -62,6 +63,10 @@ $router->group(['prefix' => 'authorizations'], function () use ($router) {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
+
+    $router->get('/documentation', function () use ($router) {
+        return response()->json(['message' => 'Welcome to Caradhras API']);
+    });
 
     $router->group(['prefix' => 'auth'], function () use ($router) {
         $router->post('login', 'Authentication\AuthController@login');
@@ -118,6 +123,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             });
         });
 
+        $router->group(['prefix' => 'subaccounts'], function () use ($router) {
+            $router->get('/', 'Subaccounts\SubaccountController@index');
+            $router->get('/{uuid}', 'Subaccounts\SubaccountController@show');
+            $router->post('/', 'Subaccounts\SubaccountController@store');
+            $router->put('/{uuid}', 'Subaccounts\SubaccountController@update');
+        });
+
         $router->group(['prefix' => 'embossing_batches'], function () use ($router) {
             $router->get('/key', 'EmbossingManagement\EmbossingBatchController@getKey');
             $router->post('/key', 'EmbossingManagement\EmbossingBatchController@generateKey');
@@ -150,6 +162,14 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'aes'], function () use ($router) {
             $router->post('/generate', 'Caradhras\Security\AesController@generate');
             $router->get('/', 'Caradhras\Security\AesController@find');
+        });
+
+        $router->group(['prefix' => 'wallet'], function () use ($router) {
+            $router->group(['prefix' => 'by_stp'], function () use ($router) {
+            });
+            $router->group(['prefix' => 'by_uuid'], function () use ($router) {
+                $router->put('/{uuid}', 'Wallet\WalletController@register_deposit_by_uuid');
+            });
         });
     });
 });

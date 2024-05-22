@@ -1,23 +1,21 @@
 <?php
 
-namespace App\Models\CardMovements;
+namespace App\Models\Account;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CardMovements extends Model
+class Subaccount extends Model
 {
     use HasFactory;
 
-    protected $table = 'card_movements';
+    protected $table = 'subaccounts';
     protected $primaryKey = 'Id';
     protected $fillable = [
-        'AuthorizationRequestId',
-        'CardId',
-        'Type',
-        'Description',
-        'Amount',
-        'Balance'
+        'AccountId',
+        'UUID',
+        'ExternalId',
+        'Description'
     ];
     protected $hidden = [
         'created_at',

@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Models\CardMovements;
+namespace App\Models\Wallet;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CardMovements extends Model
+class WalletMovement extends Model
 {
     use HasFactory;
 
-    protected $table = 'card_movements';
+    protected $table = 'account_wallet_movements';
     protected $primaryKey = 'Id';
     protected $fillable = [
-        'AuthorizationRequestId',
-        'CardId',
+        'WalletId',
         'Type',
         'Description',
         'Amount',
         'Balance'
     ];
+
     protected $hidden = [
         'created_at',
         'updated_at'

@@ -15,6 +15,7 @@ class Card extends Model
         'UUID',
         'BatchId',
         'CreatorId',
+        'SubAccountId',
         'PersonId',
         'Type',
         'ActiveFunction',
@@ -25,7 +26,8 @@ class Card extends Model
         'ExpirationDate',
         'CVV',
         'Pin',
-        'Balance'
+        'Balance',
+        'STPAccount'
     ];
     protected $hidden = [
         'created_at',

@@ -119,7 +119,7 @@ class AuthorizationController extends Controller
         return $code;
     }
 
-    public function registerMovement($cardId, $amount, $balance, $type)
+    public function registerMovement($cardId, $amount, $balance, $type, $authorization = null, $description = null)
     {
         CardMovements::create([
             'CardId' => $cardId,
