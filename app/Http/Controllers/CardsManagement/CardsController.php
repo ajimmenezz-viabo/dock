@@ -40,12 +40,14 @@ class CardsController extends Controller
             $offset = ($page - 1) * $limit;
 
             $cards = Card::where('CreatorId', auth()->user()->Id)
-                ->orWhere('PersonId', auth()->user()->Id)
+                // ->orWhere('PersonId', auth()->user()->Id)
                 ->offset($offset)
                 ->limit($limit)
                 ->get();
 
-            $count = Card::where('CreatorId', auth()->user()->Id)->orWhere('PersonId', auth()->user()->Id)->count();
+            $count = Card::where('CreatorId', auth()->user()->Id)
+            // ->orWhere('PersonId', auth()->user()->Id)
+            ->count();
 
             $cards_array = [];
 
@@ -360,10 +362,12 @@ class CardsController extends Controller
     private function validateCardPermission($id)
     {
         return Card::where('Id', $id)
-            ->where(function ($query) {
-                $query->where('CreatorId', auth()->user()->Id)
-                    ->orWhere('PersonId', auth()->user()->Id);
-            })->first();
+            ->where('CreatorId', auth()->user()->Id)
+            // ->where(function ($query) {
+            //     $query->where('CreatorId', auth()->user()->Id)
+            //         ->orWhere('PersonId', auth()->user()->Id);
+            // })
+            ->first();
     }
 
     private function validateCardData($request)

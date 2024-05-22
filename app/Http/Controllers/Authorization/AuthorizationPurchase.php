@@ -50,15 +50,12 @@ class AuthorizationPurchase extends AuthorizationController
             $card->Balance = $this->encrypter->encrypt($newBalance);
             $card->save();
 
-            $this->registerMovement($card->Id, "-" . $request->all()['values']['billing_value'], $newBalance, 'PURCHASE');
-
-            // $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance, [
-            //     'authorization_code' => substr($authorization->AuthorizationCode, -6)
-            // ]);
 
             $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance);
 
-            $this->save_response($authorization, $request, $response);
+            $authorizationRequestId = $this->save_response($authorization, $request, $response);
+
+            $this->registerMovement($card->Id, "-" . $request->all()['values']['billing_value'], $newBalance, 'PURCHASE', $authorizationRequestId, $request->all()['establishment'] ?? 'Unknown establishment');
 
             return response()->json($response, 200);
         } catch (AuthorizationException $e) {

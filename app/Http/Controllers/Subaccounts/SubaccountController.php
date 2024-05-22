@@ -20,11 +20,38 @@ class SubaccountController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/v1/subaccounts",
-     *    tags={"Subaccounts"},
-     *    summary="Get all subaccounts for the authenticated user",
-     *    description="Get all subaccounts for the authenticated user",
-     *    @OA\Response(response="200", description="An example endpoint")
+     *      path="/api/v1/subaccounts",
+     *      tags={"Subaccounts"},
+     *      summary="Get all subaccounts for the authenticated account user",
+     *      description="Get all subaccounts for the authenticated account user",
+     *      security={{"bearerAuth":{}}},
+     * 
+     *      @OA\Response(
+     *          response="200",
+     *          description="Subaccounts retrieved successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="subaccounts", type="array", 
+     *                  @OA\Items(
+     *                      @OA\Property(property="UUID", type="string", example="123456", description="Subaccount UUID"),
+     *                      @OA\Property(property="ExternalId", type="string", example="123456", description="Subaccount ExternalId"),
+     *                      @OA\Property(property="Description", type="string", example="My subaccount", description="Subaccount Description"),
+     *                      @OA\Property(property="Balance", type="string", example="0.00", description="Subaccount Balance"),
+     *                      @OA\Property(property="STPAccount", type="string", example="123456", description="STPAccount associated with the subaccount")
+     *                  ),
+     *                  @OA\Property(property="page", type="integer", example="1", description="Current page"),
+     *                  @OA\Property(property="total_pages", type="integer", example="1", description="Total pages"),
+     *                  @OA\Property(property="total_records", type="integer", example="1", description="Total records")
+     *              )
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *      ),
      * )
      */
     public function index(Request $request)
@@ -60,6 +87,52 @@ class SubaccountController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *      path="/api/v1/subaccounts",
+     *      tags={"Subaccounts"},
+     *      summary="Create a new subaccount",
+     *      description="Create a new subaccount",
+     * 
+     *      security={{"bearerAuth":{}}},
+     * 
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              required={"ExternalId", "Description"},
+     *              @OA\Property(property="ExternalId", type="string", example="123456"),
+     *              @OA\Property(property="Description", type="string", example="My subaccount")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response="200", 
+     *          description="Subaccount created successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="UUID", type="string", example="123456", description="Subaccount UUID"),
+     *              @OA\Property(property="ExternalId", type="string", example="123456", description="Subaccount ExternalId"),
+     *              @OA\Property(property="Description", type="string", example="My subaccount", description="Subaccount Description"),
+     *              @OA\Property(property="Balance", type="string", example="0.00", description="Subaccount Balance"),
+     *              @OA\Property(property="STPAccount", type="string", example="123456", description="STPAccount associated with the subaccount")
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Subaccount with this ExternalId already exists | Subaccount with this Description already exists | Error creating subaccount",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Subaccount with this ExternalId already exists | Subaccount with this Description already exists | Error creating subaccount", description="Message")
+     *          )
+     *      )
+     * )
+     * 
+     */
     public function store(Request $request)
     {
         $this->validateSubaccountData($request);
@@ -126,11 +199,53 @@ class SubaccountController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/subaccounts/{uuid}",
-     *    tags={"Subaccounts"},
-     *    summary="Get all subaccounts for the authenticated user",
-     *    description="Get all subaccounts for the authenticated user",
-     *    @OA\Response(response="200", description="An example endpoint")
+     *      path="/api/v1/subaccounts/{uuid}",
+     *      tags={"Subaccounts"},
+     *      summary="Get a specific subaccount",
+     *      description="Get a specific subaccount",
+     * 
+     *      security={{"bearerAuth":{}}},
+     * 
+     *      @OA\Parameter(
+     *          name="uuid",
+     *          in="path",
+     *          required=true,
+     *         description="Subaccount UUID",
+     *         @OA\Schema( 
+     *          type="string",
+     *          example="123456"
+     *          )
+     *     ),
+     * 
+     *      @OA\Response(
+     *          response="200",
+     *          description="Subaccount retrieved successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="UUID", type="string", example="123456", description="Subaccount UUID"),
+     *              @OA\Property(property="ExternalId", type="string", example="123456", description="Subaccount ExternalId"),
+     *              @OA\Property(property="Description", type="string", example="My subaccount", description="Subaccount Description"), 
+     *              @OA\Property(property="Balance", type="string", example="0.00", description="Subaccount Balance"), 
+     *              @OA\Property(property="STPAccount", type="string", example="123456", description="STPAccount associated with the subaccount")
+     *         )
+     *     ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *     ),
+     *      
+     *     @OA\Response(
+     *          response=404,
+     *          description="Subaccount not found or you do not have permission to access it",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Subaccount not found or you do not have permission to access it", description="Message")
+     *          )
+     *      )
+     * )
+     *    
      * )
      */
     public function show($uuid)

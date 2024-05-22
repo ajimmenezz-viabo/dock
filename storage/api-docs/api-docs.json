@@ -189,14 +189,205 @@
                 "tags": [
                     "Subaccounts"
                 ],
-                "summary": "Get all subaccounts for the authenticated user",
-                "description": "Get all subaccounts for the authenticated user",
+                "summary": "Get all subaccounts for the authenticated account user",
+                "description": "Get all subaccounts for the authenticated account user",
                 "operationId": "d66a5f5111182c8d3c21e1beb0708fb7",
                 "responses": {
                     "200": {
-                        "description": "An example endpoint"
+                        "description": "Subaccounts retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "subaccounts": {
+                                            "properties": {
+                                                "page": {
+                                                    "description": "Current page",
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "total_pages": {
+                                                    "description": "Total pages",
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "total_records": {
+                                                    "description": "Total records",
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                }
+                                            },
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "UUID": {
+                                                        "description": "Subaccount UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "ExternalId": {
+                                                        "description": "Subaccount ExternalId",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "Description": {
+                                                        "description": "Subaccount Description",
+                                                        "type": "string",
+                                                        "example": "My subaccount"
+                                                    },
+                                                    "Balance": {
+                                                        "description": "Subaccount Balance",
+                                                        "type": "string",
+                                                        "example": "0.00"
+                                                    },
+                                                    "STPAccount": {
+                                                        "description": "STPAccount associated with the subaccount",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Subaccounts"
+                ],
+                "summary": "Create a new subaccount",
+                "description": "Create a new subaccount",
+                "operationId": "6950fa9808f9369daceab2e7638b48b2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ExternalId",
+                                    "Description"
+                                ],
+                                "properties": {
+                                    "ExternalId": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "Description": {
+                                        "type": "string",
+                                        "example": "My subaccount"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subaccount created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "UUID": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "ExternalId": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "Description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        },
+                                        "Balance": {
+                                            "description": "Subaccount Balance",
+                                            "type": "string",
+                                            "example": "0.00"
+                                        },
+                                        "STPAccount": {
+                                            "description": "STPAccount associated with the subaccount",
+                                            "type": "string",
+                                            "example": "123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Subaccount with this ExternalId already exists | Subaccount with this Description already exists | Error creating subaccount",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Subaccount with this ExternalId already exists | Subaccount with this Description already exists | Error creating subaccount"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/subaccounts/{uuid}": {
@@ -204,14 +395,99 @@
                 "tags": [
                     "Subaccounts"
                 ],
-                "summary": "Get all subaccounts for the authenticated user",
-                "description": "Get all subaccounts for the authenticated user",
+                "summary": "Get a specific subaccount",
+                "description": "Get a specific subaccount",
                 "operationId": "ad73511451a322cf87e9d5a2dd5d43ef",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "123456"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "An example endpoint"
+                        "description": "Subaccount retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "UUID": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "ExternalId": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "Description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        },
+                                        "Balance": {
+                                            "description": "Subaccount Balance",
+                                            "type": "string",
+                                            "example": "0.00"
+                                        },
+                                        "STPAccount": {
+                                            "description": "STPAccount associated with the subaccount",
+                                            "type": "string",
+                                            "example": "123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subaccount not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Subaccount not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     }

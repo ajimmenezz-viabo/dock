@@ -31,6 +31,8 @@ class AuthorizationController extends Controller
         $authorization->Error = '';
         $authorization->Code = 200;
         $authorization->save();
+
+        return $authorization->Id;
     }
 
     public function dock_response($response, $reason, $limit = null, $additional = null)
@@ -125,7 +127,9 @@ class AuthorizationController extends Controller
             'CardId' => $cardId,
             'Amount' => str_replace(',', '', number_format($amount, 2)),
             'Balance' => $balance,
-            'Type' => $type
+            'Type' => $type,
+            'AuthorizationRequestId' => $authorization,
+            'Description' => $description
         ]);
     }
 
