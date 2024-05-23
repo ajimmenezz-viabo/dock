@@ -46,8 +46,8 @@ class CardsController extends Controller
                 ->get();
 
             $count = Card::where('CreatorId', auth()->user()->Id)
-            // ->orWhere('PersonId', auth()->user()->Id)
-            ->count();
+                // ->orWhere('PersonId', auth()->user()->Id)
+                ->count();
 
             $cards_array = [];
 
@@ -546,7 +546,7 @@ class CardsController extends Controller
         ];
 
         $response = DockApiService::request(
-            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'account-services/alias-core/v1/alias/ecosystems/MASTERCARD/schemas/CARDS',
+            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'account-services/alias-core/v1/alias/ecosystems/MASTERCARD/schemas/' . env('DOCK_CARD_ISSUER'),
             'POST',
             [],
             ['trace_id' => ""],
