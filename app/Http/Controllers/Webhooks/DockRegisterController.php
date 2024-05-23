@@ -8,6 +8,24 @@ use App\Services\DockApiService;
 
 class DockRegisterController extends Controller
 {
+    public function retrieve_key(){
+        try{
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'notifications/v1/public-key',
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+
+            return response()->json($response, 200);
+        }catch(\Exception $e){
+            return self::error('Error retrieving key', 500, $e);
+        }
+    }
+
+
     public function store(Request $request)
     {
         try {

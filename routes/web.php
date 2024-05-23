@@ -78,6 +78,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(["middleware" => "auth:api", 'prefix' => 'v1'], function () use ($router) {
 
         $router->group(['prefix' => 'dock_webhook_register'], function () use ($router) {
+            $router->get('/retrieve_key', 'Webhooks\DockRegisterController@retrieve_key');
             $router->post('/', 'Webhooks\DockRegisterController@store');
         });
 
