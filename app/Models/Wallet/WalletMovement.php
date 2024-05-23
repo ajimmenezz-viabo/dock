@@ -13,6 +13,7 @@ class WalletMovement extends Model
     protected $primaryKey = 'Id';
     protected $fillable = [
         'WalletId',
+        'CardId',
         'Type',
         'Description',
         'Amount',

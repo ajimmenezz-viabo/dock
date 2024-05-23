@@ -52,7 +52,7 @@ class CardsController extends Controller
             $cards_array = [];
 
             foreach ($cards as $card) {
-                array_push($cards_array, $this->cardObject($card->Id));
+                array_push($cards_array, $this->cardObject($card->UUID));
             }
 
             return response()->json([
@@ -66,13 +66,13 @@ class CardsController extends Controller
         }
     }
 
-    public function show($id)
+    public function show($uuid)
     {
         try {
-            $card = $this->validateCardPermission($id);
+            $card = $this->validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
-            return response()->json(['card' => $this->cardObject($id)], 200);
+            return response()->json($this->cardObject($uuid), 200);
         } catch (Exception $e) {
             return self::error('Error getting card', 400, $e);
         }
@@ -130,10 +130,10 @@ class CardsController extends Controller
         }
     }
 
-    public function block($id)
+    public function block($uuid)
     {
         try {
-            $card = $this->validateCardPermission($id);
+            $card = $this->validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $dockRaw = [
@@ -170,17 +170,17 @@ class CardsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($id)], 200);
+            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($uuid)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error blocking card', 400, $e);
         }
     }
 
-    public function unblock($id)
+    public function unblock($uuid)
     {
         try {
-            $card = $this->validateCardPermission($id);
+            $card = $this->validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $dockRaw = [
@@ -217,17 +217,17 @@ class CardsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Card unblocked successfully', 'card' => $this->cardObject($id)], 200);
+            return response()->json(['message' => 'Card unblocked successfully', 'card' => $this->cardObject($uuid)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error blocking card', 400, $e);
         }
     }
 
-    public function sensitive($id)
+    public function sensitive($uuid)
     {
         try {
-            $card = $this->validateCardPermission($id);
+            $card = $this->validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $card = $this->fillSensitiveData($card);
@@ -359,9 +359,9 @@ class CardsController extends Controller
     }
 
 
-    private function validateCardPermission($id)
+    private function validateCardPermission($uuid)
     {
-        return Card::where('Id', $id)
+        return Card::where('UUID', $uuid)
             ->where('CreatorId', auth()->user()->Id)
             // ->where(function ($query) {
             //     $query->where('CreatorId', auth()->user()->Id)
@@ -421,9 +421,9 @@ class CardsController extends Controller
         return array_merge($array_part, $base);
     }
 
-    private function cardObject(int $id)
+    private function cardObject(string $uuid)
     {
-        $card = Card::where('Id', $id)->first();
+        $card = Card::where('UUID', $uuid)->first();
         $person = PersonController::getPersonObjectShort($card->PersonId);
         $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
         if (!$alias) {
@@ -437,7 +437,7 @@ class CardsController extends Controller
 
 
         $object = [
-            'card_id' => $card->Id,
+            'card_id' => $card->UUID,
             'card_type' => $card->Type,
             'active_function' => $card->ActiveFunction,
             'brand' => $card->Brand,

@@ -103,15 +103,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         $router->group(['prefix' => 'cards_management'], function () use ($router) {
             $router->get('/', 'CardsManagement\CardsController@index');
-            $router->get('/{id}', 'CardsManagement\CardsController@show');
+            $router->get('/{uuid}', 'CardsManagement\CardsController@show');
             $router->post('/', 'CardsManagement\CardsController@store');
-            $router->put('/{id}', 'CardsManagement\CardsController@update');
-            $router->delete('/{id}', 'CardsManagement\CardsController@destroy');
 
-            $router->post('/{id}/block', 'CardsManagement\CardsController@block');
-            $router->post('/{id}/unblock', 'CardsManagement\CardsController@unblock');
+            $router->post('/{uuid}/block', 'CardsManagement\CardsController@block');
+            $router->post('/{uuid}/unblock', 'CardsManagement\CardsController@unblock');
 
-            $router->group(['prefix' => '{id}/sensitive'], function () use ($router) {
+            $router->group(['prefix' => '{uuid}/sensitive'], function () use ($router) {
                 $router->get('/', 'CardsManagement\CardsController@sensitive');
                 $router->get('/dynamic-cvv', 'CardsManagement\CardsController@getDynamicCVV');
             });
@@ -128,6 +126,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{uuid}', 'Subaccounts\SubaccountController@show');
             $router->post('/', 'Subaccounts\SubaccountController@store');
             $router->put('/{uuid}', 'Subaccounts\SubaccountController@update');
+            $router->get('/{uuid}/movements', 'Subaccounts\SubaccountController@movements');
         });
 
         $router->group(['prefix' => 'embossing_batches'], function () use ($router) {
