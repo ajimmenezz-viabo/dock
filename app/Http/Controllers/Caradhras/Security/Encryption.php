@@ -7,9 +7,13 @@ use Exception;
 class Encryption
 {
 
-    public static function decrypt($aesBase64, $ivBase64, $msgBase64)
+    public static function decrypt($aesBase64, $ivBase64, $msgBase64, $mode = 'gcm')
     {
-        $goFilePath = realpath(__DIR__ . '/DecryptGo/decrypt.go');
+        if ($mode == 'gcm') {
+            $goFilePath = realpath(__DIR__ . '/DecryptGo/decrypt.go');
+        } else {
+            $goFilePath = realpath(__DIR__ . '/DecryptCBCGo/decrypt.go');
+        }
 
         // Construir el comando con los parámetros escapados
         $command =  env('PREFIX_GO_COMMAND') . "go run " . $goFilePath . " " .

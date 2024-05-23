@@ -599,10 +599,12 @@ class CardsController extends Controller
                     null
                 );
 
+                $mode = isset($response->mode) ? $response->mode : 'gcm';
+
                 Card::where('Id', $card->Id)->update([
-                    'Pan' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pan)),
-                    'CVV' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv)),
-                    'ExpirationDate' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->expiration_date))
+                    'Pan' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pan, $mode)),
+                    'CVV' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
+                    'ExpirationDate' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->expiration_date, $mode))
                 ]);
             }
 
@@ -630,7 +632,9 @@ class CardsController extends Controller
                 null
             );
 
-            return $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pin);
+            $mode = isset($response->mode) ? $response->mode : 'gcm';
+
+            return $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pin, $mode);
         } catch (Exception $e) {
             return null;
         }
@@ -654,7 +658,9 @@ class CardsController extends Controller
                 null
             );
 
-            return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv)], 200);
+            $mode = isset($response->mode) ? $response->mode : 'gcm';
+
+            return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)], 200);
         } catch (Exception $e) {
             return self::error('Error getting dynamic CVV', 400, $e);
         } catch (Exception $e) {
