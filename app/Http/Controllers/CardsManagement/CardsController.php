@@ -69,7 +69,7 @@ class CardsController extends Controller
     public function show($uuid)
     {
         try {
-            $card = $this->validateCardPermission($uuid);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             return response()->json($this->cardObject($uuid), 200);
@@ -133,7 +133,7 @@ class CardsController extends Controller
     public function block($uuid)
     {
         try {
-            $card = $this->validateCardPermission($uuid);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $dockRaw = [
@@ -180,7 +180,7 @@ class CardsController extends Controller
     public function unblock($uuid)
     {
         try {
-            $card = $this->validateCardPermission($uuid);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $dockRaw = [
@@ -227,7 +227,7 @@ class CardsController extends Controller
     public function sensitive($uuid)
     {
         try {
-            $card = $this->validateCardPermission($uuid);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             $card = $this->fillSensitiveData($card);
@@ -238,19 +238,19 @@ class CardsController extends Controller
         }
     }
 
-    public function setSetup($card_id, $setup_name, $action)
+    public function setSetup($uuid, $setup_name, $action)
     {
         try {
             DB::beginTransaction();
 
-            $card = $this->validateCardPermission($card_id);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             if (!$this->validateSetupName($setup_name)) return response()->json(['message' => 'Invalid setup name'], 400);
 
             if (!$this->validateSetupAction($action)) return response()->json(['message' => 'Invalid action'], 400);
 
-            $rawLocalSetup = $this->saveSetup($card_id, $setup_name, $action);
+            $rawLocalSetup = $this->saveSetup($card->Id, $setup_name, $action);
 
             $response = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/settings',
@@ -263,7 +263,7 @@ class CardsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Card setup updated successfully', 'card' => $this->cardObject($card_id)], 200);
+            return response()->json(['message' => 'Card setup updated successfully', 'card' => $this->cardObject($uuid)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error setting card setup', 400, $e);
@@ -359,7 +359,7 @@ class CardsController extends Controller
     }
 
 
-    private function validateCardPermission($uuid)
+    public static function validateCardPermission($uuid)
     {
         return Card::where('UUID', $uuid)
             ->where('CreatorId', auth()->user()->Id)
@@ -643,7 +643,7 @@ class CardsController extends Controller
     public function getDynamicCVV($uuid)
     {
         try {
-            $card = $this->validateCardPermission($uuid);
+            $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             if ($card->Type != 'virtual')
@@ -661,6 +661,7 @@ class CardsController extends Controller
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
             return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)], 200);
+            
         } catch (Exception $e) {
             return self::error('Error getting dynamic CVV', 400, $e);
         } catch (Exception $e) {
