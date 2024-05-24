@@ -640,10 +640,10 @@ class CardsController extends Controller
         }
     }
 
-    public function getDynamicCVV($id)
+    public function getDynamicCVV($uuid)
     {
         try {
-            $card = $this->validateCardPermission($id);
+            $card = $this->validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
             if ($card->Type != 'virtual')
