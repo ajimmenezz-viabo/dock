@@ -76,6 +76,10 @@ class CvvController extends Controller
                 []
             );
 
+            if(!isset($response->cvv)){
+                return response()->json(['message' => 'There is no dynamic CVV for this card. Please create one'], 404);
+            }
+
             $mode = isset($response->mode) ? $response->mode : 'gcm';
             $cvv = $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode);
 
