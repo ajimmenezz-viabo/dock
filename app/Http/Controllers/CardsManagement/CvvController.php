@@ -41,7 +41,18 @@ class CvvController extends Controller
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
-            return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)], 200);
+            if(env('DEV_MODE') === true){
+                return response()->json([
+                    'cvv' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
+                    'cvv_raw' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode),
+                ], 200);
+            }else {
+                return response()->json([
+                    'cvv' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
+                ], 200);
+            }
+
+
         } catch (\Exception $e) {
             return self::error('Error creating CVV', 500, $e);
         }

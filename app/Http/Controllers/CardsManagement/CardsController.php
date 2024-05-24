@@ -400,12 +400,16 @@ class CardsController extends Controller
             ];
         }
 
+        $date = new \DateTime();
+        $date->modify('+8 years');
+
         $base = [
             'type' => strtoupper($request['type']),
             'active_function' => $request['data']['profile']->ProductType,
             'cardholder_name' => $request['data']['person']->PersonType == 1 ? $request['data']['person']->LegalName : $request['data']['person']->FullName,
             'pin' => str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT),
             'profile_id' => $request['data']['profile']->ExternalId,
+            'expiration_date' => $date->format('Y-m-d\TH:i:s\Z'),
             'settings' => [
                 'transaction' => [
                     'ecommerce' => true,
