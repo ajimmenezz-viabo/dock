@@ -79,6 +79,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
         $router->group(['prefix' => 'dock_webhook_register'], function () use ($router) {
             $router->get('/retrieve_key', 'Webhooks\DockRegisterController@retrieve_key');
+            $router->post('/upload_aes_key', 'Webhooks\DockRegisterController@upload_aes_key');
             $router->post('/', 'Webhooks\DockRegisterController@store');
         });
 

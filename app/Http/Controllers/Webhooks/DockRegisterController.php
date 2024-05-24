@@ -25,6 +25,25 @@ class DockRegisterController extends Controller
         }
     }
 
+    public function upload_aes_key(Request $request){
+        try{
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'notifications/v1/cryptography',
+                'POST',
+                [],
+                [],
+                'bearer',
+                [
+                    'encrypted_aes_key' => $request->input('key')
+                ]
+            );
+
+            return response()->json($response, 200);
+        }catch(\Exception $e){
+            return self::error('Error uploading key', 500, $e);
+        }
+    }
+
 
     public function store(Request $request)
     {
