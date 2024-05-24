@@ -316,6 +316,23 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -362,30 +379,20 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "UUID": {
+                                        "subaccount_id": {
                                             "description": "Subaccount UUID",
                                             "type": "string",
                                             "example": "123456"
                                         },
-                                        "ExternalId": {
+                                        "external_id": {
                                             "description": "Subaccount ExternalId",
                                             "type": "string",
                                             "example": "123456"
                                         },
-                                        "Description": {
+                                        "description": {
                                             "description": "Subaccount Description",
                                             "type": "string",
                                             "example": "My subaccount"
-                                        },
-                                        "Balance": {
-                                            "description": "Subaccount Balance",
-                                            "type": "string",
-                                            "example": "0.00"
-                                        },
-                                        "STPAccount": {
-                                            "description": "STPAccount associated with the subaccount",
-                                            "type": "string",
-                                            "example": "123456"
                                         }
                                     },
                                     "type": "object"
@@ -462,117 +469,94 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "subaccounts": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "subaccount_id": {
-                                                        "description": "Subaccount UUID",
-                                                        "type": "string",
-                                                        "example": "123456"
-                                                    },
-                                                    "external_id": {
-                                                        "description": "Subaccount ExternalId",
-                                                        "type": "string",
-                                                        "example": "123456"
-                                                    },
-                                                    "description": {
-                                                        "description": "Subaccount Description",
-                                                        "type": "string",
-                                                        "example": "My subaccount"
-                                                    },
-                                                    "wallet": {
+                                        "subaccount_id": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "external_id": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        },
+                                        "wallet": {
+                                            "properties": {
+                                                "wallet_id": {
+                                                    "description": "Wallet UUID",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "balance": {
+                                                    "description": "Wallet Balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Wallet CLABE",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "last_movements": {
+                                                    "description": "Last movements",
+                                                    "type": "array",
+                                                    "items": {
                                                         "properties": {
-                                                            "wallet_id": {
-                                                                "description": "Wallet UUID",
+                                                            "movement_id": {
+                                                                "description": "Movement UUID",
                                                                 "type": "string",
                                                                 "example": "123456"
+                                                            },
+                                                            "card": {
+                                                                "properties": {
+                                                                    "card_id": {
+                                                                        "description": "Card UUID",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    },
+                                                                    "masked_pan": {
+                                                                        "description": "Card Masked PAN",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "type": {
+                                                                "description": "Movement Type",
+                                                                "type": "string",
+                                                                "example": "deposit"
+                                                            },
+                                                            "description": {
+                                                                "description": "Movement Description",
+                                                                "type": "string",
+                                                                "example": "Deposit"
+                                                            },
+                                                            "amount": {
+                                                                "description": "Movement Amount",
+                                                                "type": "string",
+                                                                "example": "100.00"
                                                             },
                                                             "balance": {
-                                                                "description": "Wallet Balance",
+                                                                "description": "Movement Balance",
                                                                 "type": "string",
-                                                                "example": "0.00"
+                                                                "example": "100.00"
                                                             },
-                                                            "clabe": {
-                                                                "description": "Wallet CLABE",
+                                                            "date": {
+                                                                "description": "Movement Date",
                                                                 "type": "string",
-                                                                "example": "123456"
-                                                            },
-                                                            "last_movements": {
-                                                                "description": "Last movements",
-                                                                "type": "array",
-                                                                "items": {
-                                                                    "properties": {
-                                                                        "movement_id": {
-                                                                            "description": "Movement UUID",
-                                                                            "type": "string",
-                                                                            "example": "123456"
-                                                                        },
-                                                                        "card": {
-                                                                            "properties": {
-                                                                                "card_id": {
-                                                                                    "description": "Card UUID",
-                                                                                    "type": "string",
-                                                                                    "example": "123456"
-                                                                                },
-                                                                                "masked_pan": {
-                                                                                    "description": "Card Masked PAN",
-                                                                                    "type": "string",
-                                                                                    "example": "123456"
-                                                                                }
-                                                                            },
-                                                                            "type": "object"
-                                                                        },
-                                                                        "type": {
-                                                                            "description": "Movement Type",
-                                                                            "type": "string",
-                                                                            "example": "deposit"
-                                                                        },
-                                                                        "description": {
-                                                                            "description": "Movement Description",
-                                                                            "type": "string",
-                                                                            "example": "Deposit"
-                                                                        },
-                                                                        "amount": {
-                                                                            "description": "Movement Amount",
-                                                                            "type": "string",
-                                                                            "example": "100.00"
-                                                                        },
-                                                                        "balance": {
-                                                                            "description": "Movement Balance",
-                                                                            "type": "string",
-                                                                            "example": "100.00"
-                                                                        },
-                                                                        "date": {
-                                                                            "description": "Movement Date",
-                                                                            "type": "string",
-                                                                            "example": "2024-05-23 04:52:41"
-                                                                        }
-                                                                    },
-                                                                    "type": "object"
-                                                                }
+                                                                "example": "2024-05-23 04:52:41"
                                                             }
                                                         },
                                                         "type": "object"
-                                                    },
-                                                    "page": {
-                                                        "description": "Current page",
-                                                        "type": "integer",
-                                                        "example": "1"
-                                                    },
-                                                    "total_pages": {
-                                                        "description": "Total pages",
-                                                        "type": "integer",
-                                                        "example": "1"
-                                                    },
-                                                    "total_records": {
-                                                        "description": "Total records",
-                                                        "type": "integer",
-                                                        "example": "1"
                                                     }
-                                                },
-                                                "type": "object"
-                                            }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -637,113 +621,54 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "subaccounts": {
+                                        "movements": {
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "subaccount_id": {
-                                                        "description": "Subaccount UUID",
+                                                    "movement_id": {
+                                                        "description": "Movement UUID",
                                                         "type": "string",
                                                         "example": "123456"
                                                     },
-                                                    "external_id": {
-                                                        "description": "Subaccount ExternalId",
-                                                        "type": "string",
-                                                        "example": "123456"
-                                                    },
-                                                    "description": {
-                                                        "description": "Subaccount Description",
-                                                        "type": "string",
-                                                        "example": "My subaccount"
-                                                    },
-                                                    "wallet": {
+                                                    "card": {
                                                         "properties": {
-                                                            "wallet_id": {
-                                                                "description": "Wallet UUID",
+                                                            "card_id": {
+                                                                "description": "Card UUID",
                                                                 "type": "string",
                                                                 "example": "123456"
                                                             },
-                                                            "balance": {
-                                                                "description": "Wallet Balance",
-                                                                "type": "string",
-                                                                "example": "0.00"
-                                                            },
-                                                            "clabe": {
-                                                                "description": "Wallet CLABE",
+                                                            "masked_pan": {
+                                                                "description": "Card Masked PAN",
                                                                 "type": "string",
                                                                 "example": "123456"
-                                                            },
-                                                            "last_movements": {
-                                                                "description": "Last movements",
-                                                                "type": "array",
-                                                                "items": {
-                                                                    "properties": {
-                                                                        "movement_id": {
-                                                                            "description": "Movement UUID",
-                                                                            "type": "string",
-                                                                            "example": "123456"
-                                                                        },
-                                                                        "card": {
-                                                                            "properties": {
-                                                                                "card_id": {
-                                                                                    "description": "Card UUID",
-                                                                                    "type": "string",
-                                                                                    "example": "123456"
-                                                                                },
-                                                                                "masked_pan": {
-                                                                                    "description": "Card Masked PAN",
-                                                                                    "type": "string",
-                                                                                    "example": "123456"
-                                                                                }
-                                                                            },
-                                                                            "type": "object"
-                                                                        },
-                                                                        "type": {
-                                                                            "description": "Movement Type",
-                                                                            "type": "string",
-                                                                            "example": "deposit"
-                                                                        },
-                                                                        "description": {
-                                                                            "description": "Movement Description",
-                                                                            "type": "string",
-                                                                            "example": "Deposit"
-                                                                        },
-                                                                        "amount": {
-                                                                            "description": "Movement Amount",
-                                                                            "type": "string",
-                                                                            "example": "100.00"
-                                                                        },
-                                                                        "balance": {
-                                                                            "description": "Movement Balance",
-                                                                            "type": "string",
-                                                                            "example": "100.00"
-                                                                        },
-                                                                        "date": {
-                                                                            "description": "Movement Date",
-                                                                            "type": "string",
-                                                                            "example": "2024-05-23 04:52:41"
-                                                                        }
-                                                                    },
-                                                                    "type": "object"
-                                                                }
                                                             }
                                                         },
                                                         "type": "object"
                                                     },
-                                                    "page": {
-                                                        "description": "Current page",
-                                                        "type": "integer",
-                                                        "example": "1"
+                                                    "type": {
+                                                        "description": "Movement Type",
+                                                        "type": "string",
+                                                        "example": "deposit"
                                                     },
-                                                    "total_pages": {
-                                                        "description": "Total pages",
-                                                        "type": "integer",
-                                                        "example": "1"
+                                                    "description": {
+                                                        "description": "Movement Description",
+                                                        "type": "string",
+                                                        "example": "Deposit"
                                                     },
-                                                    "total_records": {
-                                                        "description": "Total records",
-                                                        "type": "integer",
-                                                        "example": "1"
+                                                    "amount": {
+                                                        "description": "Movement Amount",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Movement Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "date": {
+                                                        "description": "Movement Date / Unix Timestamp",
+                                                        "type": "string",
+                                                        "example": "1716611739"
                                                     }
                                                 },
                                                 "type": "object"
@@ -761,44 +686,6 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        }
-    },
-    "components": {
-        "responses": {
-            "401": {
-                "description": "Unauthorized",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "description": "Message",
-                                    "type": "string",
-                                    "example": "Unauthorized | Error while decoding the token"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "404": {
-                "description": "Subaccount not found or you do not have permission to access it",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "description": "Message",
-                                    "type": "string",
-                                    "example": "Subaccount not found or you do not have permission to access it"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
             }
         }
     }

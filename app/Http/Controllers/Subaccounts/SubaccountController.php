@@ -61,7 +61,15 @@ class SubaccountController extends Controller
      *              )
      *         )
      *          )
-     *      )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *         )
+     *    ),
      * )
      */
     public function index(Request $request)
@@ -119,11 +127,9 @@ class SubaccountController extends Controller
      *          response="200", 
      *          description="Subaccount created successfully",
      *          @OA\JsonContent(
-     *              @OA\Property(property="UUID", type="string", example="123456", description="Subaccount UUID"),
-     *              @OA\Property(property="ExternalId", type="string", example="123456", description="Subaccount ExternalId"),
-     *              @OA\Property(property="Description", type="string", example="My subaccount", description="Subaccount Description"),
-     *              @OA\Property(property="Balance", type="string", example="0.00", description="Subaccount Balance"),
-     *              @OA\Property(property="STPAccount", type="string", example="123456", description="STPAccount associated with the subaccount")
+     *              @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
+     *              @OA\Property(property="external_id", type="string", example="123456", description="Subaccount ExternalId"),
+     *              @OA\Property(property="description", type="string", example="My subaccount", description="Subaccount Description"),
      *          )
      *      ),
      *      @OA\Response(
@@ -171,7 +177,7 @@ class SubaccountController extends Controller
 
             DB::commit();
 
-            return response()->json($this->subaccountObject($subaccount->Id), 200);
+            return response()->json($this->subaccountObject($subaccount->Id, true), 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error creating subaccount', 400, $e);
@@ -220,49 +226,40 @@ class SubaccountController extends Controller
      *          name="uuid",
      *          in="path",
      *          required=true,
-     *         description="Subaccount UUID",
-     *         @OA\Schema( 
-     *          type="string",
-     *          example="123456"
-     *          )
-     *     ),
+     *          description="Subaccount UUID",
+     *              @OA\Schema( 
+     *                  type="string",
+     *                  example="123456"
+     *              )
+     *       ),
      * 
      *      @OA\Response(
      *          response="200",
      *          description="Subaccount retrieved successfully",
      *          @OA\JsonContent(
-     *              @OA\Property(property="subaccounts", type="array", 
-     *                  @OA\Items(
-     *                      @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
-     *                      @OA\Property(property="external_id", type="string", example="123456", description="Subaccount ExternalId"),
-     *                      @OA\Property(property="description", type="string", example="My subaccount", description="Subaccount Description"),
-     *                      @OA\Property(property="wallet", type="object",
-     *                          @OA\Property(property="wallet_id", type="string", example="123456", description="Wallet UUID"),
-     *                          @OA\Property(property="balance", type="string", example="0.00", description="Wallet Balance"),
-     *                          @OA\Property(property="clabe", type="string", example="123456", description="Wallet CLABE"),
-     *                          @OA\Property(property="last_movements", type="array", description="Last movements",  
-     *                              @OA\Items(
-     *                                  @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
-     *                                  @OA\Property(property="card", type="object",
-     *                                      @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
-     *                                      @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
-     *                                  ),
-     *                                  @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
-     *                                  @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
-     *                                  @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
-     *                                  @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
-     *                                  @OA\Property(property="date", type="string", example="2024-05-23 04:52:41", description="Movement Date"),
-     *                             )
-     *                        )
-     *                  ),
-     *                  @OA\Property(property="page", type="integer", example="1", description="Current page"),
-     *                  @OA\Property(property="total_pages", type="integer", example="1", description="Total pages"),
-     *                  @OA\Property(property="total_records", type="integer", example="1", description="Total records")
+     *              @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
+     *              @OA\Property(property="external_id", type="string", example="123456", description="Subaccount ExternalId"),
+     *              @OA\Property(property="description", type="string", example="My subaccount", description="Subaccount Description"),
+     *              @OA\Property(property="wallet", type="object",
+     *                  @OA\Property(property="wallet_id", type="string", example="123456", description="Wallet UUID"),
+     *                  @OA\Property(property="balance", type="string", example="0.00", description="Wallet Balance"),
+     *                  @OA\Property(property="clabe", type="string", example="123456", description="Wallet CLABE"),
+     *                  @OA\Property(property="last_movements", type="array", description="Last movements",  
+     *                      @OA\Items(
+     *                          @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
+     *                          @OA\Property(property="card", type="object",
+     *                          @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
+     *                          @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
+     *                       ),
+     *                       @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
+     *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
+     *                       @OA\Property(property="date", type="string", example="2024-05-23 04:52:41", description="Movement Date"),
+     *                   )
      *              )
      *         )
-     *          )
-     *      )
-     *     ),
+     *    ),
      * 
      *      @OA\Response(
      *          response=401,
@@ -350,23 +347,30 @@ class SubaccountController extends Controller
         $this->fixNonSTPAccountWallet($accountWallet);
     }
 
-    public function subaccountObject($subaccount_id)
+    public function subaccountObject($subaccount_id, $lite = false)
     {
         $subaccount = Subaccount::where('Id', $subaccount_id)->first();
         $wallet = AccountWallet::where('SubAccountId', $subaccount_id)->first();
         $wallet = $this->fixNonSTPAccountWallet($wallet);
 
-        return [
+
+        $object = [
             'subaccount_id' => $subaccount->UUID,
             'external_id' => $subaccount->ExternalId,
             'description' => $subaccount->Description,
-            'wallet' => [
+
+        ];
+
+        if (!$lite) {
+            $object['wallet'] = [
                 'wallet_id' => $wallet->UUID,
                 'balance' => $this->encrypter->decrypt($wallet->Balance),
                 'clabe' => $wallet->STPAccount,
                 'last_movements' => WalletController::last_movements($wallet->Id)
-            ]
-        ];
+            ];
+        }
+
+        return $object;
     }
 
     private function validateSubaccountData($request)
@@ -413,42 +417,28 @@ class SubaccountController extends Controller
      *          )
      *     ),
      * 
-     *      @OA\Response(
+     *     @OA\Response(
      *          response="200",
-     *          description="Movements retrieved successfully",  
+     *          description="Movements retrieved successfully",
      *          @OA\JsonContent(
-     *              @OA\Property(property="subaccounts", type="array", 
-     *                  @OA\Items(
-     *                      @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
-     *                      @OA\Property(property="external_id", type="string", example="123456", description="Subaccount ExternalId"),
-     *                      @OA\Property(property="description", type="string", example="My subaccount", description="Subaccount Description"),
-     *                      @OA\Property(property="wallet", type="object",
-     *                          @OA\Property(property="wallet_id", type="string", example="123456", description="Wallet UUID"),
-     *                          @OA\Property(property="balance", type="string", example="0.00", description="Wallet Balance"),
-     *                          @OA\Property(property="clabe", type="string", example="123456", description="Wallet CLABE"),
-     *                          @OA\Property(property="last_movements", type="array", description="Last movements",  
-     *                              @OA\Items(
-     *                                  @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
-     *                                  @OA\Property(property="card", type="object",
-     *                                      @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
-     *                                      @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
-     *                                  ),
-     *                                  @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
-     *                                  @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
-     *                                  @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
-     *                                  @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
-     *                                  @OA\Property(property="date", type="string", example="2024-05-23 04:52:41", description="Movement Date"),
-     *                             )
-     *                        )
-     *                  ),
-     *                  @OA\Property(property="page", type="integer", example="1", description="Current page"),
-     *                  @OA\Property(property="total_pages", type="integer", example="1", description="Total pages"),
-     *                  @OA\Property(property="total_records", type="integer", example="1", description="Total records")
-     *              )
-     *         )
+     *              @OA\Property(property="movements", type="array", 
+     *                   @OA\Items(
+     *                       @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
+     *                       @OA\Property(property="card", type="object",
+     *                           @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
+     *                           @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
+     *                       ),
+     *                       @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
+     *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
+     *                       @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
+     *                    )
+     *               )
      *          )
-     *      )
-     * )
+     *      ),
+     *
+     *  )
      */
     public function movements($uuid, Request $request)
     {
