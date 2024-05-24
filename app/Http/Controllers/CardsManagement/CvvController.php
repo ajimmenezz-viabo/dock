@@ -61,7 +61,8 @@ class CvvController extends Controller
                 'GET',
                 [],
                 [],
-                'bearer'[]
+                'bearer',
+                []
             );
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
