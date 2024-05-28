@@ -12,12 +12,15 @@ class WalletMovement extends Model
     protected $table = 'account_wallet_movements';
     protected $primaryKey = 'Id';
     protected $fillable = [
+        'UUID',
         'WalletId',
+        'ApprovedBy',
         'CardId',
         'Type',
         'Description',
         'Amount',
-        'Balance'
+        'Balance',
+        'Reference'
     ];
 
     protected $hidden = [

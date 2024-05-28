@@ -5,6 +5,251 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/v1/account": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get account associated with the authenticated user",
+                "description": "Get account associated with the authenticated user",
+                "operationId": "7fd1f673a59c8757cb63bac412a6f5c1",
+                "responses": {
+                    "200": {
+                        "description": "Account retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "account": {
+                                            "description": "Account Name",
+                                            "type": "string",
+                                            "example": "Account Name"
+                                        },
+                                        "wallet": {
+                                            "properties": {
+                                                "wallet_id": {
+                                                    "description": "Wallet UUID",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "balance": {
+                                                    "description": "Wallet Balance",
+                                                    "type": "string",
+                                                    "example": "100.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Wallet CLABE",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "last_movements": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "movement_id": {
+                                                                "description": "Movement UUID",
+                                                                "type": "string",
+                                                                "example": "123456"
+                                                            },
+                                                            "card": {
+                                                                "properties": {
+                                                                    "card_id": {
+                                                                        "description": "Card UUID",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    },
+                                                                    "masked_pan": {
+                                                                        "description": "Card Masked PAN",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "type": {
+                                                                "description": "Movement Type",
+                                                                "type": "string",
+                                                                "example": "deposit"
+                                                            },
+                                                            "description": {
+                                                                "description": "Movement Description",
+                                                                "type": "string",
+                                                                "example": "Deposit"
+                                                            },
+                                                            "amount": {
+                                                                "description": "Movement Amount",
+                                                                "type": "string",
+                                                                "example": "100.00"
+                                                            },
+                                                            "balance": {
+                                                                "description": "Movement Balance",
+                                                                "type": "string",
+                                                                "example": "100.00"
+                                                            },
+                                                            "date": {
+                                                                "description": "Movement Date / Unix Timestamp",
+                                                                "type": "string",
+                                                                "example": "1716611739"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "You don't have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/account/movements": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get all movements for a specific account",
+                "description": "Get all movements for a specific account",
+                "operationId": "16fa49431cd2690f5dda0326ce771a07",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "from": {
+                                        "description": "From date",
+                                        "type": "string",
+                                        "example": "2024-05-23 04:52:41"
+                                    },
+                                    "to": {
+                                        "description": "To date",
+                                        "type": "string",
+                                        "example": "2024-05-23 04:52:41"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Movements retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "movements": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "movement_id": {
+                                                        "description": "Movement UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "card": {
+                                                        "properties": {
+                                                            "card_id": {
+                                                                "description": "Card UUID",
+                                                                "type": "string",
+                                                                "example": "123456"
+                                                            },
+                                                            "masked_pan": {
+                                                                "description": "Card Masked PAN",
+                                                                "type": "string",
+                                                                "example": "123456"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "type": {
+                                                        "description": "Movement Type",
+                                                        "type": "string",
+                                                        "example": "deposit"
+                                                    },
+                                                    "description": {
+                                                        "description": "Movement Description",
+                                                        "type": "string",
+                                                        "example": "Deposit"
+                                                    },
+                                                    "amount": {
+                                                        "description": "Movement Amount",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Movement Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "date": {
+                                                        "description": "Movement Date / Unix Timestamp",
+                                                        "type": "string",
+                                                        "example": "1716611739"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "tags": [
@@ -281,9 +526,9 @@
                                                                             "example": "100.00"
                                                                         },
                                                                         "date": {
-                                                                            "description": "Movement Date",
+                                                                            "description": "Movement Date / Unix Timestamp",
                                                                             "type": "string",
-                                                                            "example": "2024-05-23 04:52:41"
+                                                                            "example": "1716611739"
                                                                         }
                                                                     },
                                                                     "type": "object"
@@ -547,9 +792,9 @@
                                                                 "example": "100.00"
                                                             },
                                                             "date": {
-                                                                "description": "Movement Date",
+                                                                "description": "Movement Date / Unix Timestamp",
                                                                 "type": "string",
-                                                                "example": "2024-05-23 04:52:41"
+                                                                "example": "1716611739"
                                                             }
                                                         },
                                                         "type": "object"

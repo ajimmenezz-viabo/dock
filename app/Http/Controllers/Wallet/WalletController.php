@@ -31,12 +31,6 @@ class WalletController extends Controller
 
     public static function movements($wallet_id, $from, $to)
     {
-        // $movements = WalletMovement::where('WalletId', $wallet_id)
-        //     ->where('created_at', '>=', $from)
-        //     ->where('created_at', '<=', $to)
-        //     ->orderBy('created_at', 'desc')
-        //     ->get();
-
         $movements = WalletMovement::where('WalletId', $wallet_id)
             ->whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
@@ -57,31 +51,19 @@ class WalletController extends Controller
 
     public static function movement_object($movement)
     {
-        $m = [
+        $card = Card::where('Id', $movement->CardId)->first();
+
+        return [
             'movement_id' => $movement->UUID,
             'type' => $movement->Type,
             'description' => $movement->Description,
             'amount' => $movement->Amount,
             'balance' => $movement->Balance,
-            'date' => $movement->created_at
+            'date' => self::toUnixTime($movement->created_at),
+            'card' => [
+                'card_id' => $card->UUID ?? null,
+                'masked_pan' => $card->MaskedPan ?? null
+            ]
         ];
-
-        $card = Card::where('Id', $movement->CardId)->first();
-        if ($card) {
-            $m['card'] = [
-                'card_id' => $card->UUID,
-                'masked_pan' => $card->MaskedPan
-            ];
-        }
-
-        return $m;
-    }
-
-    public function register_deposit_by_uuid(Request $request, $uuid)
-    {
-        try {
-        } catch (Exception $e) {
-            return self::error('Error registering deposit', 400, $e);
-        }
     }
 }

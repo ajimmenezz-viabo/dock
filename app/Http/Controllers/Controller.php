@@ -34,4 +34,9 @@ class Controller extends BaseController
             'trace' => $e->getTraceAsString()
         ];
     }
+
+    static public function toUnixTime($date)
+    {
+        return strtotime($date);
+    }
 }

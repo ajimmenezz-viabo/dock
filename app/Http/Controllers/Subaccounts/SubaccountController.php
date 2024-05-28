@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 use Exception;
 
-/**
- * @OA\Info(title="API Documentation", version="1.0")
- */
-
 class SubaccountController extends Controller
 {
     /**
@@ -51,7 +47,7 @@ class SubaccountController extends Controller
      *                                  @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
      *                                  @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
      *                                  @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
-     *                                  @OA\Property(property="date", type="string", example="2024-05-23 04:52:41", description="Movement Date"),
+     *                                  @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
      *                             )
      *                        )
      *                  ),
@@ -255,7 +251,7 @@ class SubaccountController extends Controller
      *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
      *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
      *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
-     *                       @OA\Property(property="date", type="string", example="2024-05-23 04:52:41", description="Movement Date"),
+     *                       @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
      *                   )
      *              )
      *         )
@@ -457,7 +453,6 @@ class SubaccountController extends Controller
             $wallet = AccountWallet::where('SubAccountId', $subaccount->Id)->first();
             $wallet = $this->fixNonSTPAccountWallet($wallet);
 
-            var_dump($wallet->Id, $from, $to);
             $movements = WalletController::movements($wallet->Id, $from, $to);
 
             return response()->json([

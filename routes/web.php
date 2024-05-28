@@ -127,6 +127,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             });
         });
 
+        $router->group(['prefix' => 'account'], function () use ($router) {
+            $router->get('/', 'Accounts\AccountController@index');
+            $router->get('/movements', 'Accounts\AccountController@movements');
+        });
+
         $router->group(['prefix' => 'subaccounts'], function () use ($router) {
             $router->get('/', 'Subaccounts\SubaccountController@index');
             $router->get('/{uuid}', 'Subaccounts\SubaccountController@show');
@@ -168,13 +173,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/generate', 'Caradhras\Security\AesController@generate');
             $router->get('/', 'Caradhras\Security\AesController@find');
         });
+    });
 
-        $router->group(['prefix' => 'wallet'], function () use ($router) {
-            $router->group(['prefix' => 'by_stp'], function () use ($router) {
-            });
-            $router->group(['prefix' => 'by_uuid'], function () use ($router) {
-                $router->put('/{uuid}', 'Wallet\WalletController@register_deposit_by_uuid');
-            });
+    $router->group(["middleware" => "auth_admin", 'prefix' => 'admin/v1'], function () use ($router) {
+        $router->group(['prefix' => 'deposit'], function () use ($router) {
+            $router->post('/account', 'Wallet\DepositController@to_account');
         });
     });
 });
