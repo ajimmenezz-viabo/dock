@@ -179,6 +179,21 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(["middleware" => "auth_admin", 'prefix' => 'admin/v1'], function () use ($router) {
         $router->group(['prefix' => 'deposit'], function () use ($router) {
             $router->post('/account', 'Wallet\DepositController@to_account');
+            $router->post('/subaccount', 'Wallet\DepositController@to_subaccount');
+        });
+
+        $router->group(['prefix' => 'reversal'], function () use ($router) {
+            $router->post('/account', 'Wallet\ReversalController@from_account');
+            $router->post('/subaccount', 'Wallet\ReversalController@from_subaccount');
+        });
+
+        $router->group(['prefix' => 'account'], function () use ($router) {
+            $router->get('/{id}', 'Accounts\AccountAdminController@index');
+            $router->get('/{account_id}/subaccounts', 'Subaccounts\SubaccountAdminController@index');
+        });
+
+        $router->group(['prefix' => 'subaccount'], function () use ($router) {
+            $router->get('/{id}', 'Subaccounts\SubaccountAdminController@index');
         });
     });
 });

@@ -87,7 +87,7 @@ class SubaccountController extends Controller
             $subaccounts_array = [];
 
             foreach ($subaccounts as $subaccount) {
-                array_push($subaccounts_array, $this->subaccountObject($subaccount->Id));
+                array_push($subaccounts_array, self::subaccountObject($subaccount->Id));
             }
 
             return response()->json([
@@ -169,11 +169,11 @@ class SubaccountController extends Controller
                 'AccountId' => auth()->user()->Id
             ]);
 
-            $this->createWallet($subaccount->Id);
+            $this->createWallet(auth()->user()->Id, $subaccount->Id);
 
             DB::commit();
 
-            return response()->json($this->subaccountObject($subaccount->Id, true), 200);
+            return response()->json(self::subaccountObject($subaccount->Id, true), 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error creating subaccount', 400, $e);
@@ -201,13 +201,12 @@ class SubaccountController extends Controller
 
             DB::commit();
 
-            return response()->json($this->subaccountObject($subaccount->Id), 200);
+            return response()->json(self::subaccountObject($subaccount->Id), 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error updating subaccount', 400, $e);
         }
     }
-
 
     /**
      * @OA\Get(
@@ -282,16 +281,14 @@ class SubaccountController extends Controller
             $subaccount = $this->validateSubaccountPermission($uuid);
             if (!$subaccount) return response()->json(['message' => 'Subaccount not found or you do not have permission to access it'], 404);
 
-            return response()->json($this->subaccountObject($subaccount->Id), 200);
+            return response()->json(self::subaccountObject($subaccount->Id), 200);
         } catch (Exception $e) {
             return self::error('Error getting subaccount', 400, $e);
         }
     }
 
-    private function createWallet($subaccount_id)
+    private function createWallet($account_id, $subaccount_id)
     {
-        $this->fixNonAccountWallet();
-
         while (true) {
             $uuid = Uuid::uuid7()->toString();
             $exists = AccountWallet::where('UUID', $uuid)->first();
@@ -300,15 +297,15 @@ class SubaccountController extends Controller
 
         $accountWallet = AccountWallet::create([
             'UUID' => $uuid,
-            'AccountId' => auth()->user()->Id,
+            'AccountId' => $account_id,
             'SubAccountId' => $subaccount_id,
-            'Balance' => $this->encrypter->encrypt('0.00')
+            'Balance' => self::encrypt('0.00')
         ]);
 
-        $this->fixNonSTPAccountWallet($accountWallet);
+        self::fixNonSTPAccountWallet($accountWallet);
     }
 
-    private function fixNonSTPAccountWallet($accountWallet)
+    public static function fixNonSTPAccountWallet($accountWallet)
     {
         $availableSTPAccount = AvailableSTPAccount::where('Available', true)->first();
 
@@ -320,35 +317,35 @@ class SubaccountController extends Controller
         return AccountWallet::where('Id', $accountWallet->Id)->first();
     }
 
-    private function fixNonAccountWallet()
+    public static function fixNonSubaccountWallet($account_id, $subaccount_id)
     {
-        $accountWallet = AccountWallet::where('AccountId', auth()->user()->Id)
-            ->where('SubAccountId', null)
+        $subaccountWallet = AccountWallet::where('AccountId', $account_id)
+            ->where('SubAccountId', $subaccount_id)
             ->first();
 
-        if (!$accountWallet) {
+        if (!$subaccountWallet) {
             while (true) {
                 $uuid = Uuid::uuid7()->toString();
                 $exists = AccountWallet::where('UUID', $uuid)->first();
                 if (!$exists) break;
             }
 
-            $accountWallet = AccountWallet::create([
+            $subaccountWallet = AccountWallet::create([
                 'UUID' => $uuid,
-                'AccountId' => auth()->user()->Id,
-                'Balance' => $this->encrypter->encrypt('0.00')
+                'AccountId' => $account_id,
+                'SubAccountId' => $subaccount_id,
+                'Balance' => self::encrypt('0.00')
             ]);
         }
 
-        $this->fixNonSTPAccountWallet($accountWallet);
+        return self::fixNonSTPAccountWallet($subaccountWallet);
+
     }
 
-    public function subaccountObject($subaccount_id, $lite = false)
+    public static function subaccountObject($subaccount_id, $lite = false)
     {
         $subaccount = Subaccount::where('Id', $subaccount_id)->first();
-        $wallet = AccountWallet::where('SubAccountId', $subaccount_id)->first();
-        $wallet = $this->fixNonSTPAccountWallet($wallet);
-
+        $wallet = self::fixNonSubaccountWallet($subaccount->AccountId, $subaccount->Id);
 
         $object = [
             'subaccount_id' => $subaccount->UUID,
@@ -360,7 +357,7 @@ class SubaccountController extends Controller
         if (!$lite) {
             $object['wallet'] = [
                 'wallet_id' => $wallet->UUID,
-                'balance' => $this->encrypter->decrypt($wallet->Balance),
+                'balance' => self::decrypt($wallet->Balance),
                 'clabe' => $wallet->STPAccount,
                 'last_movements' => WalletController::last_movements($wallet->Id)
             ];

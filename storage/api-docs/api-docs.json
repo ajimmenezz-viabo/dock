@@ -76,6 +76,11 @@
                                                                 "type": "string",
                                                                 "example": "Deposit"
                                                             },
+                                                            "reference": {
+                                                                "description": "Movement Reference",
+                                                                "type": "string",
+                                                                "example": "REF76287"
+                                                            },
                                                             "amount": {
                                                                 "description": "Movement Amount",
                                                                 "type": "string",
@@ -216,6 +221,11 @@
                                                         "description": "Movement Description",
                                                         "type": "string",
                                                         "example": "Deposit"
+                                                    },
+                                                    "reference": {
+                                                        "description": "Movement Reference",
+                                                        "type": "string",
+                                                        "example": "REF76287"
                                                     },
                                                     "amount": {
                                                         "description": "Movement Amount",

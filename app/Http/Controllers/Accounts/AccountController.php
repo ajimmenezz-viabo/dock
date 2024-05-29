@@ -10,6 +10,7 @@ use App\Models\Wallet\AccountWallet;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 use Exception;
 
@@ -45,6 +46,7 @@ class AccountController extends Controller
      *                           ),
      *                          @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
      *                          @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                          @OA\Property(property="reference", type="string", example="REF76287", description="Movement Reference"),
      *                          @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
      *                          @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
      *                          @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
@@ -76,7 +78,7 @@ class AccountController extends Controller
     {
         try {
             if (auth()->user()->profile == 'admin_account') {
-                return response()->json($this->accountObject(auth()->user()->Id), 200);
+                return response()->json(self::accountObject(auth()->user()->Id), 200);
             } else {
                 return response()->json(['message' => 'You don\'t have permission to access this resource'], 403);
             }
@@ -85,22 +87,27 @@ class AccountController extends Controller
         }
     }
 
-    private function fixNonSTPAccountWallet($accountWallet)
+    public static function accountObject($account_id)
     {
-        $availableSTPAccount = AvailableSTPAccount::where('Available', true)->first();
+        $wallet = self::fixNonAccountWallet($account_id);
 
-        if ($availableSTPAccount && $accountWallet->STPAccount == null) {
-            AccountWallet::where('Id', $accountWallet->Id)->update(['STPAccount' => $availableSTPAccount->STPAccount]);
-            AvailableSTPAccount::where('STPAccount', $availableSTPAccount->STPAccount)->update(['Available' => false]);
-        }
+        $object = [
+            'account' => User::where('Id', $account_id)->first()->name,
+            'wallet' => [
+                'wallet_id' => $wallet->UUID,
+                'balance' => number_format(self::decrypt($wallet->Balance), 2, '.', ''),
+                'clabe' => $wallet->STPAccount,
+                'last_movements' => WalletController::last_movements($wallet->Id)
+            ]
+        ];
 
-        return AccountWallet::where('Id', $accountWallet->Id)->first();
+        return $object;
     }
 
-    private function fixNonAccountWallet()
+    public static function fixNonAccountWallet($account_id)
     {
-        $accountWallet = AccountWallet::where('AccountId', auth()->user()->Id)
-            ->where('SubAccountId', null)
+        $accountWallet = AccountWallet::where('AccountId', $account_id)
+            ->whereNull('SubAccountId')
             ->first();
 
         if (!$accountWallet) {
@@ -112,34 +119,26 @@ class AccountController extends Controller
 
             $accountWallet = AccountWallet::create([
                 'UUID' => $uuid,
-                'AccountId' => auth()->user()->Id,
-                'Balance' => $this->encrypter->encrypt('0.00')
+                'AccountId' => $account_id,
+                'Balance' => self::encrypt('0.00')
             ]);
         }
 
-        $this->fixNonSTPAccountWallet($accountWallet);
+        self::fixNonSTPAccountWallet($accountWallet);
+
+        return AccountWallet::where('Id', $accountWallet->Id)->where('SubAccountId', null)->first();
     }
 
-    public function accountObject($account_id)
+    public static function fixNonSTPAccountWallet($accountWallet)
     {
-        $this->fixNonAccountWallet();
+        $availableSTPAccount = AvailableSTPAccount::where('Available', true)->first();
 
-        $wallet = AccountWallet::where('AccountId', $account_id)
-            ->where('SubAccountId', null)
-            ->first();
+        if ($availableSTPAccount && $accountWallet->STPAccount == null) {
+            AccountWallet::where('Id', $accountWallet->Id)->update(['STPAccount' => $availableSTPAccount->STPAccount]);
+            AvailableSTPAccount::where('STPAccount', $availableSTPAccount->STPAccount)->update(['Available' => false]);
+        }
 
-        $object = [
-            'account' => auth()->user()->name,
-            'wallet' => [
-                'wallet_id' => $wallet->UUID,
-                'balance' => $this->encrypter->decrypt($wallet->Balance),
-                'clabe' => $wallet->STPAccount,
-                'last_movements' => WalletController::last_movements($wallet->Id)
-            ]
-        ];
-
-
-        return $object;
+        return AccountWallet::where('Id', $accountWallet->Id)->first();
     }
 
 
@@ -173,6 +172,7 @@ class AccountController extends Controller
      *                       ),
      *                       @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
      *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                       @OA\Property(property="reference", type="string", example="REF76287", description="Movement Reference"),
      *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
      *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
      *                       @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
@@ -194,7 +194,7 @@ class AccountController extends Controller
 
                 if (strtotime($to) - strtotime($from) > (2592000 * 3)) return response()->json(['message' => 'Date range exceeds 90 days'], 400);
 
-                $this->fixNonAccountWallet();
+                self::fixNonAccountWallet(auth()->user()->Id);
 
                 $wallet = AccountWallet::where('AccountId', auth()->user()->Id)
                     ->where('SubAccountId', null)

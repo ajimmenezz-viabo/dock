@@ -39,4 +39,17 @@ class Controller extends BaseController
     {
         return strtotime($date);
     }
+
+    static public function encrypt($data)
+    {
+        $encrypter = new \Illuminate\Encryption\Encrypter(env('APP_KEY'), 'AES-256-CBC');
+        return $encrypter->encrypt($data);
+    }
+
+    static public function decrypt($data)
+    {
+        $encrypter = new \Illuminate\Encryption\Encrypter(env('APP_KEY'), 'AES-256-CBC');
+        return $encrypter->decrypt($data);
+    }
+    
 }

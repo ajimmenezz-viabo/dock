@@ -23,7 +23,7 @@ class WalletController extends Controller
         $movements_array = [];
 
         foreach ($movements as $movement) {
-            $movements_array = self::movement_object($movement);
+            $movements_array[] = self::movement_object($movement);
         }
 
         return $movements_array;
@@ -57,6 +57,7 @@ class WalletController extends Controller
             'movement_id' => $movement->UUID,
             'type' => $movement->Type,
             'description' => $movement->Description,
+            'reference' => $movement->Reference ?? '',
             'amount' => $movement->Amount,
             'balance' => $movement->Balance,
             'date' => self::toUnixTime($movement->created_at),
@@ -65,5 +66,12 @@ class WalletController extends Controller
                 'masked_pan' => $card->MaskedPan ?? null
             ]
         ];
+    }
+
+    public function account(Request $request)
+    {
+        $this->validate($request, [
+            'account_id' => 'required'
+        ]);
     }
 }
