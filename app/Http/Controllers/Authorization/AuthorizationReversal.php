@@ -27,12 +27,12 @@ class AuthorizationReversal extends AuthorizationController
 
             $card->Balance = $this->encrypter->encrypt(number_format($newBalance, 2, '.', ''));
             $card->save();
-
-            $this->registerMovement($card->Id, $reversal, $newBalance, 'REVERSAL');
-
+            
             $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance);
+            
+            $authorizationRequestId = $this->save_response($authorization, $request, $response);
 
-            $this->save_response($authorization, $request, $response);
+            $this->registerMovement($card->Id, $reversal, $newBalance, 'REVERSAL', $authorizationRequestId, $request->all()['establishment'] ?? 'Unknown establishment');
 
             return response()->json($response, 200);
         } catch (AuthorizationException $e) {

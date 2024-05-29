@@ -22,6 +22,7 @@ $router->group(['prefix' => 'wh'], function () use ($router) {
 $router->group(['prefix' => 'dev'], function () use ($router) {
     $router->get('/decrypt', 'Security\Decrypt@decrypt');
     $router->post('/create_usr', 'Security\Dev@create_user');
+    $router->post('/encrypt', 'Security\Dev@encrypt_data');
 });
 
 $router->group(['prefix' => 'authorizations'], function () use ($router) {

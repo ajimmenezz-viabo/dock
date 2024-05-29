@@ -50,8 +50,9 @@ class AuthorizationPurchase extends AuthorizationController
             $card->Balance = $this->encrypter->encrypt($newBalance);
             $card->save();
 
-
-            $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance);
+            $response = $this->dock_response('APPROVED', 'Transaction approved', $newBalance, [
+                'authorization_code' => substr($authorization->AuthorizationCode, -6)
+            ]);
 
             $authorizationRequestId = $this->save_response($authorization, $request, $response);
 

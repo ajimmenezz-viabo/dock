@@ -11,6 +11,10 @@ use Exception;
 
 class Dev extends Controller
 {
+    public function encrypt_data(Request $request){
+        return $this->encrypter->encrypt($request->data);
+    }
+
     public function create_user(Request $request)
     {
         $this->validateUserData($request);
