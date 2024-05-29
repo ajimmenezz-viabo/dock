@@ -32,8 +32,7 @@ class WalletController extends Controller
     public static function movements($wallet_id, $from, $to)
     {
         $movements = WalletMovement::where('WalletId', $wallet_id)
-            ->whereDate('created_at', '>=', $from)
-            ->whereDate('created_at', '<=', $to)
+            ->whereBetween('created_at', [$from, $to])
             ->orderBy('created_at', 'desc')
             ->get();
 

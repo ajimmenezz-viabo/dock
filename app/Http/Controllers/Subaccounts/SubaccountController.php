@@ -7,6 +7,7 @@ use App\Http\Controllers\Wallet\WalletController;
 use App\Models\Account\Subaccount;
 use App\Models\Shared\AvailableSTPAccount;
 use App\Models\Wallet\AccountWallet;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\DB;
@@ -339,7 +340,6 @@ class SubaccountController extends Controller
         }
 
         return self::fixNonSTPAccountWallet($subaccountWallet);
-
     }
 
     public static function subaccountObject($subaccount_id, $lite = false)
@@ -440,8 +440,8 @@ class SubaccountController extends Controller
 
             if (!$subaccount) return response()->json(['message' => 'Subaccount not found or you do not have permission to access it'], 404);
 
-            $from = $request['from'] ?? date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s') . ' - 1 month'));
-            $to = $request['to'] ?? date('Y-m-d H:i:s');
+            $from = isset($request['from']) ? Carbon::createFromTimestamp($request->from) : Carbon::now()->subMonth();
+            $to = isset($request['to']) ? Carbon::createFromTimestamp($request->to) : Carbon::now();
 
             if ($from > $to) return response()->json(['message' => 'Invalid date range'], 400);
 
