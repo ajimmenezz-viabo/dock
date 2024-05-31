@@ -139,6 +139,13 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/', 'Subaccounts\SubaccountController@store');
             $router->put('/{uuid}', 'Subaccounts\SubaccountController@update');
             $router->get('/{uuid}/movements', 'Subaccounts\SubaccountController@movements');
+
+            $router->get('/{uuid}/cards', 'Subaccounts\SubaccountCardController@index');
+        });
+
+        $router->group(['prefix' => 'card'], function () use ($router) {
+            $router->get('/{uuid}', 'Card\MainCardController@show');
+            $router->get('/{uuid}/movements', 'Card\MainCardController@movements');
         });
 
         $router->group(['prefix' => 'embossing_batches'], function () use ($router) {

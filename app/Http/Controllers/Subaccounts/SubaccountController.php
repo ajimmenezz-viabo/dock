@@ -405,32 +405,30 @@ class SubaccountController extends Controller
      *     @OA\RequestBody(
      *         required=false,
      *          @OA\JsonContent(
-     *              @OA\Property(property="from", type="string", example="2024-05-23 04:52:41", description="From date"),
-     *              @OA\Property(property="to", type="string", example="2024-05-23 04:52:41", description="To date")
+     *              @OA\Property(property="from", type="string", example="1234567890", description="From date (Unix Timestamp)"),
+     *              @OA\Property(property="to", type="string", example="1234567890", description="To date (Unix Timestamp)")
      *          )
      *     ),
      * 
-     *     @OA\Response(
+     *      @OA\Response(
      *          response="200",
      *          description="Movements retrieved successfully",
      *          @OA\JsonContent(
-     *              @OA\Property(property="movements", type="array", 
-     *                   @OA\Items(
-     *                       @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
-     *                       @OA\Property(property="card", type="object",
-     *                           @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
-     *                           @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
-     *                       ),
-     *                       @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
-     *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
-     *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
-     *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
-     *                       @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
-     *                    )
-     *               )
+     *              @OA\Property(property="movements", type="array", description="Movements",
+     *                  @OA\Items(
+     *                      @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),
+     *                      @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
+     *                      @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
+     *                      @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                      @OA\Property(property="authorization_code", type="string", example="123456", description="Authorization Code"),
+     *                      @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                 )
+     *              ),
+     *              @OA\Property(property="total_records", type="integer", example="1", description="Total records"),
+     *              @OA\Property(property="from", type="string", example="1234567890", description="From date (Unix Timestamp)"),
+     *              @OA\Property(property="to", type="string", example="1234567890", description="To date (Unix Timestamp)")
      *          )
-     *      ),
-     *
+     *     ),
      *  )
      */
     public function movements($uuid, Request $request)
@@ -455,8 +453,8 @@ class SubaccountController extends Controller
             return response()->json([
                 'movements' => $movements['movements'],
                 'total_records' => $movements['count'],
-                'from' => $from,
-                'to' => $to
+                'from' => $from->timestamp,
+                'to' => $to->timestamp
             ], 200);
         } catch (Exception $e) {
             return self::error('Error getting subaccount movements', 400, $e);

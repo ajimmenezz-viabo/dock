@@ -42,7 +42,7 @@ class AuthorizationController extends Controller
             'reason' => $reason
         ];
 
-        $response = !is_null($limit) ? array_merge($response, ['available_limit' => number_format($limit,2,'.','')]) : $response;
+        $response = !is_null($limit) ? array_merge($response, ['available_limit' => number_format($limit, 2, '.', '')]) : $response;
 
         if ($additional) {
             $response = array_merge($response, $additional);
@@ -123,7 +123,12 @@ class AuthorizationController extends Controller
 
     public function registerMovement($cardId, $amount, $balance, $type, $authorization = null, $description = null)
     {
+        do{
+            $uuid = Uuid::uuid7()->toString();
+        } while (CardMovements::where('UUID', $uuid)->exists());
+
         CardMovements::create([
+            'UUID' => $uuid,
             'CardId' => $cardId,
             'Amount' => str_replace(',', '', number_format($amount, 2)),
             'Balance' => $balance,

@@ -12,6 +12,7 @@ class CardMovements extends Model
     protected $table = 'card_movements';
     protected $primaryKey = 'Id';
     protected $fillable = [
+        'UUID', 
         'AuthorizationRequestId',
         'CardId',
         'Type',

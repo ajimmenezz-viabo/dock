@@ -30,7 +30,6 @@ class ReversalController extends Controller
                 return self::error('The amount must be greater than 0, even for reversals', 400, new Exception('Invalid amount'));
             }
 
-
             if (WalletMovement::where('Type', 'Reversal')
                 ->where('Reference', $request->reference)
                 ->first()

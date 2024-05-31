@@ -439,6 +439,362 @@
                 ]
             }
         },
+        "/api/v1/card/{uuid}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get card details",
+                "description": "Returns card details",
+                "operationId": "7632fb802a351d364b1e64b9efb2d767",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cards retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "card_id": {
+                                            "description": "Card UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "card_type": {
+                                            "description": "Card Type",
+                                            "type": "string",
+                                            "example": "credit"
+                                        },
+                                        "brand": {
+                                            "description": "Card Brand",
+                                            "type": "string",
+                                            "example": "master"
+                                        },
+                                        "bin": {
+                                            "description": "Card BIN",
+                                            "type": "string",
+                                            "example": "12345678"
+                                        },
+                                        "balance": {
+                                            "description": "Card Balance",
+                                            "type": "string",
+                                            "example": "100.00"
+                                        },
+                                        "clabe": {
+                                            "description": "Card CLABE",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "status": {
+                                            "description": "Card Status",
+                                            "type": "string",
+                                            "example": "active"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/card/{uuid}/movements": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get card movements",
+                "description": "Returns card movements",
+                "operationId": "45e258b5d5dd9ab4010276a916807e35",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "from": {
+                                        "description": "From date (Unix timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "to": {
+                                        "description": "To date (Unix timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Movements retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "movements": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "movement_id": {
+                                                        "description": "Movement UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "date": {
+                                                        "description": "Movement Date (Unix timestamp)",
+                                                        "type": "string",
+                                                        "example": "1234567890"
+                                                    },
+                                                    "type": {
+                                                        "description": "Movement Type",
+                                                        "type": "string",
+                                                        "example": "deposit"
+                                                    },
+                                                    "amount": {
+                                                        "description": "Movement Amount",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "authorization_code": {
+                                                        "description": "Authorization Code",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "description": {
+                                                        "description": "Movement Description",
+                                                        "type": "string",
+                                                        "example": "Deposit"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "from": {
+                                            "description": "From date (Unix timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        },
+                                        "to": {
+                                            "description": "To date (Unix timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/subaccounts/{uuid}/cards": {
+            "get": {
+                "tags": [
+                    "Subaccount Cards"
+                ],
+                "summary": "Get all cards for the subaccount specified",
+                "description": "Returns all cards for the subaccount specified",
+                "operationId": "344ef7d1c3b2c21e59c50de5d8d36521",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "page": {
+                                        "description": "Page number",
+                                        "type": "integer",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cards retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "cards": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "card_id": {
+                                                        "description": "Card UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "card_type": {
+                                                        "description": "Card Type",
+                                                        "type": "string",
+                                                        "example": "credit"
+                                                    },
+                                                    "brand": {
+                                                        "description": "Card Brand",
+                                                        "type": "string",
+                                                        "example": "master"
+                                                    },
+                                                    "bin": {
+                                                        "description": "Card BIN",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Card Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "clabe": {
+                                                        "description": "Card CLABE",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "status": {
+                                                        "description": "Card Status",
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "page": {
+                                            "description": "Current page",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_pages": {
+                                            "description": "Total pages",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/subaccounts": {
             "get": {
                 "tags": [
@@ -854,14 +1210,14 @@
                             "schema": {
                                 "properties": {
                                     "from": {
-                                        "description": "From date",
+                                        "description": "From date (Unix Timestamp)",
                                         "type": "string",
-                                        "example": "2024-05-23 04:52:41"
+                                        "example": "1234567890"
                                     },
                                     "to": {
-                                        "description": "To date",
+                                        "description": "To date (Unix Timestamp)",
                                         "type": "string",
-                                        "example": "2024-05-23 04:52:41"
+                                        "example": "1234567890"
                                     }
                                 },
                                 "type": "object"
@@ -877,6 +1233,7 @@
                                 "schema": {
                                     "properties": {
                                         "movements": {
+                                            "description": "Movements",
                                             "type": "array",
                                             "items": {
                                                 "properties": {
@@ -885,49 +1242,49 @@
                                                         "type": "string",
                                                         "example": "123456"
                                                     },
-                                                    "card": {
-                                                        "properties": {
-                                                            "card_id": {
-                                                                "description": "Card UUID",
-                                                                "type": "string",
-                                                                "example": "123456"
-                                                            },
-                                                            "masked_pan": {
-                                                                "description": "Card Masked PAN",
-                                                                "type": "string",
-                                                                "example": "123456"
-                                                            }
-                                                        },
-                                                        "type": "object"
+                                                    "date": {
+                                                        "description": "Movement Date / Unix Timestamp",
+                                                        "type": "string",
+                                                        "example": "1716611739"
                                                     },
                                                     "type": {
                                                         "description": "Movement Type",
                                                         "type": "string",
                                                         "example": "deposit"
                                                     },
-                                                    "description": {
-                                                        "description": "Movement Description",
-                                                        "type": "string",
-                                                        "example": "Deposit"
-                                                    },
                                                     "amount": {
                                                         "description": "Movement Amount",
                                                         "type": "string",
                                                         "example": "100.00"
                                                     },
-                                                    "balance": {
-                                                        "description": "Movement Balance",
+                                                    "authorization_code": {
+                                                        "description": "Authorization Code",
                                                         "type": "string",
-                                                        "example": "100.00"
+                                                        "example": "123456"
                                                     },
-                                                    "date": {
-                                                        "description": "Movement Date / Unix Timestamp",
+                                                    "description": {
+                                                        "description": "Movement Description",
                                                         "type": "string",
-                                                        "example": "1716611739"
+                                                        "example": "Deposit"
                                                     }
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "from": {
+                                            "description": "From date (Unix Timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        },
+                                        "to": {
+                                            "description": "To date (Unix Timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
                                         }
                                     },
                                     "type": "object"
