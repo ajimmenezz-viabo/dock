@@ -130,6 +130,62 @@ class CardsController extends Controller
         }
     }
 
+    /**
+    *   @OA\Post(
+    *       path="/api/v1/card/{uuid}/block",
+    *       summary="Block a card",
+    *       description="Block a card.",
+    *       tags={"Cards"},
+    *       security={{"bearerAuth": {}}},
+    *       @OA\Parameter(
+    *           name="uuid",
+    *           in="path",
+    *           description="Card UUID",
+    *           required=true,
+    *           @OA\Schema(
+    *               type="string"
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=200,
+    *           description="Card blocked successfully",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
+    *               @OA\Property(property="card",type="object",description="Card object",
+    *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
+    *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
+    *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
+    *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
+    *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
+    *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
+    *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
+    *               )
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=404,
+    *           description="Card not found or you do not have permission to access it",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=400,
+    *           description="Error blocking card",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=401,
+    *           description="Unauthorized",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Unauthorized")
+    *           )
+    *       )
+    *   )
+    *
+    */
     public function block($uuid)
     {
         try {
@@ -177,6 +233,63 @@ class CardsController extends Controller
         }
     }
 
+
+    /**
+    *   @OA\Post(
+    *       path="/api/v1/card/{uuid}/unblock",
+    *       summary="Unblock a card",
+    *       description="Unblock a card.",
+    *       tags={"Cards"},
+    *       security={{"bearerAuth": {}}},
+    *       @OA\Parameter(
+    *           name="uuid",
+    *           in="path",
+    *           description="Card UUID",
+    *           required=true,
+    *           @OA\Schema(
+    *               type="string"
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=200,
+    *           description="Card unblocked successfully",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
+    *               @OA\Property(property="card",type="object",description="Card object",
+    *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
+    *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
+    *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
+    *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
+    *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
+    *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
+    *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
+    *               )
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=404,
+    *           description="Card not found or you do not have permission to access it",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=400,
+    *           description="Error blocking card",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
+    *           )
+    *       ),
+    *       @OA\Response(
+    *           response=401,
+    *           description="Unauthorized",
+    *           @OA\JsonContent(
+    *               @OA\Property(property="message", type="string", example="Unauthorized")
+    *           )
+    *       )
+    *   )
+    *
+    */
     public function unblock($uuid)
     {
         try {
@@ -224,6 +337,99 @@ class CardsController extends Controller
         }
     }
 
+
+
+    /**
+     *  @OA\Get(
+     *      path="/api/v1/card/{uuid}/sensitive",
+     *      summary="Get sensitive data from a card",
+     *      description="Get sensitive data from a card.",
+     *      operationId="getSensitiveData",
+     *      tags={"Cards"},
+     * 
+     *      security={{"bearerAuth": {}}},
+     * 
+     *      @OA\Parameter(
+     *          name="uuid",
+     *          in="path",
+     *          description="Card UUID",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string"
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation. You must decrypt the response with the provided key and the AES-CBC-256 algorithm. The sensitive data raw is only an example of the data you will receive. The sensitive data is the encrypted version of the sensitive data raw.",
+     *          @OA\JsonContent(
+     *              @OA\Property(
+     *                  property="sensitive_data",
+     *                  type="string",
+     *                  example="eyJwYW4iOiIxMjM0NTY3ODkwIiwiZXhwaXJhdGlvbl9kYXRlIjoiMjAyMS0wMS0wMSAxMDo1MzowMCIsInBpbiI6IjEyMzQ1Njc4OTAifQ==",
+     *                  description="Encrypted sensitive data"
+     *              ),
+     *             @OA\Property(
+     *                  property="sensitive_data_raw",
+     *                  type="object",
+     *                  description="Sensitive data",
+     *                  @OA\Property(
+     *                      property="pan",
+     *                      type="string",
+     *                      example="5555444466667777",
+     *                      description="Card PAN"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="expiration_date",
+     *                      type="string",
+     *                      example="2024-12-12",
+     *                      description="Card expiration date"
+     *                  ),
+     *                  @OA\Property(
+     *                      property="pin",
+     *                      type="string",
+     *                      example="1234",
+     *                      description="Card PIN"
+     *                  )
+     *              )
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=404,
+     *          description="Card not found or you do not have permission to access it",
+     *          @OA\JsonContent(
+     *              @OA\Property(
+     *                  property="message",
+     *                  type="string",
+     *                  example="Card not found or you do not have permission to access it",
+     *                  description="Error message"
+     *              )
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=400,
+     *          description="Error getting sensitive data",
+     *          @OA\JsonContent(
+     *              @OA\Property(
+     *                  property="message",
+     *                  type="string",
+     *                  example="Error getting sensitive data",
+     *                  description="Error message"
+     *              )
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized")
+     *          )
+     *      )
+     *  )
+     */
     public function sensitive($uuid)
     {
         try {
@@ -464,7 +670,7 @@ class CardsController extends Controller
 
         $sensitive = [
             'pan' => $this->encrypter->decrypt($card->Pan),
-            'cvv' => $this->encrypter->decrypt($card->CVV),
+            // 'cvv' => $this->encrypter->decrypt($card->CVV),
             'expiration_date' => $this->encrypter->decrypt($card->ExpirationDate),
             'pin' => (is_null($card->Pin)) ? null : $this->encrypter->decrypt($card->Pin)
         ];
@@ -472,12 +678,7 @@ class CardsController extends Controller
         if (env('DEV_MODE') === true) {
             return [
                 'sensitive_data' => $this->encrypter->encrypt(json_encode($sensitive)),
-                'sensitive_data_raw' => [
-                    'pan' => $sensitive['pan'],
-                    'cvv' => $sensitive['cvv'],
-                    'expiration_date' => $sensitive['expiration_date'],
-                    'pin' => $sensitive['pin']
-                ]
+                'sensitive_data_raw' => $sensitive
             ];
         }
 
@@ -665,7 +866,6 @@ class CardsController extends Controller
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
             return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)], 200);
-            
         } catch (Exception $e) {
             return self::error('Error getting dynamic CVV', 400, $e);
         } catch (Exception $e) {

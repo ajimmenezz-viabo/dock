@@ -146,6 +146,9 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'card'], function () use ($router) {
             $router->get('/{uuid}', 'Card\MainCardController@show');
             $router->get('/{uuid}/movements', 'Card\MainCardController@movements');
+            $router->get('/{uuid}/sensitive', 'CardsManagement\CardsController@sensitive');
+            $router->post('/{uuid}/block', 'CardsManagement\CardsController@block');
+            $router->post('/{uuid}/unblock', 'CardsManagement\CardsController@unblock');
         });
 
         $router->group(['prefix' => 'embossing_batches'], function () use ($router) {

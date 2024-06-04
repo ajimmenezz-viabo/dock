@@ -663,6 +663,394 @@
                 ]
             }
         },
+        "/api/v1/card/{uuid}/block": {
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Block a card",
+                "description": "Block a card.",
+                "operationId": "2618903d952e5e333aac674af8e72a87",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card blocked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string",
+                                            "example": "Card blocked successfully"
+                                        },
+                                        "card": {
+                                            "description": "Card object",
+                                            "properties": {
+                                                "card_id": {
+                                                    "description": "Card UUID",
+                                                    "type": "string",
+                                                    "example": "f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b"
+                                                },
+                                                "card_type": {
+                                                    "description": "Card type",
+                                                    "type": "string",
+                                                    "example": "virtual"
+                                                },
+                                                "brand": {
+                                                    "description": "Card active function",
+                                                    "type": "string",
+                                                    "example": "Mastercard"
+                                                },
+                                                "bin": {
+                                                    "description": "Card BIN",
+                                                    "type": "string",
+                                                    "example": "98765437"
+                                                },
+                                                "balance": {
+                                                    "description": "Card balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Card CLABE",
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "status": {
+                                                    "description": "Card status",
+                                                    "type": "string",
+                                                    "example": "BLOCKED"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error blocking card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error blocking card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/card/{uuid}/unblock": {
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Unblock a card",
+                "description": "Unblock a card.",
+                "operationId": "41d647f60dc29c96ebb87a61ae07d205",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card unblocked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string",
+                                            "example": "Card blocked successfully"
+                                        },
+                                        "card": {
+                                            "description": "Card object",
+                                            "properties": {
+                                                "card_id": {
+                                                    "description": "Card UUID",
+                                                    "type": "string",
+                                                    "example": "f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b"
+                                                },
+                                                "card_type": {
+                                                    "description": "Card type",
+                                                    "type": "string",
+                                                    "example": "virtual"
+                                                },
+                                                "brand": {
+                                                    "description": "Card active function",
+                                                    "type": "string",
+                                                    "example": "Mastercard"
+                                                },
+                                                "bin": {
+                                                    "description": "Card BIN",
+                                                    "type": "string",
+                                                    "example": "98765437"
+                                                },
+                                                "balance": {
+                                                    "description": "Card balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Card CLABE",
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "status": {
+                                                    "description": "Card status",
+                                                    "type": "string",
+                                                    "example": "BLOCKED"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error blocking card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error blocking card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/card/{uuid}/sensitive": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get sensitive data from a card",
+                "description": "Get sensitive data from a card.",
+                "operationId": "getSensitiveData",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation. You must decrypt the response with the provided key and the AES-CBC-256 algorithm. The sensitive data raw is only an example of the data you will receive. The sensitive data is the encrypted version of the sensitive data raw.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "sensitive_data": {
+                                            "description": "Encrypted sensitive data",
+                                            "type": "string",
+                                            "example": "eyJwYW4iOiIxMjM0NTY3ODkwIiwiZXhwaXJhdGlvbl9kYXRlIjoiMjAyMS0wMS0wMSAxMDo1MzowMCIsInBpbiI6IjEyMzQ1Njc4OTAifQ=="
+                                        },
+                                        "sensitive_data_raw": {
+                                            "description": "Sensitive data",
+                                            "properties": {
+                                                "pan": {
+                                                    "description": "Card PAN",
+                                                    "type": "string",
+                                                    "example": "5555444466667777"
+                                                },
+                                                "expiration_date": {
+                                                    "description": "Card expiration date",
+                                                    "type": "string",
+                                                    "example": "2024-12-12"
+                                                },
+                                                "pin": {
+                                                    "description": "Card PIN",
+                                                    "type": "string",
+                                                    "example": "1234"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error getting sensitive data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error getting sensitive data"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/subaccounts/{uuid}/cards": {
             "get": {
                 "tags": [
