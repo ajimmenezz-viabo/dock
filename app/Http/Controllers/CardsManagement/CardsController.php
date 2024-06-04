@@ -20,6 +20,7 @@ use App\Models\CardSetups\CardSetups;
 use App\Models\CardSetups\CardSetupsChange;
 use App\Models\Person\PersonAccount;
 use App\Models\Person\PersonAccountAlias;
+use App\Http\Controllers\Card\MainCardController;
 use Exception;
 
 class CardsController extends Controller
@@ -226,7 +227,7 @@ class CardsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Card blocked successfully', 'card' => $this->cardObject($uuid)], 200);
+            return response()->json(['message' => 'Card blocked successfully', 'card' => MainCardController::cardObject($uuid)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error blocking card', 400, $e);
@@ -330,7 +331,7 @@ class CardsController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Card unblocked successfully', 'card' => $this->cardObject($uuid)], 200);
+            return response()->json(['message' => 'Card unblocked successfully', 'card' => MainCardController::cardObject($uuid)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error blocking card', 400, $e);
