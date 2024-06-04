@@ -185,7 +185,9 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/', 'Caradhras\Security\AesController@find');
         });
 
-
+        $router->group(['prefix' => 'transfer'], function () use ($router) {
+            $router->post('/', 'Transfer\TransferController@transfer');
+        });
     });
 
     $router->group(["middleware" => "auth_admin", 'prefix' => 'admin/v1'], function () use ($router) {
