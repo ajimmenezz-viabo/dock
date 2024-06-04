@@ -29,22 +29,22 @@ class EmbossingBatchController extends Controller
         $batches = [];
 
         foreach ($embossing_batches as $batch) {
-            $batches[] = $this->batchEmbossingObject($batch->Id);
+            $batches[] = $this->batchEmbossingObject($batch->ExternalId);
             $this->fillBatchCards($batch);
         }
 
         return response()->json($batches, 200);
     }
 
-    public function show($id)
+    public function show($uuid)
     {
         try {
-            $batch = EmbossingBatch::where('UserId', auth()->user()->Id)->where('Id', $id)
+            $batch = EmbossingBatch::where('UserId', auth()->user()->Id)->where('ExternalId', $uuid)
                 ->select('Id', 'ExternalId', 'TotalCards', 'Status')
                 ->first();
             if (!$batch) return response()->json(['error' => 'Batch not found or you do not have permission to access it'], 404);
 
-            return $this->batchEmbossingObject($id);
+            return $this->batchEmbossingObject($uuid);
         } catch (Exception $e) {
             return self::error('Error getting batch', 500, $e);
         }
@@ -82,10 +82,10 @@ class EmbossingBatchController extends Controller
         }
     }
 
-    private function batchEmbossingObject($id)
+    private function batchEmbossingObject($uuid)
     {
         try {
-            $batch = EmbossingBatch::where('Id', $id)->first();
+            $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
 
             $object = [
                 'id' => $batch->ExternalId,
@@ -169,7 +169,7 @@ class EmbossingBatchController extends Controller
                 ]);
 
                 MainCardController::fixNonCustomerId($card, $prefix);
-                
+
             }
         } catch (Exception $e) {
             var_dump($e->getMessage());

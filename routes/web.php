@@ -157,7 +157,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
             $router->get('/', 'EmbossingManagement\EmbossingBatchController@index');
             $router->post('/', 'EmbossingManagement\EmbossingBatchController@batchEmbossing');
-            $router->get('/{id}', 'EmbossingManagement\EmbossingBatchController@show');
+            $router->get('/{uuid}', 'EmbossingManagement\EmbossingBatchController@show');
         });
 
         $router->group(['prefix' => 'card_profiles'], function () use ($router) {
@@ -184,6 +184,8 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/generate', 'Caradhras\Security\AesController@generate');
             $router->get('/', 'Caradhras\Security\AesController@find');
         });
+
+
     });
 
     $router->group(["middleware" => "auth_admin", 'prefix' => 'admin/v1'], function () use ($router) {
