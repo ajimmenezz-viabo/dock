@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\EmbossingManagement;
 
+use App\Http\Controllers\Card\MainCardController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PersonManagement\PersonController;
 use App\Models\Card\Card;
@@ -15,6 +16,7 @@ use App\Models\Person\Person;
 use App\Models\Embossing\EmbossingBatch;
 use App\Models\Person\PersonAddress;
 use App\Models\Shared\Country;
+use App\Models\User;
 use Exception;
 
 class EmbossingBatchController extends Controller
@@ -140,11 +142,17 @@ class EmbossingBatchController extends Controller
                 []
             );
 
-            foreach ($batch_external_data->content as $card) {
-                if (Card::where('ExternalId', $card->id)->first())
-                    continue;
+            $prefix = User::where('Id', $batch->UserId)->first()->prefix;
 
-                Card::create([
+            foreach ($batch_external_data->content as $card) {
+                $cardExist = Card::where('ExternalId', $card->id)->first();
+
+                if ($cardExist) {
+                    MainCardController::fixNonCustomerId($cardExist, $prefix);
+                    continue;
+                }
+
+                $card = Card::create([
                     'BatchId' => $batch->Id,
                     'UUID' => Uuid::uuid7()->toString(),
                     'CreatorId' => $batch->UserId,
@@ -159,6 +167,9 @@ class EmbossingBatchController extends Controller
                     'CVV' => null,
                     'Balance' => $this->encrypter->encrypt('0.00')
                 ]);
+
+                MainCardController::fixNonCustomerId($card, $prefix);
+                
             }
         } catch (Exception $e) {
             var_dump($e->getMessage());

@@ -64,7 +64,7 @@ class MainCardController extends Controller
             return self::error('Card not found or you do not have permission to access it', 403, new \Exception('Unauthorized'));
         }
 
-        return response()->json(self::cardObject($uuid), 200);
+        return response()->json(self::cardObject($uuid, auth()->user()->prefix), 200);
     }
 
     /**
@@ -179,5 +179,21 @@ class MainCardController extends Controller
         }
 
         return false;
+    }
+
+    public static function fixNonCustomerId($card, $prefix)
+    {
+        if ($card->CustomerId == null || $card->CustomerId == '') {
+            $last = Card::where('CustomerPrefix', $prefix)->orderBy('CustomerId', 'desc')->first();
+            if ($last) {
+                $card->CustomerPrefix = $prefix;
+                $card->CustomerId = $last->CustomerId + 1;
+            } else {
+                $card->CustomerPrefix = $prefix;
+                $card->CustomerId = 1;
+            }
+
+            $card->save();
+        }
     }
 }

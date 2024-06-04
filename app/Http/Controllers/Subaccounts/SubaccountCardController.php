@@ -110,6 +110,8 @@ class SubaccountCardController extends Controller
 
         $cards_array = [];
         foreach ($cards as $card) {
+            MainCardController::fixNonCustomerId($card, auth()->user()->prefix);
+
             array_push($cards_array, MainCardController::cardObject($card->UUID));
         }
 

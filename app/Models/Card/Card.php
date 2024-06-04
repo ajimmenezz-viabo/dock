@@ -17,6 +17,7 @@ class Card extends Model
         'CreatorId',
         'SubAccountId',
         'PersonId',
+        'CustomerId',
         'Type',
         'ActiveFunction',
         'ExternalId',
