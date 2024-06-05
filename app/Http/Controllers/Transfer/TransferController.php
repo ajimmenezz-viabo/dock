@@ -17,6 +17,61 @@ use Ramsey\Uuid\Uuid;
 
 class TransferController extends Controller
 {
+    /**
+     * @OA\Post(
+     *      path="/api/v1/transfer",
+     *      tags={"Transfer"},
+     *      summary="Transfer funds between account, subaccount or card",
+     *      description="Transfer funds between account, subaccount or card",
+     *      security={{"bearerAuth":{}}},
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(
+     *              @OA\Property(property="sourceType", type="string", example="account", description="Source type (account, subaccount, card)"),
+     *              @OA\Property(property="source", type="string", example="123456", description="Source UUID"),
+     *              @OA\Property(property="destinationType", type="string", example="subaccount", description="Destination type (account, subaccount, card)"),
+     *              @OA\Property(property="destination", type="string", example="123456", description="Destination UUID"),
+     *              @OA\Property(property="amount", type="number", example="100.00", description="Amount to transfer"),
+     *              @OA\Property(property="description", type="string", example="Transfer funds", description="Transfer description")
+     *          )
+     *      ),
+     * 
+     *     @OA\Response(
+     *          response="200",
+     *          description="Transfer funds successfully (Origin Account or Subaccount)",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="new_balance", type="string", example="100.00", description="New balance"),
+     *              @OA\Property(property="movement", type="object",
+     *                  @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),
+     *                  @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
+     *                  @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
+     *                  @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                  @OA\Property(property="authorization_code", type="string", example="123456", description="Authorization Code"),
+     *                  @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *              )
+     *          )
+     *      ),
+     * 
+     * 
+     *      @OA\Response(
+     *          response="400",
+     *          description="Error transferring funds",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="error", type="string", example="Error transferring funds", description="Error message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response( 
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *     )
+     *
+     * )
+     */
+
     public function transfer(Request $request)
     {
         $this->validateTransferData($request);

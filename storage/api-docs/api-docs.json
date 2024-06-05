@@ -1687,6 +1687,151 @@
                     }
                 ]
             }
+        },
+        "/api/v1/transfer": {
+            "post": {
+                "tags": [
+                    "Transfer"
+                ],
+                "summary": "Transfer funds between account, subaccount or card",
+                "description": "Transfer funds between account, subaccount or card",
+                "operationId": "58232a51f096e13cc6d9e51138d52777",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "sourceType": {
+                                        "description": "Source type (account, subaccount, card)",
+                                        "type": "string",
+                                        "example": "account"
+                                    },
+                                    "source": {
+                                        "description": "Source UUID",
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "destinationType": {
+                                        "description": "Destination type (account, subaccount, card)",
+                                        "type": "string",
+                                        "example": "subaccount"
+                                    },
+                                    "destination": {
+                                        "description": "Destination UUID",
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "amount": {
+                                        "description": "Amount to transfer",
+                                        "type": "number",
+                                        "example": "100.00"
+                                    },
+                                    "description": {
+                                        "description": "Transfer description",
+                                        "type": "string",
+                                        "example": "Transfer funds"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transfer funds successfully (Origin Account or Subaccount)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "new_balance": {
+                                            "description": "New balance",
+                                            "type": "string",
+                                            "example": "100.00"
+                                        },
+                                        "movement": {
+                                            "properties": {
+                                                "movement_id": {
+                                                    "description": "Movement UUID",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "date": {
+                                                    "description": "Movement Date / Unix Timestamp",
+                                                    "type": "string",
+                                                    "example": "1716611739"
+                                                },
+                                                "type": {
+                                                    "description": "Movement Type",
+                                                    "type": "string",
+                                                    "example": "deposit"
+                                                },
+                                                "amount": {
+                                                    "description": "Movement Amount",
+                                                    "type": "string",
+                                                    "example": "100.00"
+                                                },
+                                                "authorization_code": {
+                                                    "description": "Authorization Code",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "description": {
+                                                    "description": "Movement Description",
+                                                    "type": "string",
+                                                    "example": "Deposit"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error transferring funds",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error transferring funds"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     }
 }
