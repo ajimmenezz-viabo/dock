@@ -52,9 +52,12 @@ class CvvController extends Controller
 
             if ($card->Type != 'virtual') {
                 $card = CardsController::fillSensitiveData($card);
+                $date = Carbon::parse(self::decrypt($card->ExpirationDate));
+                $dateInUtc = $date->setTimezone('UTC');
+
                 return response()->json([
                     'cvv' => self::decrypt($card->CVV),
-                    'expiration' => self::decrypt($card->ExpirationDate)
+                    'expiration' => $dateInUtc->timestamp
                 ], 200);
             }
 
@@ -81,9 +84,12 @@ class CvvController extends Controller
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
+            $date = Carbon::parse($response->expiration_date);
+            $dateInUtc = $date->setTimezone('UTC');
+
             return response()->json([
                 'cvv' => DockEncryption::decrypt($response->aes, $response->iv, $response->cvv, $mode),
-                'expiration_date' => $response->expiration_date
+                'expiration_date' => $dateInUtc->timestamp
             ], 200);
         } catch (\Exception $e) {
             return self::error('Error getting CVV, please try again later', 500, $e);
