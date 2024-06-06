@@ -20,7 +20,7 @@ class CvvController extends Controller
     public static function create($card)
     {
         try {
-            $expiration_date = Carbon::now()->addMinutes(2);
+            $expiration_date = Carbon::now(env('APP_TIMEZONE'))->addMinutes(2);
 
             $response = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/dynamic-cvv',
