@@ -44,6 +44,63 @@ class CvvController extends Controller
         }
     }
 
+
+    /**
+     * @OA\Get(
+     *      path="/api/v1/card/{uuid}/cvv",
+     *      operationId="show",
+     *      tags={"Cards"},
+     *      summary="Get CVV for the card specified",
+     *      description="Returns the CVV for the card specified. If the card is a virtual card, the CVV will be generated and expire in 2 minutes.",
+     *      security={{"bearerAuth":{}}},
+     *     
+     *      @OA\Parameter(
+     *          name="uuid",
+     *          in="path",
+     *          description="Card UUID",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string"
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response="200",
+     *          description="CVV retrieved successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="cvv", type="string", example="123", description="Card CVV"),
+     *              @OA\Property(property="expiration", type="integer", example="1234567890", description="CVV expiration date")
+     *         )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=404,
+     *          description="Card not found or you do not have permission to access it",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=500,
+     *          description="Error getting CVV, please try again later",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Error getting CVV, please try again later", description="Message")
+     *          )
+     *      )
+     *  
+     *  )
+     *      
+     */
+
     public function show($uuid)
     {
         try {

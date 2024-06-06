@@ -1051,6 +1051,107 @@
                 ]
             }
         },
+        "/api/v1/card/{uuid}/cvv": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get CVV for the card specified",
+                "description": "Returns the CVV for the card specified. If the card is a virtual card, the CVV will be generated and expire in 2 minutes.",
+                "operationId": "show",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Card UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CVV retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "cvv": {
+                                            "description": "Card CVV",
+                                            "type": "string",
+                                            "example": "123"
+                                        },
+                                        "expiration": {
+                                            "description": "CVV expiration date",
+                                            "type": "integer",
+                                            "example": "1234567890"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error getting CVV, please try again later",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error getting CVV, please try again later"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/subaccounts/{uuid}/cards": {
             "get": {
                 "tags": [

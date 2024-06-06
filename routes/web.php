@@ -146,6 +146,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{uuid}', 'Card\MainCardController@show');
             $router->get('/{uuid}/movements', 'Card\MainCardController@movements');
             $router->get('/{uuid}/sensitive', 'CardsManagement\CardsController@sensitive');
+            $router->get('/{uuid}/cvv', 'CardsManagement\CvvController@show');
             $router->post('/{uuid}/block', 'CardsManagement\CardsController@block');
             $router->post('/{uuid}/unblock', 'CardsManagement\CardsController@unblock');
         });
