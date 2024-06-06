@@ -14,7 +14,7 @@ use App\Models\Embossing\Embossing;
 use App\Models\Person\Person;
 use App\Models\Person\PersonAddress;
 use App\Models\Shared\Country;
-use App\Http\Controllers\Caradhras\Security\Encryption;
+use App\Http\Controllers\Caradhras\Security\Encryption as DockEncryption;
 use App\Http\Controllers\PersonManagement\PersonController;
 use App\Models\CardSetups\CardSetups;
 use App\Models\CardSetups\CardSetupsChange;
@@ -25,12 +25,10 @@ use Exception;
 
 class CardsController extends Controller
 {
-    private $dock_encrypter;
 
     public function __construct()
     {
         parent::__construct();
-        $this->dock_encrypter = new Encryption();
     }
 
     public function index(Request $request)
@@ -437,7 +435,7 @@ class CardsController extends Controller
             $card = self::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
-            $card = $this->fillSensitiveData($card);
+            $card = self::fillSensitiveData($card);
 
             return response()->json($this->sensitiveData($card), 200);
         } catch (Exception $e) {
@@ -793,7 +791,16 @@ class CardsController extends Controller
         ];
     }
 
-    private function fillSensitiveData(Card $card)
+    public static function sensitiveDataRaw($card)
+    {
+        return [
+            'pan' => $card->Pan,
+            'expiration_date' => $card->ExpirationDate,
+            'pin' => $card->Pin
+        ];
+    }
+
+    public static function fillSensitiveData(Card $card)
     {
         try {
             if ($card->Pan == null || $card->Pan == "") {
@@ -809,16 +816,16 @@ class CardsController extends Controller
                 $mode = isset($response->mode) ? $response->mode : 'gcm';
 
                 Card::where('Id', $card->Id)->update([
-                    'Pan' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pan, $mode)),
-                    'CVV' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
-                    'ExpirationDate' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->expiration_date, $mode))
+                    'Pan' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->pan, $mode)),
+                    'CVV' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->cvv, $mode)),
+                    'ExpirationDate' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->expiration_date, $mode))
                 ]);
             }
 
             if ($card->Pin == null || $card->Pin == "") {
-                $pin = $this->getPin($card->ExternalId);
+                $pin = self::getPin($card->ExternalId);
                 Card::where('Id', $card->Id)->update([
-                    'Pin' => !is_null($pin) ? $this->encrypter->encrypt($pin) : null
+                    'Pin' => !is_null($pin) ? self::encrypt($pin) : null
                 ]);
             }
             return Card::where('Id', $card->Id)->first();
@@ -827,7 +834,7 @@ class CardsController extends Controller
         }
     }
 
-    private function getPin($card_id)
+    public static function getPin($card_id)
     {
         try {
             $response = DockApiService::request(
@@ -841,36 +848,9 @@ class CardsController extends Controller
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
-            return $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->pin, $mode);
+            return DockEncryption::decrypt($response->aes, $response->iv, $response->pin, $mode);
         } catch (Exception $e) {
             return null;
-        }
-    }
-
-    public function getDynamicCVV($uuid)
-    {
-        try {
-            $card = self::validateCardPermission($uuid);
-            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
-
-            if ($card->Type != 'virtual')
-                return response()->json(['message' => 'Dynamic CVV is only available for virtual cards'], 400);
-
-            $response = DockApiService::request(
-                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards​/' . $card->ExternalId . '/dynamic-cvv',
-                'GET',
-                [],
-                [],
-                'bearer',
-                null
-            );
-
-            $mode = isset($response->mode) ? $response->mode : 'gcm';
-
-            return response()->json(['data' => $response, 'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)], 200);
-        } catch (Exception $e) {
-            return self::error('Error getting dynamic CVV', 400, $e);
-        } catch (Exception $e) {
         }
     }
 }

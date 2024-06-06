@@ -118,7 +118,6 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
             $router->group(['prefix' => '{uuid}/cvv'], function () use ($router) {
                 $router->get('/', 'CardsManagement\CvvController@show');
-                $router->post('/', 'CardsManagement\CvvController@create');
             });
 
             $router->group(['prefix' => '{uuid}/setup'], function () use ($router) {

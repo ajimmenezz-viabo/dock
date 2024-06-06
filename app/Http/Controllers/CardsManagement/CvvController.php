@@ -6,27 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Services\DockApiService;
-use App\Http\Controllers\Caradhras\Security\Encryption;
+use App\Http\Controllers\Caradhras\Security\Encryption as DockEncryption;
+use Carbon\Carbon;
 use Exception;
 
 class CvvController extends Controller
 {
-    private $dock_encrypter;
-
     public function __construct()
     {
         parent::__construct();
-        $this->dock_encrypter = new Encryption();
     }
 
-    public function create($uuid, Request $request)
+    public static function create($card)
     {
         try {
-            $card = CardsController::validateCardPermission($uuid);
-            if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
-
-            if ($card->Type != 'virtual')
-                return response()->json(['message' => 'Dynamic CVV is only available for virtual cards'], 400);
+            $expiration_date = Carbon::now()->addMinutes(2);
 
             $response = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/dynamic-cvv',
@@ -35,26 +29,18 @@ class CvvController extends Controller
                 [],
                 'bearer',
                 [
-                    'expiration_date' => $request->input('expiration_date')
+                    'expiration_date' => $expiration_date->format('Y-m-d\TH:i:s\Z')
                 ]
             );
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
 
-            if(env('DEV_MODE') === true){
-                return response()->json([
-                    'cvv' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
-                    'cvv_raw' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode),
-                ], 200);
-            }else {
-                return response()->json([
-                    'cvv' => $this->encrypter->encrypt($this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode)),
-                ], 200);
-            }
-
-
+            return [
+                'cvv' => DockEncryption::decrypt($response->aes, $response->iv, $response->cvv, $mode),
+                'expiration_date' => $expiration_date->timestamp
+            ];
         } catch (\Exception $e) {
-            return self::error('Error creating CVV', 500, $e);
+            return [];
         }
     }
 
@@ -64,8 +50,13 @@ class CvvController extends Controller
             $card = CardsController::validateCardPermission($uuid);
             if (!$card) return response()->json(['message' => 'Card not found or you do not have permission to access it'], 404);
 
-            if ($card->Type != 'virtual')
-                return response()->json(['message' => 'Dynamic CVV is only available for virtual cards'], 400);
+            if ($card->Type != 'virtual') {
+                $card = CardsController::fillSensitiveData($card);
+                return response()->json([
+                    'cvv' => self::decrypt($card->CVV),
+                    'expiration' => self::decrypt($card->ExpirationDate)
+                ], 200);
+            }
 
             $response = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/dynamic-cvv',
@@ -76,27 +67,26 @@ class CvvController extends Controller
                 []
             );
 
-            if(!isset($response->cvv)){
-                return response()->json(['message' => 'There is no dynamic CVV for this card. Please create one'], 404);
+            if (!isset($response->cvv)) {
+                $cvv_data = self::create($card);
+                if (empty($cvv_data)) {
+                    return self::error('Error getting CVV, please try again later', 500, new Exception('Error getting CVV'));
+                } else {
+                    return response()->json([
+                        'cvv' => $cvv_data['cvv'],
+                        'expiration_date' => $cvv_data['expiration_date']
+                    ], 200);
+                }
             }
 
             $mode = isset($response->mode) ? $response->mode : 'gcm';
-            $cvv = $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode);
 
-            if (env('DEV_MODE') === true) {
-                return response()->json([
-                    'cvv' => $this->encrypter->encrypt($cvv),
-                    'expiration_date' => $response->expiration_date,
-                    'cvv_raw' => $cvv
-                ], 200);
-            } else {
-                return response()->json([
-                    'cvv' => $this->dock_encrypter->decrypt($response->aes, $response->iv, $response->cvv, $mode),
-                    'expiration_date' => $response->expiration_date
-                ], 200);
-            }
+            return response()->json([
+                'cvv' => DockEncryption::decrypt($response->aes, $response->iv, $response->cvv, $mode),
+                'expiration_date' => $response->expiration_date
+            ], 200);
         } catch (\Exception $e) {
-            return self::error('Error showing CVV', 500, $e);
+            return self::error('Error getting CVV, please try again later', 500, $e);
         }
     }
 }
