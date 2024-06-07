@@ -743,7 +743,7 @@ class CardController extends Controller
 
                 DB::commit();
 
-                return response()->json(['message' => 'Card blocked successfully', 'card' => MainCardController::cardObject($card->UUID)], 200);
+                return response()->json(['message' => 'Card unblocked successfully', 'card' => MainCardController::cardObject($card->UUID)], 200);
             } else {
                 return response()->json([
                     'message' => 'Card not found or you do not have permission to access it'
