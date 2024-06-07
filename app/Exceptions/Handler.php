@@ -55,11 +55,11 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-            return response()->json(['error' => $exception->getMessage() ?? "Not found"], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => $exception->getMessage() ?? "Not found"], Response::HTTP_NOT_FOUND);
         }
 
         if ($exception instanceof MethodNotAllowedHttpException) {
-            return response()->json(['error' => 'Method Not Allowed'], Response::HTTP_METHOD_NOT_ALLOWED);
+            return response()->json(['message' => 'Method Not Allowed'], Response::HTTP_METHOD_NOT_ALLOWED);
         }
 
         if ($exception instanceof ValidationException) {
@@ -67,19 +67,19 @@ class Handler extends ExceptionHandler
         }
 
         if ($exception instanceof TokenInvalidException) {
-            return response()->json(['error' => 'Token is invalid'], 401);
+            return response()->json(['message' => 'Token is invalid'], 401);
         }
 
         if ($exception instanceof TokenExpiredException) {
-            return response()->json(['error' => 'Token has expired'], 401);
+            return response()->json(['message' => 'Token has expired'], 401);
         }
 
         if ($exception instanceof JWTException) {
-            return response()->json(['error' => 'Error while decoding the token'], 401);
+            return response()->json(['message' => 'Error while decoding the token'], 401);
         }
 
         if ($exception instanceof HttpException) {
-            return response()->json(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+            return response()->json(['message' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         if ($exception instanceof AuthorizationException) {
@@ -102,12 +102,12 @@ class Handler extends ExceptionHandler
 
         if (env('APP_ENV') !== 'production') {
             return response()->json([
-                'error' => 'The given data was invalid. Please check the documentation for more information',
+                'message' => 'The given data was invalid. Please check the documentation for more information',
                 'dev_errors' => $errors,
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } else {
             return response()->json([
-                'error' => 'The given data was invalid. Please check the documentation for more information',
+                'message' => 'The given data was invalid. Please check the documentation for more information',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }

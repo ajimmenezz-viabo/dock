@@ -42,7 +42,7 @@ class EmbossingBatchController extends Controller
             $batch = EmbossingBatch::where('UserId', auth()->user()->Id)->where('ExternalId', $uuid)
                 ->select('Id', 'ExternalId', 'TotalCards', 'Status')
                 ->first();
-            if (!$batch) return response()->json(['error' => 'Batch not found or you do not have permission to access it'], 404);
+            if (!$batch) return response()->json(['message' => 'Batch not found or you do not have permission to access it'], 404);
 
             return $this->batchEmbossingObject($uuid);
         } catch (Exception $e) {

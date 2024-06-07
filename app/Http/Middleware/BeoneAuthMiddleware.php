@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
-class AdminAuthMiddleware
+class BeoneAuthMiddleware
 {
     /**
      * The authentication guard factory instance.
@@ -35,7 +35,7 @@ class AdminAuthMiddleware
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if ($this->auth->guard($guard)->guest() || $this->auth->guard($guard)->user()->profile !== 'superadmin') {
+        if ($this->auth->guard($guard)->guest() || $this->auth->guard($guard)->user()->profile !== 'beone') {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 

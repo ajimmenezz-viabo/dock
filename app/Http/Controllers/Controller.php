@@ -18,9 +18,9 @@ class Controller extends BaseController
     static public function error($message, $code = 500, Exception $e)
     {
         if (env('DEV_MODE') !== 'false')
-            return response()->json(['error' => $message, 'error_dev' => self::dev_error($e)], $code);
+            return response()->json(['message' => $message, 'error_dev' => self::dev_error($e)], $code);
 
-        return response()->json(['error' => $message], $code);
+        return response()->json(['message' => $message], $code);
     }
 
 

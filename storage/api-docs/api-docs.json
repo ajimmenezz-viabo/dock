@@ -109,6 +109,23 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Error getting subaccounts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error getting subaccounts"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "content": {
@@ -245,6 +262,40 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error getting account movements",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error getting account movements | Invalid date range"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized"
                                         }
                                     },
                                     "type": "object"
@@ -424,6 +475,1385 @@
                                             "description": "Message",
                                             "type": "string",
                                             "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccount/{uuid}/cards": {
+            "get": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Get all cards for the subaccount specified",
+                "description": "Returns all cards for the subaccount specified",
+                "operationId": "82c8ab7bec5096df327d25c8eedb3ffb",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "page": {
+                                        "description": "Page number",
+                                        "type": "integer",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cards retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "cards": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "card_id": {
+                                                        "description": "Card UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "card_type": {
+                                                        "description": "Card Type",
+                                                        "type": "string",
+                                                        "example": "credit"
+                                                    },
+                                                    "brand": {
+                                                        "description": "Card Brand",
+                                                        "type": "string",
+                                                        "example": "master"
+                                                    },
+                                                    "bin": {
+                                                        "description": "Card BIN",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Card Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "clabe": {
+                                                        "description": "Card CLABE",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "status": {
+                                                        "description": "Card Status",
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "page": {
+                                            "description": "Current page",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_pages": {
+                                            "description": "Total pages",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subaccount not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Subaccount not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}": {
+            "get": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Get card by bin",
+                "description": "Returns card by bin",
+                "operationId": "ae418c991951fae03eea35cc9c7a0a39",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card BIN",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "card_id": {
+                                            "description": "Card UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "card_type": {
+                                            "description": "Card Type",
+                                            "type": "string",
+                                            "example": "credit"
+                                        },
+                                        "brand": {
+                                            "description": "Card Brand",
+                                            "type": "string",
+                                            "example": "master"
+                                        },
+                                        "bin": {
+                                            "description": "Card BIN",
+                                            "type": "string",
+                                            "example": "12345678"
+                                        },
+                                        "balance": {
+                                            "description": "Card Balance",
+                                            "type": "string",
+                                            "example": "100.00"
+                                        },
+                                        "clabe": {
+                                            "description": "Card CLABE",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "status": {
+                                            "description": "Card Status",
+                                            "type": "string",
+                                            "example": "active"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/balance": {
+            "get": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Get card balance by bin",
+                "description": "Returns card balance by bin",
+                "operationId": "73b9a0813f5b4bf993f5c4be30152680",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card BIN",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "balance": {
+                                            "description": "Card Balance",
+                                            "type": "string",
+                                            "example": "100.00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/movements": {
+            "get": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Get card movements",
+                "description": "Returns card movements",
+                "operationId": "f6e30583a22fe2856e9d3b909a463d91",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card bin",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "from": {
+                                        "description": "From date (Unix timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "to": {
+                                        "description": "To date (Unix timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Movements retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "movements": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "movement_id": {
+                                                        "description": "Movement UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "date": {
+                                                        "description": "Movement Date (Unix timestamp)",
+                                                        "type": "string",
+                                                        "example": "1234567890"
+                                                    },
+                                                    "type": {
+                                                        "description": "Movement Type",
+                                                        "type": "string",
+                                                        "example": "deposit"
+                                                    },
+                                                    "amount": {
+                                                        "description": "Movement Amount",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "authorization_code": {
+                                                        "description": "Authorization Code",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "description": {
+                                                        "description": "Movement Description",
+                                                        "type": "string",
+                                                        "example": "Deposit"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "from": {
+                                            "description": "From date (Unix timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        },
+                                        "to": {
+                                            "description": "To date (Unix timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/deposit": {
+            "post": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Deposit to card",
+                "description": "Deposit to card",
+                "operationId": "c5d4ee0f5be4042a584c53d229bd3895",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card BIN",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "amount": {
+                                        "description": "Amount to deposit",
+                                        "type": "string",
+                                        "example": "100.00"
+                                    },
+                                    "description": {
+                                        "description": "Deposit description",
+                                        "type": "string",
+                                        "example": "Deposit"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deposit applied successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Deposit applied successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error applying deposit to card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error applying deposit to card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/reverse": {
+            "post": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Reverse from card to subaccount",
+                "description": "Reverse from card to subaccount",
+                "operationId": "490bd4674bb440f657e8f7cb882c2e8d",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card BIN",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "amount": {
+                                        "description": "Amount to reverse",
+                                        "type": "string",
+                                        "example": "100.00"
+                                    },
+                                    "description": {
+                                        "description": "Reverse description",
+                                        "type": "string",
+                                        "example": "Reverse"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reverse applied successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Reverse applied successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error applying reverse to card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error applying reverse to card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/block": {
+            "post": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Block a card by bin",
+                "description": "Block a card by bin.",
+                "operationId": "8ea6e5435dc411e871b8d3b593880d03",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card bin",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card blocked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string",
+                                            "example": "Card blocked successfully"
+                                        },
+                                        "card": {
+                                            "description": "Card object",
+                                            "properties": {
+                                                "card_id": {
+                                                    "description": "Card UUID",
+                                                    "type": "string",
+                                                    "example": "f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b"
+                                                },
+                                                "card_type": {
+                                                    "description": "Card type",
+                                                    "type": "string",
+                                                    "example": "virtual"
+                                                },
+                                                "brand": {
+                                                    "description": "Card active function",
+                                                    "type": "string",
+                                                    "example": "Mastercard"
+                                                },
+                                                "bin": {
+                                                    "description": "Card BIN",
+                                                    "type": "string",
+                                                    "example": "98765437"
+                                                },
+                                                "balance": {
+                                                    "description": "Card balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Card CLABE",
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "status": {
+                                                    "description": "Card status",
+                                                    "type": "string",
+                                                    "example": "BLOCKED"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error blocking card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error blocking card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/card/{bin}/unblock": {
+            "post": {
+                "tags": [
+                    "BeOne Cards"
+                ],
+                "summary": "Unblock a card by bin",
+                "description": "Unblock a card by bin.",
+                "operationId": "449a18a714a1953d64b1b1a99fd0d5d3",
+                "parameters": [
+                    {
+                        "name": "bin",
+                        "in": "path",
+                        "description": "Card bin",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Card unblocked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Success message",
+                                            "type": "string",
+                                            "example": "Card blocked successfully"
+                                        },
+                                        "card": {
+                                            "description": "Card object",
+                                            "properties": {
+                                                "card_id": {
+                                                    "description": "Card UUID",
+                                                    "type": "string",
+                                                    "example": "f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b"
+                                                },
+                                                "card_type": {
+                                                    "description": "Card type",
+                                                    "type": "string",
+                                                    "example": "virtual"
+                                                },
+                                                "brand": {
+                                                    "description": "Card active function",
+                                                    "type": "string",
+                                                    "example": "Mastercard"
+                                                },
+                                                "bin": {
+                                                    "description": "Card BIN",
+                                                    "type": "string",
+                                                    "example": "98765437"
+                                                },
+                                                "balance": {
+                                                    "description": "Card balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Card CLABE",
+                                                    "type": "string",
+                                                    "example": "0123456789"
+                                                },
+                                                "status": {
+                                                    "description": "Card status",
+                                                    "type": "string",
+                                                    "example": "BLOCKED"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Card not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error blocking card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Error message",
+                                            "type": "string",
+                                            "example": "Error blocking card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccounts": {
+            "get": {
+                "tags": [
+                    "BeOne Subaccounts"
+                ],
+                "summary": "Get all BeOne subaccounts",
+                "description": "Get all BeOne subaccounts",
+                "operationId": "1cda098f013ff4a1b4c909331cc7c382",
+                "responses": {
+                    "200": {
+                        "description": "Subaccounts retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "subaccounts": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "subaccount_id": {
+                                                        "description": "Subaccount UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "external_id": {
+                                                        "description": "Subaccount ExternalId",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "description": {
+                                                        "description": "Subaccount Description",
+                                                        "type": "string",
+                                                        "example": "My subaccount"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccount": {
+            "post": {
+                "tags": [
+                    "BeOne Subaccounts"
+                ],
+                "summary": "Create a new BeOne subaccount",
+                "description": "Create a new BeOne subaccount",
+                "operationId": "f22d0bd86a8a574e8b639408ec954f16",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "Description"
+                                ],
+                                "properties": {
+                                    "description": {
+                                        "type": "string",
+                                        "example": "My subaccount"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subaccount created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "subaccount_id": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "external_id": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccount/{uuid}": {
+            "get": {
+                "tags": [
+                    "BeOne Subaccounts"
+                ],
+                "summary": "Get a specific BeOne subaccount",
+                "description": "Get a specific BeOne subaccount by UUID",
+                "operationId": "0531cdf21f1a95e0b5fce0e29611af05",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "123456"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subaccount retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "subaccount_id": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "external_id": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subaccount not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Subaccount not found or you do not have permission to access it"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccount/{uuid}/balance": {
+            "get": {
+                "tags": [
+                    "BeOne Subaccounts"
+                ],
+                "summary": "Get the balance of a specific BeOne subaccount",
+                "description": "Get the balance of a specific BeOne subaccount by UUID",
+                "operationId": "d98539cbd0ec94d8fd1609445214a411",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "123456"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Balance retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "balance": {
+                                            "description": "Subaccount balance",
+                                            "type": "number",
+                                            "example": "100.00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/b1/subaccount/{uuid}/movements": {
+            "get": {
+                "tags": [
+                    "BeOne Subaccounts"
+                ],
+                "summary": "Get all movements for a specific subaccount",
+                "description": "Get all movements for a specific subaccount",
+                "operationId": "f5ca334e0a18cd51a899d60f27e92a4b",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "123456"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "from": {
+                                        "description": "From date (Unix Timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    },
+                                    "to": {
+                                        "description": "To date (Unix Timestamp)",
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Movements retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "movements": {
+                                            "description": "Movements",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "movement_id": {
+                                                        "description": "Movement UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "date": {
+                                                        "description": "Movement Date / Unix Timestamp",
+                                                        "type": "string",
+                                                        "example": "1716611739"
+                                                    },
+                                                    "type": {
+                                                        "description": "Movement Type",
+                                                        "type": "string",
+                                                        "example": "deposit"
+                                                    },
+                                                    "amount": {
+                                                        "description": "Movement Amount",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "authorization_code": {
+                                                        "description": "Authorization Code",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "description": {
+                                                        "description": "Movement Description",
+                                                        "type": "string",
+                                                        "example": "Deposit"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "from": {
+                                            "description": "From date (Unix Timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
+                                        },
+                                        "to": {
+                                            "description": "To date (Unix Timestamp)",
+                                            "type": "string",
+                                            "example": "1234567890"
                                         }
                                     },
                                     "type": "object"
@@ -1898,7 +3328,7 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "error": {
+                                        "message": {
                                             "description": "Error message",
                                             "type": "string",
                                             "example": "Error transferring funds"

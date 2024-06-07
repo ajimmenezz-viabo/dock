@@ -13,7 +13,7 @@ class BasicAuthMiddleware
         $authorization = $request->header('Authorization');
 
         if (!$authorization || !$this->isValidCredentials($authorization)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         return $next($request);

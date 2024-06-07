@@ -18,7 +18,7 @@ class ProfileController extends Controller
     public function show($id)
     {
         $profile = $this->baseQuery()->where('Id', $id)->first();
-        if (!$profile) return response()->json(['error' => 'Profile not found'], 404);
+        if (!$profile) return response()->json(['message' => 'Profile not found'], 404);
 
         return $profile;
     }

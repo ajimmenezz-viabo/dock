@@ -56,6 +56,13 @@ class AccountController extends Controller
      *          )    
      *      ),
      * 
+     *      @OA\Response(
+     *          response=400,
+     *          description="Error getting subaccounts",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Error getting subaccounts", description="Message")
+     *         )
+     *      ),
      * 
      *      @OA\Response(
      *          response=401,
@@ -180,7 +187,22 @@ class AccountController extends Controller
      *               )
      *          )
      *      ),
-     *
+     * 
+     *      @OA\Response(
+     *          response=400,
+     *          description="Error getting account movements",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Error getting account movements | Invalid date range", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized", description="Message")
+     *          )
+     *      ),
      *  )
      */
     public function movements(Request $request)

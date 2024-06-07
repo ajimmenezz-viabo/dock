@@ -170,7 +170,7 @@ class SubaccountController extends Controller
                 'AccountId' => auth()->user()->Id
             ]);
 
-            $this->createWallet(auth()->user()->Id, $subaccount->Id);
+            self::createWallet(auth()->user()->Id, $subaccount->Id);
 
             DB::commit();
 
@@ -288,7 +288,7 @@ class SubaccountController extends Controller
         }
     }
 
-    private function createWallet($account_id, $subaccount_id)
+    public static function createWallet($account_id, $subaccount_id)
     {
         while (true) {
             $uuid = Uuid::uuid7()->toString();

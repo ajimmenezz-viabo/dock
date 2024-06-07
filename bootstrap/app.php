@@ -80,6 +80,7 @@ $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
     'auth_basic' => App\Http\Middleware\BasicAuthMiddleware::class,
     'auth_admin' => App\Http\Middleware\AdminAuthMiddleware::class,
+    'auth_beone' => App\Http\Middleware\BeoneAuthMiddleware::class,
 ]);
 
 /*

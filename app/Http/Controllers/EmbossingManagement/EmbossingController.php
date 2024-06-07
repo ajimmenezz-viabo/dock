@@ -18,7 +18,7 @@ class EmbossingController extends Controller
     public function show($id)
     {
         $embossing = $this->baseQuery()->where('Id', $id)->first();
-        if (!$embossing) return response()->json(['error' => 'Embossing Setup Not Found'], 404);
+        if (!$embossing) return response()->json(['message' => 'Embossing Setup Not Found'], 404);
 
         return $embossing;
     }

@@ -57,7 +57,7 @@ class TransferController extends Controller
      *          response="400",
      *          description="Error transferring funds",
      *          @OA\JsonContent(
-     *              @OA\Property(property="error", type="string", example="Error transferring funds", description="Error message")
+     *              @OA\Property(property="message", type="string", example="Error transferring funds", description="Error message")
      *          )
      *      ),
      * 

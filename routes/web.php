@@ -210,4 +210,25 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{id}', 'Subaccounts\SubaccountAdminController@index');
         });
     });
+
+    $router->group(["middleware" => "auth_beone", "prefix" => "b1"], function () use ($router) {
+        $router->group(['prefix' => 'subaccount'], function () use ($router) {
+            $router->get('/', 'BeOne\SubaccountController@index');
+            $router->post('/', 'BeOne\SubaccountController@store');
+            $router->get('/{uuid}', 'BeOne\SubaccountController@show');
+            $router->get('/{uuid}/balance', 'BeOne\SubaccountController@balance');
+            $router->get('/{uuid}/cards', 'BeOne\CardController@index');
+            $router->get('/{uuid}/movements', 'BeOne\SubaccountController@movements');
+        });
+
+        $router->group(['prefix' => 'card'], function () use ($router) {
+            $router->get('/{bin}', 'BeOne\CardController@show');
+            $router->get('/{bin}/balance', 'BeOne\CardController@balance');
+            $router->get('/{bin}/movements', 'BeOne\CardController@movements');
+            $router->post('/{bin}/deposit', 'BeOne\CardController@deposit');
+            $router->post('/{bin}/reverse', 'BeOne\CardController@reverse');
+            $router->post('/{bin}/block', 'BeOne\CardController@block');
+            $router->post('/{bin}/unblock', 'BeOne\CardController@unblock');
+        });
+    });
 });
