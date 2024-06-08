@@ -771,7 +771,8 @@ class CardsController extends Controller
     private function validateCardDataExist($request)
     {
 
-        $person = Person::where('Id', $request['person_id'])->where('UserId', auth()->user()->Id)->first();
+        // $person = Person::where('Id', $request['person_id'])->where('UserId', auth()->user()->Id)->first();
+        $person = Person::where('Id', $request['person_id'])->first();
         $card_profile = Profile::where('Id', $request['card_profile_id'])->first();
         $embossing_setup = Embossing::where('Id', $request['embossing_setup_id'])->first();
 
