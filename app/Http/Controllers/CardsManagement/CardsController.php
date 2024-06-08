@@ -120,9 +120,11 @@ class CardsController extends Controller
                 'MaskedPan' => $response->masked_pan
             ]);
 
+            self::fillSensitiveData($card);
+
             DB::commit();
 
-            return response()->json(['message' => 'Card created successfully', 'card' => $this->cardObject($card->Id)], 200);
+            return response()->json(['message' => 'Card created successfully', 'card' => $this->cardObject($card->UUID)], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return self::error('Error creating card', 400, $e);
