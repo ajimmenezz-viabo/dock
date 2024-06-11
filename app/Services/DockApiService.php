@@ -76,8 +76,8 @@ class DockApiService
             foreach ($historyContainer as $transaction) {
                 $request = $transaction['request'];
                 $options = [
-                    'cert' => storage_path('cert/certificate.pem'),
-                    'ssl_key' => storage_path('cert/certificate.key'),
+                    'cert' => file_get_contents(storage_path('cert/certificate.pem')),
+                    'ssl_key' => file_get_contents(storage_path('cert/certificate.key')),
                 ];
                 $curl_command .= self::generateCurlCommand($request, $options) . PHP_EOL;
             }
