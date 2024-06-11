@@ -26,18 +26,6 @@ class DockApiService
     static public function request($url, $method, $params = [], $headers = [], $authType, $raw = null)
     {
         try {
-            $client_options = [];
-            if (env('PROXY') != null && env('PROXY') != "") {
-                $client_options = [
-                    RequestOptions::PROXY => [
-                        'http'  => env('PROXY'),
-                        'https' => env('PROXY')
-                    ],
-                    RequestOptions::VERIFY => false,
-                    RequestOptions::TIMEOUT => 30
-                ];
-            }
-
             // Handler stack
             $stack = HandlerStack::create();
 
@@ -45,6 +33,21 @@ class DockApiService
             $historyContainer = [];
             $history = Middleware::history($historyContainer);
             $stack->push($history);
+
+            $client_options = [
+                "handler" => $stack,
+            ];
+            if (env('PROXY') != null && env('PROXY') != "") {
+                $client_options = [
+                    RequestOptions::PROXY => [
+                        'http'  => env('PROXY'),
+                        'https' => env('PROXY')
+                    ],
+                    RequestOptions::VERIFY => false,
+                    RequestOptions::TIMEOUT => 30,
+                    "handler" => $stack,
+                ];
+            }
 
             $client = new \GuzzleHttp\Client($client_options);
 
