@@ -114,11 +114,13 @@ class CardsController extends Controller
                 $dockRaw
             );
 
-            $card = Card::where('Id', $card->Id)->update([
+            Card::where('Id', $card->Id)->update([
                 'ExternalId' => $response->id,
                 'Brand' => $response->brand,
                 'MaskedPan' => $response->masked_pan
             ]);
+
+            $card = Card::where('Id', $card->Id)->first();
 
             self::fillSensitiveData($card);
 
