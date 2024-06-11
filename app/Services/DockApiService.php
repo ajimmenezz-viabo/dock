@@ -75,7 +75,11 @@ class DockApiService
             // Imprime el comando curl
             foreach ($historyContainer as $transaction) {
                 $request = $transaction['request'];
-                $curl_command .= self::generateCurlCommand($request) . "\n";
+                $options = [
+                    'cert' => storage_path('cert/certificate.pem'),
+                    'ssl_key' => storage_path('cert/certificate.key'),
+                ];
+                $curl_command .= self::generateCurlCommand($request, $options) . PHP_EOL;
             }
 
             $api_response = json_decode($response->getBody()->getContents());
@@ -143,7 +147,7 @@ class DockApiService
         return $base_headers;
     }
 
-    static private function generateCurlCommand(Request $request)
+    static private function generateCurlCommand(Request $request, $options = [])
     {
         $method = $request->getMethod();
         $url = (string) $request->getUri();
@@ -153,12 +157,16 @@ class DockApiService
             $headers .= '-H "' . $name . ': ' . implode(', ', $values) . '" ';
         }
 
-        $body = $request->getBody()->getContents();
+        // Obtener el contenido del cuerpo de la solicitud correctamente
+        $body = (string) $request->getBody();
         if (!empty($body)) {
-            $body = '--data \'' . addslashes($body) . '\'';
+            $body = '--data ' . escapeshellarg($body);
         }
 
-        $curlCommand = "curl -X $method $headers $body '$url'";
+        $cert = isset($options['cert']) ? '--cert ' . escapeshellarg($options['cert']) : '';
+        $sslKey = isset($options['ssl_key']) ? '--key ' . escapeshellarg($options['ssl_key']) : '';
+
+        $curlCommand = "curl -X $method $headers $body $cert $sslKey '$url'";
 
         return $curlCommand;
     }
