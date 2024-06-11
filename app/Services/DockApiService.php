@@ -154,19 +154,24 @@ class DockApiService
         $headers = '';
 
         foreach ($request->getHeaders() as $name => $values) {
-            $headers .= '-H "' . $name . ': ' . implode(', ', $values) . '" ';
+            $headers .= '-H "' . $name . ': ' . implode(', ', $values) . '" \\' . PHP_EOL;
         }
 
         // Obtener el contenido del cuerpo de la solicitud correctamente
         $body = (string) $request->getBody();
         if (!empty($body)) {
-            $body = '--data ' . escapeshellarg($body);
+            $body = '--data ' . escapeshellarg($body) . ' \\' . PHP_EOL;
         }
 
-        $cert = isset($options['cert']) ? '--cert ' . escapeshellarg($options['cert']) : '';
-        $sslKey = isset($options['ssl_key']) ? '--key ' . escapeshellarg($options['ssl_key']) : '';
+        $cert = isset($options['cert']) ? '--cert ' . escapeshellarg($options['cert']) . ' \\' . PHP_EOL : '';
+        $sslKey = isset($options['ssl_key']) ? '--key ' . escapeshellarg($options['ssl_key']) . ' \\' . PHP_EOL : '';
 
-        $curlCommand = "curl -X $method $headers $body $cert $sslKey '$url'";
+        $curlCommand = "curl -X $method \\" . PHP_EOL
+            . $headers
+            . $body
+            . $cert
+            . $sslKey
+            . "'$url'";
 
         return $curlCommand;
     }
