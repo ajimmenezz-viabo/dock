@@ -114,7 +114,7 @@ class CardsController extends Controller
                 $dockRaw
             );
 
-            Card::where('Id', $card->Id)->update([
+            $card = Card::where('Id', $card->Id)->update([
                 'ExternalId' => $response->id,
                 'Brand' => $response->brand,
                 'MaskedPan' => $response->masked_pan

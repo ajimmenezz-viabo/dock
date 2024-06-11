@@ -4,6 +4,15 @@ namespace App\Services;
 
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Middleware\History;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\Handler\CurlMultiHandler;
 
 use App\Http\Controllers\Caradhras\Auth\TokenController;
 use App\Http\Controllers\Controller;
@@ -18,7 +27,7 @@ class DockApiService
     {
         try {
             $client_options = [];
-            if(env('PROXY') != null && env('PROXY') != "") {
+            if (env('PROXY') != null && env('PROXY') != "") {
                 $client_options = [
                     RequestOptions::PROXY => [
                         'http'  => env('PROXY'),
@@ -28,6 +37,14 @@ class DockApiService
                     RequestOptions::TIMEOUT => 30
                 ];
             }
+
+            // Handler stack
+            $stack = HandlerStack::create();
+
+            // Middleware para history
+            $historyContainer = [];
+            $history = Middleware::history($historyContainer);
+            $stack->push($history);
 
             $client = new \GuzzleHttp\Client($client_options);
 
@@ -50,13 +67,21 @@ class DockApiService
                 'body' => $body ?? ""
             ]);
 
+
+            $curl_command = "";
+            // Imprime el comando curl
+            foreach ($historyContainer as $transaction) {
+                $request = $transaction['request'];
+                $curl_command .= self::generateCurlCommand($request) . "\n";
+            }
+
             $api_response = json_decode($response->getBody()->getContents());
 
             if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), null);
+                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), null, $curl_command);
                 return $api_response;
             } else {
-                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), "HTTP status code: " . $response->getStatusCode());
+                self::saveRequest($url, $method, $authType, $body, json_encode($headers), json_encode($api_response), "HTTP status code: " . $response->getStatusCode(), $curl_command);
                 return json_encode(['error' => "Communication error with Dock API"]);
             }
         } catch (ClientException $e) {
@@ -69,7 +94,7 @@ class DockApiService
         }
     }
 
-    static private function saveRequest($url, $method, $authType, $body, $headers, $response, $error)
+    static private function saveRequest($url, $method, $authType, $body, $headers, $response, $error, $curl = "")
     {
         try {
             Log::info('Dock API Request', [
@@ -89,7 +114,8 @@ class DockApiService
                 'Body' => $body,
                 'Headers' => $headers,
                 'Response' => $response,
-                'Error' => $error
+                'Error' => $error,
+                'CurlCommand' => $curl
             ]);
         } catch (Exception $e) {
         }
@@ -112,5 +138,25 @@ class DockApiService
         }
 
         return $base_headers;
+    }
+
+    static private function generateCurlCommand(Request $request)
+    {
+        $method = $request->getMethod();
+        $url = (string) $request->getUri();
+        $headers = '';
+
+        foreach ($request->getHeaders() as $name => $values) {
+            $headers .= '-H "' . $name . ': ' . implode(', ', $values) . '" ';
+        }
+
+        $body = $request->getBody()->getContents();
+        if (!empty($body)) {
+            $body = '--data \'' . addslashes($body) . '\'';
+        }
+
+        $curlCommand = "curl -X $method $headers $body '$url'";
+
+        return $curlCommand;
     }
 }

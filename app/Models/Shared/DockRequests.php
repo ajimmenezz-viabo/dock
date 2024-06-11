@@ -19,7 +19,8 @@ class DockRequests extends Model
         'Body',
         'Headers',
         'Response',
-        'Error'
+        'Error',
+        'CurlCommand'
     ];
 
     protected $hidden = [
