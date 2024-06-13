@@ -130,6 +130,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         $router->group(['prefix' => 'account'], function () use ($router) {
             $router->get('/', 'Accounts\AccountController@index');
             $router->get('/movements', 'Accounts\AccountController@movements');
+            $router->get('/cards', 'Accounts\AccountCardController@index');
         });
 
         $router->group(['prefix' => 'subaccounts'], function () use ($router) {

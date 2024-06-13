@@ -9,6 +9,8 @@ use App\Models\CardMovements\CardMovements;
 use App\Models\CardSetups\CardSetups;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Services\DockApiService;
+use Exception;
 
 class MainCardController extends Controller
 {
@@ -155,13 +157,15 @@ class MainCardController extends Controller
     public static function cardObject($uuid)
     {
         $card = Card::where('UUID', $uuid)->first();
-        $setup = CardSetups::where('CardId', $card->Id)->first();
+        $setup = self::fillSetups($card);
+
+        $bin = is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8);
 
         return [
             'card_id' => $card->UUID,
             'card_type' => $card->Type,
             'brand' => $card->Brand,
-            'bin' => substr(self::decrypt($card->Pan), -8),
+            'bin' => (is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8)),
             'balance' => number_format(floatval(self::decrypt($card->Balance)), 2, '.', ''),
             'clabe' => $card->STPAccount,
             'status' => $setup->Status
@@ -196,4 +200,40 @@ class MainCardController extends Controller
             $card->save();
         }
     }
+
+    public static function fillSetups($card)
+    {
+        try {
+            $setups = CardSetups::where('CardId', $card->Id)->first();
+            if ($setups) return $setups;
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId,
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+
+            $setups = CardSetups::create([
+                'CardId' => $card->Id,
+                'Status' => $response->status,
+                'StatusReason' => $response->status_reason,
+                'Ecommerce' => $response->settings->transaction->ecommerce,
+                'International' => $response->settings->transaction->international,
+                'Stripe' => $response->settings->transaction->stripe,
+                'Wallet' => $response->settings->transaction->wallet,
+                'Withdrawal' => $response->settings->transaction->withdrawal,
+                'Contactless' => $response->settings->transaction->contactless,
+                'PinOffline' => $response->settings->security->pin_offline,
+                'PinOnUs' => $response->settings->security->pin_on_us
+            ]);
+
+            return $setups;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
 }

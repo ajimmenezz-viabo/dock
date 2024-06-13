@@ -5,6 +5,127 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/v1/account/cards": {
+            "get": {
+                "tags": [
+                    "Account Cards"
+                ],
+                "summary": "Get all account cards",
+                "description": "Returns all cards for the account associated with the token",
+                "operationId": "ba7ba687138eb2229dcb60d4bc5288bf",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "page": {
+                                        "description": "Page number",
+                                        "type": "integer",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cards retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "cards": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "card_id": {
+                                                        "description": "Card UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "card_type": {
+                                                        "description": "Card Type",
+                                                        "type": "string",
+                                                        "example": "credit"
+                                                    },
+                                                    "brand": {
+                                                        "description": "Card Brand",
+                                                        "type": "string",
+                                                        "example": "master"
+                                                    },
+                                                    "bin": {
+                                                        "description": "Card BIN",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Card Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "clabe": {
+                                                        "description": "Card CLABE",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "status": {
+                                                        "description": "Card Status",
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "page": {
+                                            "description": "Current page",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_pages": {
+                                            "description": "Total pages",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/account": {
             "get": {
                 "tags": [
