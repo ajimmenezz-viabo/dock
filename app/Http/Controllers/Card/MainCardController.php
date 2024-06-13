@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Card;
 
 use App\Http\Controllers\CardMovements\CardMovementController;
+use App\Http\Controllers\CardsManagement\CardsController;
 use App\Http\Controllers\Controller;
 use App\Models\Card\Card;
 use App\Models\CardMovements\CardMovements;
@@ -157,6 +158,7 @@ class MainCardController extends Controller
     public static function cardObject($uuid)
     {
         $card = Card::where('UUID', $uuid)->first();
+        $card = CardsController::fillSensitiveData($card);
         $setup = self::fillSetups($card);
 
         $bin = is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8);
