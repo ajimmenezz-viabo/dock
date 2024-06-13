@@ -56,6 +56,11 @@
                                                         "type": "string",
                                                         "example": "master"
                                                     },
+                                                    "masked_pan": {
+                                                        "description": "Masked Pan",
+                                                        "type": "string",
+                                                        "example": "1234xxxxxxxx9876"
+                                                    },
                                                     "bin": {
                                                         "description": "Card BIN",
                                                         "type": "string",
@@ -111,6 +116,176 @@
                                             "description": "Message",
                                             "type": "string",
                                             "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/account/cards/assign": {
+            "post": {
+                "tags": [
+                    "Account Cards"
+                ],
+                "summary": "Assign cards to a subaccount",
+                "description": "Assigns a number of cards to a subaccount",
+                "operationId": "e1c833100b8666c41e059eac0bf7b79b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "subaccount_id": {
+                                        "description": "Subaccount UUID",
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "card_type": {
+                                        "description": "Card Type",
+                                        "type": "string",
+                                        "example": "virtual"
+                                    },
+                                    "quantity": {
+                                        "description": "Number of cards to assign",
+                                        "type": "integer",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cards assigned successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "cards": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "card_id": {
+                                                        "description": "Card UUID",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "card_type": {
+                                                        "description": "Card Type",
+                                                        "type": "string",
+                                                        "example": "credit"
+                                                    },
+                                                    "brand": {
+                                                        "description": "Card Brand",
+                                                        "type": "string",
+                                                        "example": "master"
+                                                    },
+                                                    "masked_pan": {
+                                                        "description": "Masked Pan",
+                                                        "type": "string",
+                                                        "example": "1234xxxxxxxx9876"
+                                                    },
+                                                    "bin": {
+                                                        "description": "Card BIN",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "balance": {
+                                                        "description": "Card Balance",
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "clabe": {
+                                                        "description": "Card CLABE",
+                                                        "type": "string",
+                                                        "example": "123456"
+                                                    },
+                                                    "status": {
+                                                        "description": "Card Status",
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "page": {
+                                            "description": "Current page",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_pages": {
+                                            "description": "Total pages",
+                                            "type": "integer",
+                                            "example": "1"
+                                        },
+                                        "total_records": {
+                                            "description": "Total records",
+                                            "type": "integer",
+                                            "example": "1"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error assigning card",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error assigning card"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subaccount not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Not enough cards available | Subaccount not found or you do not have permission to access it"
                                         }
                                     },
                                     "type": "object"
@@ -673,6 +848,11 @@
                                                         "type": "string",
                                                         "example": "master"
                                                     },
+                                                    "masked_pan": {
+                                                        "description": "Masked Pan",
+                                                        "type": "string",
+                                                        "example": "1234xxxxxxxx9876"
+                                                    },
                                                     "bin": {
                                                         "description": "Card BIN",
                                                         "type": "string",
@@ -800,6 +980,11 @@
                                             "description": "Card Brand",
                                             "type": "string",
                                             "example": "master"
+                                        },
+                                        "masked_pan": {
+                                            "description": "Masked Pan",
+                                            "type": "string",
+                                            "example": "1234xxxxxxxx9876"
                                         },
                                         "bin": {
                                             "description": "Card BIN",
@@ -2031,6 +2216,11 @@
                                             "type": "string",
                                             "example": "master"
                                         },
+                                        "masked_pan": {
+                                            "description": "Masked Pan",
+                                            "type": "string",
+                                            "example": "1234xxxxxxxx9876"
+                                        },
                                         "bin": {
                                             "description": "Card BIN",
                                             "type": "string",
@@ -2764,6 +2954,11 @@
                                                         "description": "Card Brand",
                                                         "type": "string",
                                                         "example": "master"
+                                                    },
+                                                    "masked_pan": {
+                                                        "description": "Masked Pan",
+                                                        "type": "string",
+                                                        "example": "1234xxxxxxxx9876"
                                                     },
                                                     "bin": {
                                                         "description": "Card BIN",

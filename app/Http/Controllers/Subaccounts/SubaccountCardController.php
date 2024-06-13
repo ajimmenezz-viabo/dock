@@ -45,6 +45,7 @@ class SubaccountCardController extends Controller
      *                     @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),  
      *                      @OA\Property(property="card_type", type="string", example="credit", description="Card Type"),
      *                      @OA\Property(property="brand", type="string", example="master", description="Card Brand"),
+     *                      @OA\Property(property="masked_pan", type="string", example="1234xxxxxxxx9876", description="Masked Pan"),
      *                      @OA\Property(property="bin", type="string", example="12345678", description="Card BIN"),
      *                      @OA\Property(property="balance", type="string", example="100.00", description="Card Balance"),
      *                      @OA\Property(property="clabe", type="string", example="123456", description="Card CLABE"),
