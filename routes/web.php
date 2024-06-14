@@ -163,6 +163,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
             $router->group(['prefix' => 'layouts'], function () use ($router) {
                 $router->get('/', 'EmbossingManagement\EmbossingLayoutController@index');
+                $router->post('/', 'EmbossingManagement\EmbossingLayoutController@store');
             });
         });
 
