@@ -26,4 +26,24 @@ class EmbossingLayoutController extends Controller
 
         // return response()->json($batches, 200);
     }
+
+    public function store(Request $request){
+        $this->validate($request, [
+            'name' => 'required|string'
+        ]);
+
+        $layout = DockApiService::request(
+            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'embossing/v1/layouts',
+            'POST',
+            [],
+            [],
+            'bearer',
+            [
+                'name' => $request->name
+            ]
+        );
+
+        var_dump($layout);
+        die();
+    }
 }
