@@ -120,6 +120,7 @@ class EmbossingBatchController extends Controller
                         'Status' => $batch_external_data->status
                     ]);
                 }
+                
                 if ($batch_external_data->status == 'PROCESSED') {
                     $limit = 150;
                     $page = 1;
