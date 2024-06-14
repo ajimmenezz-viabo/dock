@@ -120,8 +120,14 @@ class EmbossingBatchController extends Controller
                         'Status' => $batch_external_data->status
                     ]);
 
-                    if ($batch_external_data->status == 'PROCESSED')
-                        $this->fillBatchCards($batch);
+                    if ($batch_external_data->status == 'PROCESSED') {
+                        $limit = 150;
+                        $page = 1;
+                        for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
+                            $this->fillBatchCards($batch, $page, $limit);
+                            $page++;
+                        }
+                    }
                 }
             }
         } catch (Exception $e) {
@@ -130,7 +136,7 @@ class EmbossingBatchController extends Controller
         return $object;
     }
 
-    private function fillBatchCards($batch)
+    private function fillBatchCards($batch, $page = 1, $limit = 150)
     {
         try {
             $batch_external_data = DockApiService::request(
@@ -139,7 +145,10 @@ class EmbossingBatchController extends Controller
                 [],
                 [],
                 'bearer',
-                []
+                [
+                    'limit' => $limit,
+                    'pages' => $page
+                ]
             );
 
             $prefix = User::where('Id', $batch->UserId)->first()->prefix;
@@ -169,7 +178,6 @@ class EmbossingBatchController extends Controller
                 ]);
 
                 MainCardController::fixNonCustomerId($card, $prefix);
-
             }
         } catch (Exception $e) {
             var_dump($e->getMessage());
