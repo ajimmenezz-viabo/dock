@@ -119,14 +119,13 @@ class EmbossingBatchController extends Controller
                     EmbossingBatch::where('Id', $batch->Id)->update([
                         'Status' => $batch_external_data->status
                     ]);
-
-                    if ($batch_external_data->status == 'PROCESSED') {
-                        $limit = 150;
-                        $page = 1;
-                        for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
-                            $this->fillBatchCards($batch, $page, $limit);
-                            $page++;
-                        }
+                }
+                if ($batch_external_data->status == 'PROCESSED') {
+                    $limit = 150;
+                    $page = 1;
+                    for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
+                        $this->fillBatchCards($batch, $page, $limit);
+                        $page++;
                     }
                 }
             }
@@ -142,13 +141,13 @@ class EmbossingBatchController extends Controller
             $batch_external_data = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId . '/cards',
                 'GET',
-                [],
-                [],
-                'bearer',
                 [
                     'limit' => $limit,
                     'pages' => $page
-                ]
+                ],
+                [],
+                'bearer',
+                []
             );
 
             $prefix = User::where('Id', $batch->UserId)->first()->prefix;
