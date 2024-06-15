@@ -160,11 +160,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/', 'EmbossingManagement\EmbossingBatchController@index');
             $router->post('/', 'EmbossingManagement\EmbossingBatchController@batchEmbossing');
             $router->get('/{uuid}', 'EmbossingManagement\EmbossingBatchController@show');
+        });
 
-            $router->group(['prefix' => 'layouts'], function () use ($router) {
-                $router->get('/', 'EmbossingManagement\EmbossingLayoutController@index');
-                $router->post('/', 'EmbossingManagement\EmbossingLayoutController@store');
-            });
+        $router->group(['prefix' => 'layouts'], function () use ($router) {
+            $router->get('/', 'EmbossingManagement\EmbossingLayoutController@index');
+            $router->post('/', 'EmbossingManagement\EmbossingLayoutController@store');
         });
 
         $router->group(['prefix' => 'card_profiles'], function () use ($router) {
