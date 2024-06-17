@@ -66,14 +66,8 @@ class EmbossingBatchController extends Controller
 
             for ($i = 0; $i < $request['quantity']; $i++) {
                 $request['metadata'] = [
-                    [
-                        'key' => 'text1',
-                        'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
-                    ],
-                    [
-                        'key' => 'text2',
-                        'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
-                    ]
+                    'key' => 'text1',
+                    'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
                 ];
 
                 $dockRaw = $this->cardBatchDockRaw($request);
@@ -105,8 +99,17 @@ class EmbossingBatchController extends Controller
 
     private function batchEmbossingObject($uuid)
     {
+        $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
+        $batch_external_data = DockApiService::request(
+            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId,
+            'GET',
+            [],
+            [],
+            'bearer',
+            []
+        );
+
         try {
-            $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
 
             $object = [
                 'id' => $batch->ExternalId,
@@ -116,15 +119,6 @@ class EmbossingBatchController extends Controller
                 'update_date' => $batch->updated_at,
                 'person' => PersonController::getPersonObjectShort($batch->PersonId)
             ];
-
-            $batch_external_data = DockApiService::request(
-                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId,
-                'GET',
-                [],
-                [],
-                'bearer',
-                []
-            );
 
             if ($batch->Status == 'PENDING') {
 
