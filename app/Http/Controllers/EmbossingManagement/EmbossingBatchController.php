@@ -39,9 +39,7 @@ class EmbossingBatchController extends Controller
     public function show($uuid)
     {
         try {
-            $batch = EmbossingBatch::where('UserId', auth()->user()->Id)->where('ExternalId', $uuid)
-                ->select('Id', 'ExternalId', 'TotalCards', 'Status')
-                ->first();
+            $batch = EmbossingBatch::where('UserId', auth()->user()->Id)->where('ExternalId', $uuid)->first();
             if (!$batch) return response()->json(['message' => 'Batch not found or you do not have permission to access it'], 404);
 
             return $this->batchEmbossingObject($uuid);
@@ -99,17 +97,17 @@ class EmbossingBatchController extends Controller
 
     private function batchEmbossingObject($uuid)
     {
-        $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
-        $batch_external_data = DockApiService::request(
-            ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId,
-            'GET',
-            [],
-            [],
-            'bearer',
-            []
-        );
-
         try {
+
+            $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
+            $batch_external_data = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId,
+                'GET',
+                [],
+                [],
+                'bearer',
+                []
+            );
 
             $object = [
                 'id' => $batch->ExternalId,
@@ -117,32 +115,29 @@ class EmbossingBatchController extends Controller
                 'status' => $batch->Status,
                 'status_reason' => '',
                 'update_date' => $batch->updated_at,
-                'person' => PersonController::getPersonObjectShort($batch->PersonId)
-            ];
-
-            if ($batch->Status == 'PENDING') {
-
-                $object['external_data'] = [
+                'person' => PersonController::getPersonObjectShort($batch->PersonId),
+                'external_data' => [
                     'status' => $batch_external_data->status,
                     'status_reason' => $batch_external_data->status_reason,
                     'update_date' => $batch_external_data->update_date
-                ];
+                ]
+            ];
 
-                $update_date = new \DateTime($batch_external_data->update_date);
 
-                if ($update_date > $batch->updated_at) {
-                    EmbossingBatch::where('Id', $batch->Id)->update([
-                        'Status' => $batch_external_data->status
-                    ]);
-                }
+            $update_date = new \DateTime($batch_external_data->update_date);
 
-                if ($batch_external_data->status == 'PROCESSED') {
-                    $limit = 150;
-                    $page = 1;
-                    for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
-                        $this->fillBatchCards($batch, $page, $limit);
-                        $page++;
-                    }
+            if ($update_date > $batch->updated_at) {
+                EmbossingBatch::where('Id', $batch->Id)->update([
+                    'Status' => $batch_external_data->status
+                ]);
+            }
+
+            if ($batch_external_data->status == 'PROCESSED') {
+                $limit = 150;
+                $page = 1;
+                for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
+                    $this->fillBatchCards($batch, $page, $limit);
+                    $page++;
                 }
             }
         } catch (Exception $e) {
