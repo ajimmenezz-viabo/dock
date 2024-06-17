@@ -28,7 +28,8 @@ class Card extends Model
         'CVV',
         'Pin',
         'Balance',
-        'STPAccount'
+        'STPAccount',
+        'CardObject'
     ];
     protected $hidden = [
         'created_at',

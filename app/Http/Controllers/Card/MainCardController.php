@@ -189,17 +189,21 @@ class MainCardController extends Controller
         return false;
     }
 
-    public static function fixNonCustomerId($card, $prefix)
+    public static function fixNonCustomerId($card, $external_card)
     {
         if ($card->CustomerId == null || $card->CustomerId == '') {
-            $last = Card::where('CustomerPrefix', $prefix)->orderBy('CustomerId', 'desc')->first();
-            if ($last) {
-                $card->CustomerPrefix = $prefix;
-                $card->CustomerId = $last->CustomerId + 1;
-            } else {
-                $card->CustomerPrefix = $prefix;
-                $card->CustomerId = 1;
+            $prefix = null;
+            $client_id = null;
+            foreach ($external_card->metadata as $metadata) {
+                if ($metadata->key == 'text1') {
+                    $prefix = substr($metadata->value, 0, 2);
+                    $client_id = intval(substr($metadata->value, 2));
+                    break;
+                }
             }
+
+            $card->CustomerId = $client_id;
+            $card->CustomerPrefix = $prefix;
 
             $card->save();
         }
@@ -239,5 +243,4 @@ class MainCardController extends Controller
             return null;
         }
     }
-
 }

@@ -57,24 +57,45 @@ class EmbossingBatchController extends Controller
         $request['data'] = $this->validateCardDataExist($request);
 
         try {
-            $dockRaw = $this->cardBatchDockRaw($request);
+            $last_clientid = Card::where('CustomerPrefix', auth()->user()->prefix)->orderBy('CustomerId', 'desc')->first();
+            if ($last_clientid) {
+                $next_clientid = $last_clientid->CustomerId + 1;
+            } else {
+                $next_clientid = 1;
+            }
 
-            $response = DockApiService::request(
-                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches',
-                'POST',
-                [],
-                [],
-                'bearer',
-                $dockRaw
-            );
+            for ($i = 0; $i < $request['quantity']; $i++) {
+                $request['metadata'] = [
+                    [
+                        'key' => 'text1',
+                        'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
+                    ],
+                    [
+                        'key' => 'text2',
+                        'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
+                    ]
+                ];
 
-            EmbossingBatch::create([
-                'UserId' => auth()->user()->Id,
-                'PersonId' => $request['data']['person']->Id,
-                'ExternalId' => $response->id,
-                'TotalCards' => $response->quantity,
-                'Status' => $response->status
-            ]);
+                $dockRaw = $this->cardBatchDockRaw($request);
+
+                $response = DockApiService::request(
+                    ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches',
+                    'POST',
+                    [],
+                    [],
+                    'bearer',
+                    $dockRaw
+                );
+
+                EmbossingBatch::create([
+                    'UserId' => auth()->user()->Id,
+                    'PersonId' => $request['data']['person']->Id,
+                    'ExternalId' => $response->id,
+                    // 'TotalCards' => $response->quantity,
+                    'TotalCards' => 1,
+                    'Status' => $response->status
+                ]);
+            }
 
             return response()->json(['message' => 'Batch created successfully'], 200);
         } catch (Exception $e) {
@@ -157,11 +178,11 @@ class EmbossingBatchController extends Controller
                 $cardExist = Card::where('ExternalId', $card->id)->first();
 
                 if ($cardExist) {
-                    MainCardController::fixNonCustomerId($cardExist, $prefix);
+                    MainCardController::fixNonCustomerId($cardExist, $card);
                     continue;
                 }
 
-                $card = Card::create([
+                $cardExist = Card::create([
                     'BatchId' => $batch->Id,
                     'UUID' => Uuid::uuid7()->toString(),
                     'CreatorId' => $batch->UserId,
@@ -177,7 +198,7 @@ class EmbossingBatchController extends Controller
                     'Balance' => $this->encrypter->encrypt('0.00')
                 ]);
 
-                MainCardController::fixNonCustomerId($card, $prefix);
+                MainCardController::fixNonCustomerId($cardExist, $card);
             }
         } catch (Exception $e) {
             var_dump($e->getMessage());
@@ -220,10 +241,10 @@ class EmbossingBatchController extends Controller
     private function cardBatchDockRaw($request)
     {
         $person_address = PersonAddress::where('PersonId', $request['data']['person']->Id)->where('Main', 1)->first();
-        $array_part = [];
 
-        $base = [
-            'quantity' => $request['quantity'],
+        return [
+            // 'quantity' => $request['quantity'],
+            'quantity' => 1,
             'profile_id' => $request['data']['profile']->ExternalId,
             'embossing_setup_id' => $request['data']['embossing']->ExternalId,
             'type' => "PHYSICAL",
@@ -245,10 +266,9 @@ class EmbossingBatchController extends Controller
                 'number' => "0",
                 'street' => $person_address->Street,
                 'postal_code' => $person_address->ZipCode,
-                'administrative_area_code' => "DIF"
-            ]
+                'administrative_area_code' => "NLE"
+            ],
+            'metadata' => $request['metadata']
         ];
-
-        return array_merge($array_part, $base);
     }
 }

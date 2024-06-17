@@ -94,7 +94,7 @@ class SubaccountCardController extends Controller
 
     public static function cards($account_id, $subaccount_id = null, $page = 1)
     {
-        $limit = 100;
+        $limit = 10000;
 
         $cards = Card::where('CreatorId', $account_id);
         if ($subaccount_id) {
