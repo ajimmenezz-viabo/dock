@@ -133,12 +133,7 @@ class EmbossingBatchController extends Controller
             }
 
             if ($batch_external_data->status == 'PROCESSED') {
-                $limit = 150;
-                $page = 1;
-                for ($i = 0; $i < $batch->TotalCards; $i += $limit) {
-                    $this->fillBatchCards($batch, $page, $limit);
-                    $page++;
-                }
+                $this->fillBatchCards($batch);
             }
         } catch (Exception $e) {
         }
@@ -146,22 +141,17 @@ class EmbossingBatchController extends Controller
         return $object;
     }
 
-    private function fillBatchCards($batch, $page = 1, $limit = 150)
+    private function fillBatchCards($batch)
     {
         try {
             $batch_external_data = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId . '/cards',
                 'GET',
-                [
-                    'limit' => $limit,
-                    'page' => $page
-                ],
+                [],
                 [],
                 'bearer',
                 []
             );
-
-            $prefix = User::where('Id', $batch->UserId)->first()->prefix;
 
             foreach ($batch_external_data->content as $card) {
                 $cardExist = Card::where('ExternalId', $card->id)->first();
