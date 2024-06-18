@@ -87,6 +87,10 @@ class EmbossingBatchController extends Controller
                     'TotalCards' => 1,
                     'Status' => $response->status
                 ]);
+
+                $this->batchEmbossingObject($response->id);
+
+                $next_clientid++;
             }
 
             return response()->json(['message' => 'Batch created successfully'], 200);
