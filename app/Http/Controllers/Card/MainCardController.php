@@ -204,6 +204,7 @@ class MainCardController extends Controller
             $prefix = null;
             $client_id = null;
             foreach ($external_card->metadata as $metadata) {
+                var_dump($metadata);
                 if (isset($metadata->key) && $metadata->key == 'text1') {
                     $prefix = substr($metadata->value, 0, 2);
                     $client_id = intval(substr($metadata->value, 2));
