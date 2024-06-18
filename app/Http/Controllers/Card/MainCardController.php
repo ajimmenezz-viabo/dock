@@ -189,9 +189,18 @@ class MainCardController extends Controller
         return false;
     }
 
-    public static function fixNonCustomerId($card, $external_card)
+    public static function fixNonCustomerId($card)
     {
         if ($card->CustomerId == null || $card->CustomerId == '') {
+            $external_card = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId,
+                'GET',
+                [],
+                [],
+                'bearer',
+                null
+            );
+
             $prefix = null;
             $client_id = null;
             foreach ($external_card->metadata as $metadata) {
@@ -204,6 +213,7 @@ class MainCardController extends Controller
 
             $card->CustomerId = $client_id;
             $card->CustomerPrefix = $prefix;
+            $card->CardObject = json_encode($external_card);
 
             $card->save();
         }

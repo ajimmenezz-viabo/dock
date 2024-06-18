@@ -648,7 +648,7 @@ class CardsController extends Controller
             $card->save();
         }
 
-        MainCardController::fixNonCustomerId($card, auth()->user()->prefix);
+        MainCardController::fixNonCustomerId($card);
 
         $object = [
             'card_id' => $card->UUID,

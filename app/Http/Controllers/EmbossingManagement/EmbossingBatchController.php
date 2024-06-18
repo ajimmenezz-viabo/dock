@@ -157,7 +157,7 @@ class EmbossingBatchController extends Controller
                 $cardExist = Card::where('ExternalId', $card->id)->first();
 
                 if ($cardExist) {
-                    MainCardController::fixNonCustomerId($cardExist, $card);
+                    MainCardController::fixNonCustomerId($cardExist);
                     continue;
                 }
 
@@ -177,7 +177,7 @@ class EmbossingBatchController extends Controller
                     'Balance' => $this->encrypter->encrypt('0.00')
                 ]);
 
-                MainCardController::fixNonCustomerId($cardExist, $card);
+                MainCardController::fixNonCustomerId($cardExist);
             }
         } catch (Exception $e) {
             var_dump($e->getMessage());
