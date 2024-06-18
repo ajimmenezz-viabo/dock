@@ -63,12 +63,12 @@ class EmbossingBatchController extends Controller
             }
 
             for ($i = 0; $i < $request['quantity']; $i++) {
-                $request['metadata'] = [
+                $metadata = [
                     'key' => 'text1',
-                    'value' => auth()->user()->prefix . str_pad($next_clientid, 7, '0', STR_PAD_LEFT)
+                    'value' => auth()->user()->prefix . str_pad($next_clientid + $i, 7, '0', STR_PAD_LEFT)
                 ];
 
-                $dockRaw = $this->cardBatchDockRaw($request);
+                $dockRaw = $this->cardBatchDockRaw($request, $metadata);
 
                 $response = DockApiService::request(
                     ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches',
@@ -89,8 +89,6 @@ class EmbossingBatchController extends Controller
                 ]);
 
                 $this->batchEmbossingObject($response->id);
-
-                $next_clientid++;
             }
 
             return response()->json(['message' => 'Batch created successfully'], 200);
@@ -102,7 +100,6 @@ class EmbossingBatchController extends Controller
     private function batchEmbossingObject($uuid)
     {
         try {
-
             $batch = EmbossingBatch::where('ExternalId', $uuid)->first();
             $batch_external_data = DockApiService::request(
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/batches/' . $batch->ExternalId,
@@ -221,7 +218,7 @@ class EmbossingBatchController extends Controller
         ];
     }
 
-    private function cardBatchDockRaw($request)
+    private function cardBatchDockRaw($request, $metadata = [])
     {
         $person_address = PersonAddress::where('PersonId', $request['data']['person']->Id)->where('Main', 1)->first();
 
@@ -251,7 +248,7 @@ class EmbossingBatchController extends Controller
                 'postal_code' => $person_address->ZipCode,
                 'administrative_area_code' => "NLE"
             ],
-            'metadata' => $request['metadata']
+            'metadata' => $metadata
         ];
     }
 }
