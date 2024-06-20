@@ -96,7 +96,7 @@ class SubaccountCardController extends Controller
     {
         $limit = 10000;
 
-        $cards = Card::where('CreatorId', $account_id);
+        $cards = Card::where('CreatorId', $account_id)->whereNotNull('Pan');
         if ($subaccount_id) {
             $cards = $cards->where('SubaccountId', $subaccount_id);
         } else {
