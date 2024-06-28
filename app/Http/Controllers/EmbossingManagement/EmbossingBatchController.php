@@ -230,6 +230,7 @@ class EmbossingBatchController extends Controller
             'embossing_setup_id' => $request['data']['embossing']->ExternalId,
             'type' => "PHYSICAL",
             'active_function' => $request['data']['profile']->ProductType,
+            "expiration_date" => "2029-08-01T00:00:01Z",
             'settings' => [
                 'transaction' => [
                     'ecommerce' => true,
