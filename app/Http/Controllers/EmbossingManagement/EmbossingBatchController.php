@@ -54,15 +54,19 @@ class EmbossingBatchController extends Controller
 
         $request['data'] = $this->validateCardDataExist($request);
 
-        try {
-            $last_clientid = Card::where('CustomerPrefix', auth()->user()->prefix)->orderBy('CustomerId', 'desc')->first();
-            if ($last_clientid) {
-                $next_clientid = $last_clientid->CustomerId + 1;
-            } else {
-                $next_clientid = 1;
-            }
+        $account = User::where('Id', auth()->user()->Id)->select('last_customer_id')->first();
+        if ($account->last_customer_id == null) {
+            $next_clientid = 1;
+        } else {
+            $next_clientid = $account->last_customer_id + 1;
+        }
 
-            for ($i = 0; $i < $request['quantity']; $i++) {
+        $cards_created = 0;
+
+        for ($i = 0; $i < $request['quantity']; $i++) {
+            try {
+                $next_clientid = $next_clientid + $i;
+
                 $metadata = [
                     'key' => 'text1',
                     'value' => auth()->user()->prefix . str_pad($next_clientid + $i, 7, '0', STR_PAD_LEFT)
@@ -79,21 +83,21 @@ class EmbossingBatchController extends Controller
                     $dockRaw
                 );
 
-                EmbossingBatch::create([
-                    'UserId' => auth()->user()->Id,
-                    'PersonId' => $request['data']['person']->Id,
-                    'ExternalId' => $response->id,
-                    // 'TotalCards' => $response->quantity,
-                    'TotalCards' => 1,
-                    'Status' => $response->status
-                ]);
-
-                $this->batchEmbossingObject($response->id);
+                $cards_created++;
+            } catch (Exception $e) {
+                break;
             }
+        }
 
-            return response()->json(['message' => 'Batch created successfully'], 200);
-        } catch (Exception $e) {
-            return self::error('Error creating batch', 500, $e);
+        if ($cards_created == 0) {
+            return response()->json(['message' => 'Error creating batch'], 500);
+        } else {
+            User::where('Id', auth()->user()->Id)->update(['last_customer_id' => $next_clientid]);
+            if ($cards_created < $request['quantity']) {
+                return response()->json(['message' => 'Only ' . $cards_created . ' cards were created. The batch is not complete'], 201);
+            } else {
+                return response()->json(['message' => 'Batch created successfully'], 201);
+            }
         }
     }
 
