@@ -35,7 +35,7 @@ class CardsController extends Controller
     {
         try {
             $page = $request['page'] ?? 1;
-            $limit = 100;
+            $limit = $request['limit'] ?? 100;
             $offset = ($page - 1) * $limit;
 
             $cards = Card::where('CreatorId', auth()->user()->Id)
