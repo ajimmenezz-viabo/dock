@@ -637,6 +637,7 @@ class CardsController extends Controller
     private function cardObject(string $uuid)
     {
         $card = Card::where('UUID', $uuid)->first();
+        $card = self::fillSensitiveData($card);
         $person = PersonController::getPersonObjectShort($card->PersonId);
         $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
         if (!$alias) {
