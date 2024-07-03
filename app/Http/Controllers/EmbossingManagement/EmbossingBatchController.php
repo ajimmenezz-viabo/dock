@@ -172,34 +172,36 @@ class EmbossingBatchController extends Controller
 
             foreach ($embossing->content as $card) {
                 array_unshift($cards, $card);
-
-                // $cardExist = Card::where('ExternalId', $card->id)->first();
-
-                // if ($cardExist) {
-                //     MainCardController::fixNonCustomerId($cardExist);
-                //     continue;
-                // }
-
-                // $cardExist = Card::create([
-                //     'BatchId' => $batch->Id,
-                //     'UUID' => Uuid::uuid7()->toString(),
-                //     'CreatorId' => $batch->UserId,
-                //     'PersonId' => $batch->PersonId,
-                //     'Type' => 'physical',
-                //     'ActiveFunction' => "CREDIT",
-                //     'ExternalId' => $card->id,
-                //     'Brand' => "MASTER",
-                //     'MaskedPan' => $card->masked_pan,
-                //     'Pan' => null,
-                //     'ExpirationDate' => null,
-                //     'CVV' => null,
-                //     'Balance' => $this->encrypter->encrypt('0.00')
-                // ]);
-
-                // MainCardController::fixNonCustomerId($cardExist);
             }
 
             $page++;
+        }
+
+        foreach ($cards as $card) {
+            $cardExist = Card::where('ExternalId', $card->id)->first();
+
+            if ($cardExist) {
+                MainCardController::fixNonCustomerId($cardExist);
+                continue;
+            }
+
+            $cardExist = Card::create([
+                'BatchId' => null,
+                'UUID' => Uuid::uuid7()->toString(),
+                'CreatorId' => auth()->user()->Id,
+                'PersonId' => 2,
+                'Type' => 'physical',
+                'ActiveFunction' => "CREDIT",
+                'ExternalId' => $card->id,
+                'Brand' => "MASTER",
+                'MaskedPan' => $card->masked_pan,
+                'Pan' => null,
+                'ExpirationDate' => null,
+                'CVV' => null,
+                'Balance' => $this->encrypter->encrypt('0.00')
+            ]);
+
+            MainCardController::fixNonCustomerId($cardExist);
         }
 
 
