@@ -764,6 +764,8 @@ class CardsController extends Controller
             $dockRaw
         );
 
+        if(!isset($response->id)) return null;
+
         return PersonAccountAlias::create([
             'CardId' => $card->Id,
             'PersonAccountId' => PersonAccount::where('ExternalId', $person_account['external_id'])->first()->Id,
