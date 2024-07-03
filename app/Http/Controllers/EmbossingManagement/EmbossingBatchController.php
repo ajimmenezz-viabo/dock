@@ -147,7 +147,7 @@ class EmbossingBatchController extends Controller
         return $object;
     }
 
-    public function fillEmbossingCards($id)
+    public function fillEmbossingCards(Request $request, $id)
     {
         $page = 0;
 
@@ -178,33 +178,37 @@ class EmbossingBatchController extends Controller
             $page++;
         }
 
-        foreach ($cards as $card) {
-            $cardExist = Card::where('ExternalId', $card->id)->first();
+        if (isset($request['fill']) && $request['fill'] == 'true') {
 
-            if ($cardExist) {
+
+
+            foreach ($cards as $card) {
+                $cardExist = Card::where('ExternalId', $card->id)->first();
+
+                if ($cardExist) {
+                    MainCardController::fixNonCustomerId($cardExist);
+                    continue;
+                }
+
+                $cardExist = Card::create([
+                    'BatchId' => null,
+                    'UUID' => Uuid::uuid7()->toString(),
+                    'CreatorId' => auth()->user()->Id,
+                    'PersonId' => 2,
+                    'Type' => 'physical',
+                    'ActiveFunction' => "CREDIT",
+                    'ExternalId' => $card->id,
+                    'Brand' => "MASTER",
+                    'MaskedPan' => $card->masked_pan,
+                    'Pan' => null,
+                    'ExpirationDate' => null,
+                    'CVV' => null,
+                    'Balance' => $this->encrypter->encrypt('0.00')
+                ]);
+
                 MainCardController::fixNonCustomerId($cardExist);
-                continue;
             }
-
-            $cardExist = Card::create([
-                'BatchId' => null,
-                'UUID' => Uuid::uuid7()->toString(),
-                'CreatorId' => auth()->user()->Id,
-                'PersonId' => 2,
-                'Type' => 'physical',
-                'ActiveFunction' => "CREDIT",
-                'ExternalId' => $card->id,
-                'Brand' => "MASTER",
-                'MaskedPan' => $card->masked_pan,
-                'Pan' => null,
-                'ExpirationDate' => null,
-                'CVV' => null,
-                'Balance' => $this->encrypter->encrypt('0.00')
-            ]);
-
-            MainCardController::fixNonCustomerId($cardExist);
         }
-
 
         return response()->json($cards, 200);
     }
