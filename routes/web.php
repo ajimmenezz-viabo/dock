@@ -162,6 +162,10 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{uuid}', 'EmbossingManagement\EmbossingBatchController@show');
         });
 
+        $router->group(['prefix' => 'embossing'], function () use ($router) {
+            $router->post('/{id}', 'EmbossingManagement\EmbossingBatchController@fillEmbossingCards');
+        });
+
         $router->group(['prefix' => 'layouts'], function () use ($router) {
             $router->get('/', 'EmbossingManagement\EmbossingLayoutController@index');
             $router->post('/', 'EmbossingManagement\EmbossingLayoutController@store');

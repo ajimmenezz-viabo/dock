@@ -146,6 +146,64 @@ class EmbossingBatchController extends Controller
         return $object;
     }
 
+    public function fillEmbossingCards($id)
+    {
+        $page = 0;
+
+        $continue = true;
+        $cards = [];
+
+        for ($i = 0; $continue; $i++) {
+            $embossing = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'embossing/v1/files/' . $id . '/cards?page=' . $page,
+                'GET',
+                [],
+                [],
+                'bearer',
+                []
+            );
+
+            if (count($embossing->content) == 0) {
+                $continue = false;
+                break;
+            }
+
+            foreach ($embossing->content as $card) {
+                array_unshift($cards, $card);
+
+                // $cardExist = Card::where('ExternalId', $card->id)->first();
+
+                // if ($cardExist) {
+                //     MainCardController::fixNonCustomerId($cardExist);
+                //     continue;
+                // }
+
+                // $cardExist = Card::create([
+                //     'BatchId' => $batch->Id,
+                //     'UUID' => Uuid::uuid7()->toString(),
+                //     'CreatorId' => $batch->UserId,
+                //     'PersonId' => $batch->PersonId,
+                //     'Type' => 'physical',
+                //     'ActiveFunction' => "CREDIT",
+                //     'ExternalId' => $card->id,
+                //     'Brand' => "MASTER",
+                //     'MaskedPan' => $card->masked_pan,
+                //     'Pan' => null,
+                //     'ExpirationDate' => null,
+                //     'CVV' => null,
+                //     'Balance' => $this->encrypter->encrypt('0.00')
+                // ]);
+
+                // MainCardController::fixNonCustomerId($cardExist);
+            }
+
+            $page++;
+        }
+
+
+        return response()->json($cards, 200);
+    }
+
     private function fillBatchCards($batch)
     {
         try {
