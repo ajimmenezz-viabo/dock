@@ -155,9 +155,11 @@ class EmbossingBatchController extends Controller
 
         for ($i = 0; $continue; $i++) {
             $embossing = DockApiService::request(
-                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'embossing/v1/files/' . $id . '/cards?page=' . $page,
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'embossing/v1/files/' . $id . '/cards',
                 'GET',
-                [],
+                [
+                    'page' => $page,
+                ],
                 [],
                 'bearer',
                 []
