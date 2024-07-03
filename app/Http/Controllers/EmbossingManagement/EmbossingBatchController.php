@@ -62,14 +62,15 @@ class EmbossingBatchController extends Controller
         }
 
         $cards_created = 0;
+        $last = 0;
 
         for ($i = 0; $i < $request['quantity']; $i++) {
             try {
-                $next_clientid = $next_clientid + $i;
+                $last = $next_clientid + $i;
 
                 $metadata = [
                     'key' => 'text1',
-                    'value' => auth()->user()->prefix . str_pad($next_clientid + $i, 7, '0', STR_PAD_LEFT)
+                    'value' => auth()->user()->prefix . str_pad($last, 7, '0', STR_PAD_LEFT)
                 ];
 
                 $dockRaw = $this->cardBatchDockRaw($request, $metadata);
@@ -92,7 +93,7 @@ class EmbossingBatchController extends Controller
         if ($cards_created == 0) {
             return response()->json(['message' => 'Error creating batch'], 500);
         } else {
-            User::where('Id', auth()->user()->Id)->update(['last_customer_id' => $next_clientid]);
+            User::where('Id', auth()->user()->Id)->update(['last_customer_id' => $last]);
             if ($cards_created < $request['quantity']) {
                 return response()->json(['message' => 'Only ' . $cards_created . ' cards were created. The batch is not complete'], 201);
             } else {
