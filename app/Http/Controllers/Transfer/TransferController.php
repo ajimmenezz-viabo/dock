@@ -89,12 +89,16 @@ class TransferController extends Controller
             return self::error($destinationOwner, 400, new Exception($destinationOwner));
         }
 
-        if($request->sourceType == 'card' && $request->destinationType == 'card' && $request->source == $request->destination){
+        if ($request->sourceType == 'card' && $request->destinationType == 'card' && $request->source == $request->destination) {
             return self::error('Transfer between the same card is not allowed', 400, new Exception('Transfer between the same card is not allowed'));
         }
 
-        if($request->sourceType == 'subaccount' && $request->destinationType == 'subaccount' && $request->source == $request->destination){
-            return self::error('Transfer between the same subaccount is not allowed', 400, new Exception('Transfer between the same subaccount is not allowed'));
+        if ($request->sourceType == 'subaccount' && $request->destinationType == 'subaccount') {
+            return self::error('Transfer between the same subaccount is not allowed', 400, new Exception('Transfer between subaccounts is not allowed'));
+        }
+
+        if ($request->sourceType == 'account' && $request->destinationType == 'card') {
+            return self::error('Transfer from account to card is not allowed. You must transfer to a subaccount first', 400, new Exception('Transfer from account to card is not allowed. You must transfer to a subaccount first'));
         }
 
         $balance = $this->validateBalance($request->sourceType, $request->source, $request->amount);
@@ -104,8 +108,17 @@ class TransferController extends Controller
 
         try {
             DB::beginTransaction();
-            $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, $request->destinationType);
-            $destination = $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, $request->sourceType);
+            if ($request->sourceType == 'card' && $request->destinationType == 'card') {
+                $originCard = Card::where('UUID', $request->source)->first();
+                $originCardSubaccount = Subaccount::where('Id', $originCard->SubAccountId)->first();
+                $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, "subaccount");
+                $this->publishDestinationTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->sourceType);
+                $this->publishOriginTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->destinationType);
+                $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, "subaccount");
+            } else {
+                $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, $request->destinationType);
+                $destination = $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, $request->sourceType);
+            }
             DB::commit();
 
             return response()->json([
