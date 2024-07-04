@@ -113,11 +113,15 @@ class TransferController extends Controller
                 $destinationCard = Card::where('UUID', $request->destination)->first();
                 $originCardSubaccount = Subaccount::where('Id', $originCard->SubAccountId)->first();
                 $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, "subaccount");
+                sleep(1);
                 $this->publishDestinationTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->sourceType, $originCard->Id);
+                sleep(1);
                 $this->publishOriginTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->destinationType, $destinationCard->Id);
+                sleep(1);
                 $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, "subaccount");
             } else {
                 $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, $request->destinationType);
+                sleep(1);
                 $destination = $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, $request->sourceType);
             }
             DB::commit();
