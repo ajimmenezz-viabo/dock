@@ -110,10 +110,11 @@ class TransferController extends Controller
             DB::beginTransaction();
             if ($request->sourceType == 'card' && $request->destinationType == 'card') {
                 $originCard = Card::where('UUID', $request->source)->first();
+                $destinationCard = Card::where('UUID', $request->destination)->first();
                 $originCardSubaccount = Subaccount::where('Id', $originCard->SubAccountId)->first();
                 $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, "subaccount");
-                $this->publishDestinationTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->sourceType);
-                $this->publishOriginTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->destinationType);
+                $this->publishDestinationTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->sourceType, $originCard->Id);
+                $this->publishOriginTransaction("subaccount", $originCardSubaccount->UUID, $request->amount, $request->description, $request->destinationType, $destinationCard->Id);
                 $this->publishDestinationTransaction($request->destinationType, $request->destination, $request->amount, $request->description, "subaccount");
             } else {
                 $origin = $this->publishOriginTransaction($request->sourceType, $request->source, $request->amount, $request->description, $request->destinationType);
@@ -211,7 +212,7 @@ class TransferController extends Controller
         }
     }
 
-    private function publishOriginTransaction($type, $uuid, $amount, $description, $destination)
+    private function publishOriginTransaction($type, $uuid, $amount, $description, $destination, $cardId = null)
     {
         $description = "Transfer to {$destination}. " . $description;
         $amount = abs($amount);
@@ -221,7 +222,7 @@ class TransferController extends Controller
                 return $this->registerAccountTransaction(($amount * -1), $description);
                 break;
             case 'subaccount':
-                return $this->registerSubaccountTransaction($uuid, ($amount * -1), $description);
+                return $this->registerSubaccountTransaction($uuid, ($amount * -1), $description, null, $cardId);
                 break;
             case 'card':
                 return $this->registerCardTransaction($uuid, ($amount * -1), $description);
@@ -232,7 +233,7 @@ class TransferController extends Controller
         }
     }
 
-    private function publishDestinationTransaction($type, $uuid, $amount, $description, $destination)
+    private function publishDestinationTransaction($type, $uuid, $amount, $description, $destination, $cardId = null)
     {
         $description = "Transfer from {$destination}. " . $description;
         $amount = abs($amount);
@@ -242,7 +243,7 @@ class TransferController extends Controller
                 return $this->registerAccountTransaction($amount, $description);
                 break;
             case 'subaccount':
-                return $this->registerSubaccountTransaction($uuid, $amount, $description);
+                return $this->registerSubaccountTransaction($uuid, $amount, $description, null, $cardId);
                 break;
             case 'card':
                 return $this->registerCardTransaction($uuid, $amount, $description);
@@ -289,7 +290,7 @@ class TransferController extends Controller
         ];
     }
 
-    private function registerSubaccountTransaction($uuid, $amount, $description, $reference = null)
+    private function registerSubaccountTransaction($uuid, $amount, $description, $reference = null, $cardId = null)
     {
         $subaccount = Subaccount::where('UUID', $uuid)->where('AccountId', auth()->user()->Id)->first();
 
@@ -314,6 +315,7 @@ class TransferController extends Controller
             'UUID' => Uuid::uuid7()->toString(),
             'WalletId' => $wallet->Id,
             'ApprovedBy' => auth()->user()->Id,
+            'CardId' => $cardId,
             'Type' => ($amount < 0 ? 'Transfer Out' : 'Transfer In'),
             'Description' => $description,
             'Amount' => floatval($amount),
