@@ -43,7 +43,7 @@ class DockWebhookController extends Controller
         try {
             $errors = WebhookRequest::where('DecryptedBody', 'Error')->get();
             foreach ($errors as $error) {
-                $decrypted = $this->decrypt($error->Body);
+                $decrypted = $this->decryptWH($error->Body);
                 if ($decrypted === false) {
                     $decryptedText = "Error";
                 } else {
@@ -56,7 +56,7 @@ class DockWebhookController extends Controller
         }
     }
 
-    private function decrypt($encryptedMessage)
+    private function decryptWH($encryptedMessage)
     {
         $aesKey = env("WEBHOOK_AES_KEY");
         $key = base64_decode($aesKey);
