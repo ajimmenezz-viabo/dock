@@ -11,6 +11,13 @@ class DockWebhookController extends Controller
 {
     public function store(Request $request)
     {
+        Log::info('Webhook received', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'headers' => $request->header(),
+            'query_params' => $request->query(),
+            'body' => $request->getContent()
+        ]);
         try {
             $decryptedText = "Error";
 
