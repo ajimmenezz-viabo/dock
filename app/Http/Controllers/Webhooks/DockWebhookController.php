@@ -14,7 +14,7 @@ class DockWebhookController extends Controller
         try {
             $decryptedText = "Error";
 
-            $decrypted = $this->decrypt($request->getContent());
+            $decrypted = $this->decryptWH($request->getContent());
             if ($decrypted === false) {
                 Log::error('Failed to decrypt message');
             } else {
