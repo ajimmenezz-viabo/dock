@@ -293,11 +293,9 @@ class MainCardController extends Controller
                 $rawData
             );
 
-            if (!isset($response->id)) {
-                Card::where('UUID', $uuid)
-                    ->update([
-                        'Pin' => self::encrypt($request->pin)
-                    ]);
+            if ($response->id == $card->ExternalId) {
+                $card->Pin = self::encrypt($request->pin);
+                $card->save();
             }
 
             return response()->json(['message' => 'Pin updated successfully'], 200);
