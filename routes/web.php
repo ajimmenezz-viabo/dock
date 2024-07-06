@@ -151,6 +151,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{uuid}/cvv', 'CardsManagement\CvvController@show');
             $router->post('/{uuid}/block', 'CardsManagement\CardsController@block');
             $router->post('/{uuid}/unblock', 'CardsManagement\CardsController@unblock');
+            $router->patch('/{uuid}/pin', 'Card\MainCardController@updatePin');
         });
 
         $router->group(['prefix' => 'embossing_batches'], function () use ($router) {

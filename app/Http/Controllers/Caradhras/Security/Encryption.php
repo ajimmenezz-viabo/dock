@@ -31,4 +31,23 @@ class Encryption
         // Devolver el resultado obtenido del programa Go
         return trim($output);
     }
+
+    public static function encryptD($raw)
+    {
+        $goFilePath = realpath(__DIR__ . '/EncryptGo/encrypt.go');
+
+        // Construir el comando con los parámetros escapados
+        $command =  env('PREFIX_GO_COMMAND') . "go run " . $goFilePath . " " .
+            escapeshellarg(env('RSA_DOCK_PUBLIC_KEY')) . " " .
+            escapeshellarg($raw);
+
+        $escapedCommand = escapeshellcmd($command);
+
+        $output = exec($escapedCommand);
+
+        // var_dump($output);
+
+        // Devolver el resultado obtenido del programa Go
+        return trim($output);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Card;
 
+use App\Http\Controllers\Caradhras\Security\Encryption;
 use App\Http\Controllers\CardMovements\CardMovementController;
 use App\Http\Controllers\CardsManagement\CardsController;
 use App\Http\Controllers\Controller;
@@ -248,6 +249,53 @@ class MainCardController extends Controller
             return $setups;
         } catch (Exception $e) {
             return null;
+        }
+    }
+
+    public function updatePin(Request $request, $uuid)
+    {
+        $card = Card::where('UUID', $uuid)->first();
+        if (!$card) {
+            return self::error('Card not found or you do not have permission to access it', 404, new \Exception('Card not found'));
+        }
+
+        if (!$this->validate_card_owner($card)) {
+            return self::error('Card not found or you do not have permission to access it', 403, new \Exception('Unauthorized'));
+        }
+
+        if ($request->pin == null || $request->pin == '') {
+            return response()->json(['message' => 'New pin is required'], 400);
+        }
+
+        if (strlen($request->pin) != 4) {
+            return response()->json(['message' => 'Pin must be 4 digits'], 400);
+        }
+
+        if (!is_numeric($request->pin)) {
+            return response()->json(['message' => 'Pin must be numeric'], 400);
+        }
+
+        try {
+            $encrytedData = json_decode(Encryption::encryptD($request->pin));
+            $rawData = [
+                "pin" => $encrytedData->encrypt,
+                "aes" => $encrytedData->aes,
+                "iv" => $encrytedData->iv,
+                "mode" => "GCM"
+            ];
+
+            $response = DockApiService::request(
+                ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/pin',
+                'PUT',
+                [],
+                $rawData,
+                'bearer',
+                null
+            );
+
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return self::error('Error while updating pin', 500, $e);
         }
     }
 }
