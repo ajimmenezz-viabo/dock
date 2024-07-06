@@ -275,8 +275,15 @@ class MainCardController extends Controller
             return response()->json(['message' => 'Pin must be numeric'], 400);
         }
 
+        if (self::changeCardPin($card, $request->pin)) return response()->json(['message' => 'Pin updated successfully'], 200);
+
+        return self::error('Error updating pin', 500, new \Exception('Error updating pin'));
+    }
+
+    public static function changeCardPin($card, $pin)
+    {
         try {
-            $encrytedData = json_decode(Encryption::encryptD($request->pin));
+            $encrytedData = json_decode(Encryption::encryptD($pin));
             $rawData = [
                 "pin" => $encrytedData->encrypt,
                 "aes" => $encrytedData->aes,
@@ -294,13 +301,12 @@ class MainCardController extends Controller
             );
 
             if ($response->id == $card->ExternalId) {
-                $card->Pin = self::encrypt($request->pin);
+                $card->Pin = self::encrypt($pin);
                 $card->save();
             }
-
-            return response()->json(['message' => 'Pin updated successfully'], 200);
+            return true;
         } catch (Exception $e) {
-            return self::error('Error while updating pin', 500, $e);
+            return false;
         }
     }
 }
