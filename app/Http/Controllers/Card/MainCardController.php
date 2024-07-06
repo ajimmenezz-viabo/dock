@@ -293,7 +293,14 @@ class MainCardController extends Controller
                 $rawData
             );
 
-            return response()->json($response, 200);
+            if (!isset($response->id)) {
+                Card::where('UUID', $uuid)
+                    ->update([
+                        'Pin' => self::encrypt($request->pin)
+                    ]);
+            }
+
+            return response()->json(['message' => 'Pin updated successfully'], 200);
         } catch (Exception $e) {
             return self::error('Error while updating pin', 500, $e);
         }
