@@ -288,9 +288,9 @@ class MainCardController extends Controller
                 ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/pin',
                 'PUT',
                 [],
-                $rawData,
+                [],
                 'bearer',
-                null
+                $rawData
             );
 
             return response()->json($response, 200);
