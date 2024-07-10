@@ -25,6 +25,7 @@ class DockApiService
 {
     static public function request($url, $method, $params = [], $headers = [], $authType, $raw = null)
     {
+        $curl_command = "";
         try {
             // Handler stack
             $stack = HandlerStack::create();
@@ -70,8 +71,6 @@ class DockApiService
                 'body' => $body ?? ""
             ]);
 
-
-            $curl_command = "";
             // Imprime el comando curl
             foreach ($historyContainer as $transaction) {
                 $request = $transaction['request'];
