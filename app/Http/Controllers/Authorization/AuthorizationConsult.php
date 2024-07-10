@@ -15,8 +15,12 @@ class AuthorizationConsult extends AuthorizationController
             $this->validateHeaders($request->headers->all());
             $this->validateBodyConsult($request->all());
             $card = $this->validateCard($request->all()['card_id']);
-            $response = $this->dock_response('APPROVED', 'Card is active and ready to use', $this->encrypter->decrypt($card->Balance));
-            $this->save_response($authorization, $request, $response);
+
+            $response = $this->dock_response('APPROVED', 'Card is active and ready to use', $this->encrypter->decrypt($card->Balance), [
+                'authorization_code' => substr($authorization->AuthorizationCode, -6)
+            ]);
+
+            $authorizationRequestId = $this->save_response($authorization, $request, $response);
 
             return response()->json($response, 200);
         } catch (AuthorizationException $e) {
