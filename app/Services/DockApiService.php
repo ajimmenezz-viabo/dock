@@ -93,7 +93,7 @@ class DockApiService
             }
         } catch (ClientException $e) {
             $response = json_decode($e->getResponse()->getBody()->getContents());
-            self::saveRequest($url, $method, $authType, $body, json_encode($headers), $e->getResponse()->getBody()->getContents(), $e->getMessage());
+            self::saveRequest($url, $method, $authType, $body, json_encode($headers), $e->getResponse()->getBody()->getContents(), $e->getMessage(), $curl_command);
             return json_decode(json_encode(['error' => 'Communication error with Dock APIs', "response" => $response->error ?? []]));
         } catch (Exception $e) {
             // self::saveRequest($url, $method, $authType, "", json_encode($headers), null, $e->getMessage());
