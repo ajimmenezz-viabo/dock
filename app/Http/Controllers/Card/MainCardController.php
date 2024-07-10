@@ -167,9 +167,12 @@ class MainCardController extends Controller
 
         return [
             'card_id' => $card->UUID,
+            'card_external_id' => $card->ExternalId,
             'card_type' => $card->Type,
             'brand' => $card->Brand,
             'bin' => (is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8)),
+            'pan' => (is_null($card->Pan) ? null : self::decrypt($card->Pan)),
+            'client_id' => $card->CustomerPrefix . str_pad($card->CustomerId, 7, '0', STR_PAD_LEFT),
             'masked_pan' => $card->MaskedPan,
             'balance' => number_format(floatval(self::decrypt($card->Balance)), 2, '.', ''),
             'clabe' => $card->STPAccount,
