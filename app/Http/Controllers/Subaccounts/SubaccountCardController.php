@@ -169,27 +169,40 @@ class SubaccountCardController extends Controller
      * 
      *      @OA\Response(
      *          response="200",
-     *          description="Cards funded successfully",
+     *          description="Subaccount retrieved successfully",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Cards funded successfully", description="Message")    
-     *          )
-     *      ),
-     * 
-     *     @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
-     *          )
-     *      ),
+     *              @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
+     *              @OA\Property(property="external_id", type="string", example="123456", description="Subaccount ExternalId"),
+     *              @OA\Property(property="description", type="string", example="My subaccount", description="Subaccount Description"),
+     *              @OA\Property(property="wallet", type="object",
+     *                  @OA\Property(property="wallet_id", type="string", example="123456", description="Wallet UUID"),
+     *                  @OA\Property(property="balance", type="string", example="0.00", description="Wallet Balance"),
+     *                  @OA\Property(property="clabe", type="string", example="123456", description="Wallet CLABE"),
+     *                  @OA\Property(property="last_movements", type="array", description="Last movements",  
+     *                      @OA\Items(
+     *                          @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),    
+     *                          @OA\Property(property="card", type="object",
+     *                          @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),     
+     *                          @OA\Property(property="masked_pan", type="string", example="123456", description="Card Masked PAN"),
+     *                       ),
+     *                       @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
+     *                       @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                       @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                       @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
+     *                       @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
+     *                   )
+     *              )
+     *         )
+     *     ),
      * 
      *      @OA\Response(
      *          response=400,
-     *          description="Error funding cards",
+     *          description="Error funding cards | Error loading layout | Insufficient funds in the subaccount",
      *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Error funding cards", description="Message")
+     *              @OA\Property(property="message", type="string", example="Error funding cards. Error message", description="Message")
      *          )
-     *     )
+     *      ),
+     *  )
      * )
      * 
      */
