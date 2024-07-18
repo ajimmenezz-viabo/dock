@@ -319,6 +319,8 @@ class SubaccountCardController extends Controller
                 ]);
             }
 
+            $wallet->Balance = self::encrypt($walletBalance);
+
             DB::commit();
             return [
                 'result' => true
