@@ -320,6 +320,7 @@ class SubaccountCardController extends Controller
             }
 
             $wallet->Balance = self::encrypt($walletBalance);
+            $wallet->save();
 
             DB::commit();
             return [
