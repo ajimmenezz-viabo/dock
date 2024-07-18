@@ -142,6 +142,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/{uuid}/movements', 'Subaccounts\SubaccountController@movements');
 
             $router->get('/{uuid}/cards', 'Subaccounts\SubaccountCardController@index');
+            $router->post('/{uuid}/fund', 'Subaccounts\SubaccountCardController@fund');
         });
 
         $router->group(['prefix' => 'card'], function () use ($router) {

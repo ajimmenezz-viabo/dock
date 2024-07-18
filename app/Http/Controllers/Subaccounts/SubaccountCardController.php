@@ -4,10 +4,19 @@ namespace App\Http\Controllers\Subaccounts;
 
 use App\Http\Controllers\Card\MainCardController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Transfer\TransferController;
 use App\Models\Account\Subaccount;
 use Illuminate\Http\Request;
 use App\Models\Card\Card;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use App\Models\Wallet\AccountWallet;
+use App\Models\Wallet\WalletMovement;
+use App\Models\Shared\AuthorizationRequest;
+use Ramsey\Uuid\Uuid;
+use App\Models\CardMovements\CardMovements;
 
 class SubaccountCardController extends Controller
 {
@@ -124,5 +133,189 @@ class SubaccountCardController extends Controller
             'total_pages' => ceil($count / $limit),
             'total_records' => $count
         ];
+    }
+
+    /**
+     * @OA\Post(
+     *      path="/api/v1/subaccounts/{uuid}/fund",
+     *      tags={"Subaccount Cards"},
+     *      summary="Fund cards for the subaccount specified through a layout",
+     *      description="Funds cards for the subaccount specified through a layout",
+     *      security={{"bearerAuth":{}}},
+     * 
+     *      @OA\Parameter(
+     *          name="uuid",
+     *          in="path",
+     *          description="Subaccount UUID",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string"
+     *          )
+     *      ),
+     * 
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\MediaType(
+     *              mediaType="multipart/form-data",
+     *              @OA\Schema(
+     *                  @OA\Property(
+     *                      property="layout",
+     *                      description="Layout file",
+     *                      type="file"
+     *                  )
+     *              )
+     *         )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response="200",
+     *          description="Cards funded successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Cards funded successfully", description="Message")    
+     *          )
+     *      ),
+     * 
+     *     @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=400,
+     *          description="Error funding cards",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Error funding cards", description="Message")
+     *          )
+     *     )
+     * )
+     * 
+     */
+
+    public function fund(Request $request, $uuid)
+    {
+        $subaccount = Subaccount::where('UUID', $uuid)->where('AccountId', auth()->user()->Id)->first();
+        $wallet = AccountWallet::where('AccountId', auth()->user()->Id)->where('SubAccountId', $subaccount->Id)->first();
+
+        if (!$subaccount) {
+            return self::error('Subaccount not found or you do not have permission to access it', 404, new Exception("Subaccount not found or you do not have permission to access it"));
+        }
+
+        $this->validate($request, [
+            'layout' => 'required|file|mimes:xlsx,xls'
+        ]);
+
+        try {
+
+            $spreadsheet = IOFactory::load($request->file('layout')->getPathname());
+            $sheet = $spreadsheet->getSheet(0);
+
+            $rows = $sheet->toArray();
+
+            $actions = [];
+            $total = 0;
+
+            for ($i = 1; $i < count($rows); $i++) {
+                $row = $rows[$i];
+
+                $card = Card::where('UUID', $row[0])->where('SubAccountId', $subaccount->Id)->first();
+                if (!$card) {
+                    return self::error('Card ' . $row[0] . ' not found or you do not have permission to access it', 404, new Exception("Card " . $row[0] . " not found or you do not have permission to access it"));
+                }
+
+                $actions[] = [
+                    'card' => $card,
+                    'balance' => self::decrypt($card->Balance),
+                    'amount' => floatval($row[3]),
+                    'new_balance' => self::decrypt($card->Balance) + floatval($row[3])
+                ];
+
+                $total += floatval($row[3]);
+            }
+
+            if ($total > self::decrypt($wallet->Balance)) {
+                return self::error('Insufficient funds in the subaccount', 400, new Exception("Insufficient funds in the subaccount"));
+            }
+
+            $resultActions = $this->callActions($wallet, $actions);
+
+            if ($resultActions['result']) {
+                return response()->json(SubaccountController::subaccountObject($subaccount->Id), 200);
+            } else {
+                return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return self::error('Error loading layout', 400, $e);
+        }
+    }
+
+    private function callActions($wallet, $actions)
+    {
+        try {
+            DB::beginTransaction();
+
+            $walletBalance = self::decrypt($wallet->Balance);
+
+            foreach ($actions as $action) {
+
+                $walletBalance = floatval($walletBalance) - floatval($action['amount']);
+
+                WalletMovement::create([
+                    'UUID' => Uuid::uuid7()->toString(),
+                    'WalletId' => $wallet->Id,
+                    'ApprovedBy' => auth()->user()->Id,
+                    'CardId' => $action['card']->Id,
+                    'Type' => 'Transfer Out',
+                    'Description' => 'Transfer to Card. Layout Movement',
+                    'Amount' => floatval($action['amount'] * -1),
+                    'Balance' => floatval($walletBalance),
+                    'Reference' => null
+                ]);
+
+                $cardBalance = self::decrypt($action['card']->Balance);
+
+                $newBalance = floatval($cardBalance) + floatval($action['amount']);
+
+                $action['card']->Balance = self::encrypt($newBalance);
+                $action['card']->save();
+
+                $authorization = AuthorizationRequest::create([
+                    'UUID' => Uuid::uuid7()->toString(),
+                    'ExternalId' => '',
+                    'AuthorizationCode' => TransferController::getAuthorizationCode('TR'),
+                    'Endpoint' => 'transfer',
+                    'Headers' => '',
+                    'Body' => '',
+                    'Response' => '',
+                    'Error' => '',
+                    'Code' => 200,
+                    'CardExternalId' => $action['card']->ExternalId
+                ]);
+
+                CardMovements::create([
+                    'UUID' => Uuid::uuid7()->toString(),
+                    'CardId' => $action['card']->Id,
+                    'AuthorizationRequestId' => $authorization->Id,
+                    'Type' => 'TRANSFER',
+                    'Description' => 'Transfer from Subaccount. Layout Movement',
+                    'Amount' => floatval($action['amount']),
+                    'Balance' => floatval($newBalance)
+                ]);
+            }
+
+            DB::commit();
+            return [
+                'result' => true
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'result' => false,
+                'message' => $e->getMessage()
+            ];
+        }
     }
 }
