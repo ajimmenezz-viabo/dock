@@ -3030,14 +3030,14 @@
                 ]
             }
         },
-        "/api/v1/subaccounts/{uuid}/fund": {
+        "/api/v1/subaccounts/{uuid}/fund_layout": {
             "post": {
                 "tags": [
                     "Subaccount Cards"
                 ],
                 "summary": "Fund cards for the subaccount specified through a layout",
                 "description": "Funds cards for the subaccount specified through a layout",
-                "operationId": "300e7e137ed9d239ce7fc43eff554626",
+                "operationId": "909691971d71b6771859166e33464a1b",
                 "parameters": [
                     {
                         "name": "uuid",
@@ -3160,6 +3160,221 @@
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/subaccounts/{uuid}/fund": {
+            "post": {
+                "tags": [
+                    "Subaccount Cards"
+                ],
+                "summary": "Fund cards for the subaccount specified",
+                "description": "Funds cards for the subaccount specified",
+                "operationId": "300e7e137ed9d239ce7fc43eff554626",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Subaccount UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "cards": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "card_id": {
+                                                    "description": "Card UUID",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "amount": {
+                                                    "description": "Amount to fund",
+                                                    "type": "string",
+                                                    "example": "100.00"
+                                                },
+                                                "description": {
+                                                    "description": "Description",
+                                                    "type": "string",
+                                                    "example": "Funding"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subaccount retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "subaccount_id": {
+                                            "description": "Subaccount UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "external_id": {
+                                            "description": "Subaccount ExternalId",
+                                            "type": "string",
+                                            "example": "123456"
+                                        },
+                                        "description": {
+                                            "description": "Subaccount Description",
+                                            "type": "string",
+                                            "example": "My subaccount"
+                                        },
+                                        "wallet": {
+                                            "properties": {
+                                                "wallet_id": {
+                                                    "description": "Wallet UUID",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "balance": {
+                                                    "description": "Wallet Balance",
+                                                    "type": "string",
+                                                    "example": "0.00"
+                                                },
+                                                "clabe": {
+                                                    "description": "Wallet CLABE",
+                                                    "type": "string",
+                                                    "example": "123456"
+                                                },
+                                                "last_movements": {
+                                                    "description": "Last movements",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "movement_id": {
+                                                                "description": "Movement UUID",
+                                                                "type": "string",
+                                                                "example": "123456"
+                                                            },
+                                                            "card": {
+                                                                "properties": {
+                                                                    "card_id": {
+                                                                        "description": "Card UUID",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    },
+                                                                    "masked_pan": {
+                                                                        "description": "Card Masked PAN",
+                                                                        "type": "string",
+                                                                        "example": "123456"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "type": {
+                                                                "description": "Movement Type",
+                                                                "type": "string",
+                                                                "example": "deposit"
+                                                            },
+                                                            "description": {
+                                                                "description": "Movement Description",
+                                                                "type": "string",
+                                                                "example": "Deposit"
+                                                            },
+                                                            "amount": {
+                                                                "description": "Movement Amount",
+                                                                "type": "string",
+                                                                "example": "100.00"
+                                                            },
+                                                            "balance": {
+                                                                "description": "Movement Balance",
+                                                                "type": "string",
+                                                                "example": "100.00"
+                                                            },
+                                                            "date": {
+                                                                "description": "Movement Date / Unix Timestamp",
+                                                                "type": "string",
+                                                                "example": "1716611739"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error funding cards | Insufficient funds in the subaccount",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Error funding cards. Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subaccount not found or you do not have permission to access it",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Subaccount not found or you do not have permission to access it"
                                         }
                                     },
                                     "type": "object"

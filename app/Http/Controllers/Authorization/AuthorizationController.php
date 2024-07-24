@@ -82,9 +82,9 @@ class AuthorizationController extends Controller
                 $card = Card::where('MaskedPan', $pan)->first();
                 if (!$card)
                     throw new AuthorizationException('Card not found', 200, 400);
+            } else {
+                throw new AuthorizationException('Card not found', 200, 400);
             }
-
-            throw new AuthorizationException('Card not found', 200, 400);
         }
 
         return $card;
@@ -123,7 +123,7 @@ class AuthorizationController extends Controller
 
     public function registerMovement($cardId, $amount, $balance, $type, $authorization = null, $description = null)
     {
-        do{
+        do {
             $uuid = Uuid::uuid7()->toString();
         } while (CardMovements::where('UUID', $uuid)->exists());
 
