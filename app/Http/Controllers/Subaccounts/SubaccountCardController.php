@@ -375,14 +375,14 @@ class SubaccountCardController extends Controller
             $total = 0;
 
             foreach ($request->cards as $card) {
-                $card = Card::where('UUID', $card['card_id'])->where('SubAccountId', $subaccount->Id)->first();
-                if (!$card) {
+                $cardO = Card::where('UUID', $card['card_id'])->where('SubAccountId', $subaccount->Id)->first();
+                if (!$cardO) {
                     return self::error('Card ' . $card['card_id'] . ' not found or you do not have permission to access it', 404, new Exception("Card " . $card['card_id'] . " not found or you do not have permission to access it"));
                 }
 
                 $actions[] = [
-                    'card' => $card,
-                    'balance' => self::decrypt($card->Balance),
+                    'card' => $cardO,
+                    'balance' => self::decrypt($cardO->Balance),
                     'amount' => floatval($card['amount']),
                     'new_balance' => self::decrypt($card->Balance) + floatval($card['amount']),
                     'description' => $card['description'] ?? 'Funding'
