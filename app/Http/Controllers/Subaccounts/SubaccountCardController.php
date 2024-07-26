@@ -384,7 +384,7 @@ class SubaccountCardController extends Controller
                     'card' => $cardO,
                     'balance' => self::decrypt($cardO->Balance),
                     'amount' => floatval($card['amount']),
-                    'new_balance' => self::decrypt($card->Balance) + floatval($card['amount']),
+                    'new_balance' => self::decrypt($cardO->Balance) + floatval($card['amount']),
                     'description' => $card['description'] ?? 'Funding'
                 ];
 
