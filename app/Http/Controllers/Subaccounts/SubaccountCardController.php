@@ -363,8 +363,8 @@ class SubaccountCardController extends Controller
             return self::error('Subaccount not found or you do not have permission to access it', 404, new Exception("Subaccount not found or you do not have permission to access it"));
         }
 
-        Log::info('Funding cards for subaccount ' . $subaccount->Id);
-        Log::info($request->cards);
+        // Log::info('Funding cards for subaccount ' . $subaccount->Id);
+        // Log::info($request->cards);
 
         $this->validate($request, [
             'cards' => 'required|array',
