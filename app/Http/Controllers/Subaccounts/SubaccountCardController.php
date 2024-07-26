@@ -17,6 +17,7 @@ use App\Models\Wallet\WalletMovement;
 use App\Models\Shared\AuthorizationRequest;
 use Ramsey\Uuid\Uuid;
 use App\Models\CardMovements\CardMovements;
+use Illuminate\Support\Facades\Log;
 
 class SubaccountCardController extends Controller
 {
@@ -361,6 +362,9 @@ class SubaccountCardController extends Controller
         if (!$subaccount) {
             return self::error('Subaccount not found or you do not have permission to access it', 404, new Exception("Subaccount not found or you do not have permission to access it"));
         }
+
+        Log::info('Funding cards for subaccount ' . $subaccount->Id);
+        Log::info($request->cards);
 
         $this->validate($request, [
             'cards' => 'required|array',
