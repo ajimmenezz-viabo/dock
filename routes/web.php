@@ -25,6 +25,10 @@ $router->group(['prefix' => 'dev'], function () use ($router) {
     $router->post('/encrypt', 'Security\Dev@encrypt_data');
 });
 
+$router->group(['prefix' => 'card'], function () use ($router) {
+    $router->post('validate', 'Card\MainCardController@public_validate');
+});
+
 $router->group(['prefix' => 'authorizations'], function () use ($router) {
     $router->post('consult',  'Authorization\AuthorizationConsult@consult');
     $router->post('purchase', 'Authorization\AuthorizationPurchase@purchase');

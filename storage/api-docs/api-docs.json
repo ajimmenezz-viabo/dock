@@ -2404,6 +2404,113 @@
                 ]
             }
         },
+        "/card/validate": {
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Validate card",
+                "description": "Validate card",
+                "operationId": "4a5379ae016e244d1c41949d63b24cec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "card": {
+                                        "description": "Last 8 card numbers",
+                                        "type": "string",
+                                        "example": "12349876"
+                                    },
+                                    "pin": {
+                                        "description": "Card pin",
+                                        "type": "string",
+                                        "example": "1234"
+                                    },
+                                    "moye": {
+                                        "description": "Expiration Date (MMYY)",
+                                        "type": "string",
+                                        "example": "1223"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Card validated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "card_id": {
+                                            "description": "Card UUID",
+                                            "type": "string",
+                                            "example": "123456"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data | Invalid expiration date | Invalid pin ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Invalid data | Invalid expiration date | Invalid pin"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Unauthorized | Error while decoding the token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Card not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Message",
+                                            "type": "string",
+                                            "example": "Card not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/card/{uuid}/block": {
             "post": {
                 "tags": [

@@ -312,4 +312,92 @@ class MainCardController extends Controller
             return false;
         }
     }
+
+    /**
+     *  @OA\Post(
+     *      path="/card/validate",
+     *      tags={"Cards"},
+     *      summary="Validate card",
+     *      description="Validate card",
+     *   
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(  
+     *              @OA\Property(property="card", type="string", example="12349876", description="Last 8 card numbers"),
+     *              @OA\Property(property="pin", type="string", example="1234", description="Card pin"),
+     *              @OA\Property(property="moye", type="string", example="1223", description="Expiration Date (MMYY)")
+     *          )
+     *     ),
+     *      
+     *      @OA\Response(
+     *          response="200",
+     *          description="Card validated successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="card_id", type="string", example="123456", description="Card UUID")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *         response=400,
+     *          description="Invalid data | Invalid expiration date | Invalid pin ",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Invalid data | Invalid expiration date | Invalid pin", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthorized",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Unauthorized | Error while decoding the token", description="Message")
+     *          )
+     *      ),
+     * 
+     *      @OA\Response(
+     *          response=404,
+     *          description="Card not found",
+     *          @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Card not found", description="Message")
+     *          )
+     *     )
+     * )
+     * 
+     */
+    public function public_validate(Request $request)
+    {
+        $this->validate($request, [
+            'card' => 'required',
+            'pin' => 'required',
+            'moye' => 'required'
+        ], [
+            'card.required' => 'Card is required',
+            'pin.required' => 'Pin is required',
+            'moye.required' => 'Expiration Date (MMYY) is required'
+        ]);
+
+        $card = Card::where('MaskedPan', 'like', '%' . substr($request->card, -4))->get();
+        if (count($card) == 0) {
+            return response()->json(['message' => 'Card not found.'], 404);
+        }
+
+        foreach ($card as $c) {
+            if (self::decrypt($c->Pan) != substr($request->card, 0, -8)) {
+                if (self::decrypt($c->Pin) == $request->pin) {
+                    $expiration = substr(self::decrypt($c->ExpirationDate), 5, 2) . substr(self::decrypt($c->ExpirationDate), 2,2);
+                    if ($expiration == $request->moye) {
+                        return response()->json([
+                            'card_id' => $c->UUID,
+                        ], 200);
+                    } else {
+                        return self::error('Invalid expiration date', 400, new \Exception('Invalid expiration date'));
+                    }
+                } else {
+                    return self::error('Invalid pin', 400, new \Exception('Invalid pin'));
+                }
+            }
+            continue;
+        }
+
+        return self::error('Card not found', 404, new \Exception('Card not found'));
+    }
 }
