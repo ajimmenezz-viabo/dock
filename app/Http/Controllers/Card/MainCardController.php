@@ -7,6 +7,7 @@ use App\Http\Controllers\CardMovements\CardMovementController;
 use App\Http\Controllers\CardsManagement\CardsController;
 use App\Http\Controllers\Controller;
 use App\Models\Card\Card;
+use App\Models\Card\Pan;
 use App\Models\CardMovements\CardMovements;
 use App\Models\CardSetups\CardSetups;
 use Illuminate\Http\Request;
@@ -159,19 +160,22 @@ class MainCardController extends Controller
 
     public static function cardObject($uuid)
     {
-        $card = Card::where('UUID', $uuid)->first();
+        $card = Card::where('UUID', $uuid)
+            ->leftJoin('card_pan', 'card_pan.CardId', '=', 'cards.Id')
+            ->select('cards.*', 'card_pan.Pan as PanDecrypted')
+            ->first();
         $card = CardsController::fillSensitiveData($card);
         $setup = self::fillSetups($card);
 
-        $bin = is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8);
+        $bin = is_null($card->PanDecrypted) ? null : substr($card->PanDecrypted, -8);
 
         return [
             'card_id' => $card->UUID,
             'card_external_id' => $card->ExternalId,
             'card_type' => $card->Type,
             'brand' => $card->Brand,
-            'bin' => (is_null($card->Pan) ? null : substr(self::decrypt($card->Pan), -8)),
-            'pan' => (is_null($card->Pan) ? null : self::decrypt($card->Pan)),
+            'bin' => $bin,
+            'pan' => $card->PanDecrypted,
             'client_id' => $card->CustomerPrefix . str_pad($card->CustomerId, 7, '0', STR_PAD_LEFT),
             'masked_pan' => $card->MaskedPan,
             'balance' => number_format(floatval(self::decrypt($card->Balance)), 2, '.', ''),
@@ -383,7 +387,7 @@ class MainCardController extends Controller
         foreach ($card as $c) {
             if (self::decrypt($c->Pan) != substr($request->card, 0, -8)) {
                 if (self::decrypt($c->Pin) == $request->pin) {
-                    $expiration = substr(self::decrypt($c->ExpirationDate), 5, 2) . substr(self::decrypt($c->ExpirationDate), 2,2);
+                    $expiration = substr(self::decrypt($c->ExpirationDate), 5, 2) . substr(self::decrypt($c->ExpirationDate), 2, 2);
                     if ($expiration == $request->moye) {
                         return response()->json([
                             'card_id' => $c->UUID,

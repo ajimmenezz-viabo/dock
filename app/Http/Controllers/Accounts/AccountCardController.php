@@ -63,13 +63,33 @@ class AccountCardController extends Controller
         try {
             $account_id = auth()->user()->Id;
 
-            $this->validate($request, [
-                'page' => 'integer'
+            $cards = Card::where('CreatorId', $account_id)
+                ->join('card_pan', 'card_pan.CardId', '=', 'cards.Id')
+                ->join('card_setup', 'card_setup.CardId', '=', 'cards.Id')
+                ->select(
+                    'cards.UUID as card_id',
+                    'cards.ExternalId as card_external_id',
+                    'cards.Type as card_type',
+                    'cards.Brand as brand',
+                    DB::raw("SUBSTRING(card_pan.Pan, -8) as bin"),
+                    'card_pan.Pan as pan',
+                    DB::raw("CONCAT(cards.CustomerPrefix, LPAD(cards.CustomerId, 7 - LENGTH(cards.CustomerPrefix), '0')) as client_id"),
+                    'cards.MaskedPan as masked_pan',
+                    'cards.Balance as balance',
+                    'cards.STPAccount as clabe',
+                    'card_setup.Status as status'
+                )->get();
+
+            foreach ($cards as $card) {
+                $card->balance = self::decrypt($card->balance);
+            }
+
+            return response()->json([
+                'cards' => $cards,
+                'page' => 1,
+                'total_pages' => 1,
+                'total_records' => count($cards)
             ]);
-
-            $page = request('page', 1);
-
-            return response()->json(SubaccountCardController::cards($account_id, null, $page), 200);
         } catch (Exception $e) {
             return self::error('Error getting cards', 400, $e);
         }
@@ -139,7 +159,7 @@ class AccountCardController extends Controller
      *      )
      * )
      * 
-    */
+     */
     public function assign(Request $request)
     {
         try {

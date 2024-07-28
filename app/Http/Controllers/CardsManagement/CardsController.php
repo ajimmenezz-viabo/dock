@@ -21,6 +21,7 @@ use App\Models\CardSetups\CardSetupsChange;
 use App\Models\Person\PersonAccount;
 use App\Models\Person\PersonAccountAlias;
 use App\Http\Controllers\Card\MainCardController;
+use App\Models\Card\Pan;
 use Exception;
 
 class CardsController extends Controller
@@ -44,9 +45,6 @@ class CardsController extends Controller
                 ->limit($limit)
                 ->get();
 
-            $count = Card::where('CreatorId', auth()->user()->Id)
-                // ->orWhere('PersonId', auth()->user()->Id)
-                ->count();
 
             $cards_array = [];
 
@@ -57,8 +55,8 @@ class CardsController extends Controller
             return response()->json([
                 'cards' => $cards_array,
                 'page' => $page,
-                'total_pages' => ceil($count / $limit),
-                'total_records' => $count
+                'total_pages' => ceil(count($cards) / $limit),
+                'total_records' => count($cards)
             ], 200);
         } catch (Exception $e) {
             return self::error('Error getting cards', 400, $e);
@@ -134,61 +132,61 @@ class CardsController extends Controller
     }
 
     /**
-    *   @OA\Post(
-    *       path="/api/v1/card/{uuid}/block",
-    *       summary="Block a card",
-    *       description="Block a card.",
-    *       tags={"Cards"},
-    *       security={{"bearerAuth": {}}},
-    *       @OA\Parameter(
-    *           name="uuid",
-    *           in="path",
-    *           description="Card UUID",
-    *           required=true,
-    *           @OA\Schema(
-    *               type="string"
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=200,
-    *           description="Card blocked successfully",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
-    *               @OA\Property(property="card",type="object",description="Card object",
-    *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
-    *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
-    *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
-    *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
-    *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
-    *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
-    *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
-    *               )
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=404,
-    *           description="Card not found or you do not have permission to access it",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=400,
-    *           description="Error blocking card",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=401,
-    *           description="Unauthorized",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Unauthorized")
-    *           )
-    *       )
-    *   )
-    *
-    */
+     *   @OA\Post(
+     *       path="/api/v1/card/{uuid}/block",
+     *       summary="Block a card",
+     *       description="Block a card.",
+     *       tags={"Cards"},
+     *       security={{"bearerAuth": {}}},
+     *       @OA\Parameter(
+     *           name="uuid",
+     *           in="path",
+     *           description="Card UUID",
+     *           required=true,
+     *           @OA\Schema(
+     *               type="string"
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=200,
+     *           description="Card blocked successfully",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
+     *               @OA\Property(property="card",type="object",description="Card object",
+     *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
+     *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
+     *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
+     *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
+     *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
+     *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
+     *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
+     *               )
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=404,
+     *           description="Card not found or you do not have permission to access it",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=400,
+     *           description="Error blocking card",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=401,
+     *           description="Unauthorized",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Unauthorized")
+     *           )
+     *       )
+     *   )
+     *
+     */
     public function block($uuid)
     {
         try {
@@ -238,61 +236,61 @@ class CardsController extends Controller
 
 
     /**
-    *   @OA\Post(
-    *       path="/api/v1/card/{uuid}/unblock",
-    *       summary="Unblock a card",
-    *       description="Unblock a card.",
-    *       tags={"Cards"},
-    *       security={{"bearerAuth": {}}},
-    *       @OA\Parameter(
-    *           name="uuid",
-    *           in="path",
-    *           description="Card UUID",
-    *           required=true,
-    *           @OA\Schema(
-    *               type="string"
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=200,
-    *           description="Card unblocked successfully",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
-    *               @OA\Property(property="card",type="object",description="Card object",
-    *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
-    *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
-    *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
-    *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
-    *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
-    *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
-    *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
-    *               )
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=404,
-    *           description="Card not found or you do not have permission to access it",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=400,
-    *           description="Error blocking card",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
-    *           )
-    *       ),
-    *       @OA\Response(
-    *           response=401,
-    *           description="Unauthorized",
-    *           @OA\JsonContent(
-    *               @OA\Property(property="message", type="string", example="Unauthorized")
-    *           )
-    *       )
-    *   )
-    *
-    */
+     *   @OA\Post(
+     *       path="/api/v1/card/{uuid}/unblock",
+     *       summary="Unblock a card",
+     *       description="Unblock a card.",
+     *       tags={"Cards"},
+     *       security={{"bearerAuth": {}}},
+     *       @OA\Parameter(
+     *           name="uuid",
+     *           in="path",
+     *           description="Card UUID",
+     *           required=true,
+     *           @OA\Schema(
+     *               type="string"
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=200,
+     *           description="Card unblocked successfully",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Card blocked successfully", description="Success message"),
+     *               @OA\Property(property="card",type="object",description="Card object",
+     *                   @OA\Property(property="card_id",type="string",example="f4b3b3b3-4b3b-4b3b-4b3b-4b3b4b3b4b3b",description="Card UUID"),
+     *                   @OA\Property(property="card_type",type="string",example="virtual",description="Card type"),
+     *                   @OA\Property(property="brand",type="string",example="Mastercard",description="Card active function"),
+     *                   @OA\Property(property="bin",type="string",example="98765437",description="Card BIN"),
+     *                   @OA\Property(property="balance",type="string",example="0.00",description="Card balance"),
+     *                   @OA\Property(property="clabe",type="string",example="0123456789",description="Card CLABE"),
+     *                   @OA\Property(property="status",type="string",example="BLOCKED",description="Card status"),
+     *               )
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=404,
+     *           description="Card not found or you do not have permission to access it",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Card not found or you do not have permission to access it", description="Error message")
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=400,
+     *           description="Error blocking card",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Error blocking card", description="Error message")
+     *           )
+     *       ),
+     *       @OA\Response(
+     *           response=401,
+     *           description="Unauthorized",
+     *           @OA\JsonContent(
+     *               @OA\Property(property="message", type="string", example="Unauthorized")
+     *           )
+     *       )
+     *   )
+     *
+     */
     public function unblock($uuid)
     {
         try {
@@ -764,7 +762,7 @@ class CardsController extends Controller
             $dockRaw
         );
 
-        if(!isset($response->id)){
+        if (!isset($response->id)) {
             return PersonAccountAlias::create([
                 'CardId' => $card->Id,
                 'PersonAccountId' => PersonAccount::where('ExternalId', $person_account['external_id'])->first()->Id,
@@ -831,20 +829,36 @@ class CardsController extends Controller
 
                 $mode = isset($response->mode) ? $response->mode : 'gcm';
 
+                $pan = self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->pan, $mode));
+
                 Card::where('Id', $card->Id)->update([
-                    'Pan' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->pan, $mode)),
+                    'Pan' => $pan,
                     'CVV' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->cvv, $mode)),
                     'ExpirationDate' => self::encrypt(DockEncryption::decrypt($response->aes, $response->iv, $response->expiration_date, $mode))
                 ]);
+
+                Pan::create([
+                    'CardId' => $card->Id,
+                    'Pan' => $pan
+                ]);
+            } else {
+                $pan = Pan::where('CardId', $card->Id)->first();
+                if (!$pan) {
+                    Pan::create([
+                        'CardId' => $card->Id,
+                        'Pan' => $card->Pan
+                    ]);
+                }
             }
 
             if ($card->Pin == null || $card->Pin == "") {
-                $pin = self::getPin($card->ExternalId);
-                Card::where('Id', $card->Id)->update([
-                    'Pin' => !is_null($pin) ? self::encrypt($pin) : null
-                ]);
+                MainCardController::changeCardPin($card, substr($card->MaskedPan, -4));
             }
-            return Card::where('Id', $card->Id)->first();
+
+            return Card::where('Id', $card->Id)
+                ->leftJoin('card_pan', 'cards.Id', '=', 'card_pan.CardId')
+                ->select('cards.*', 'card_pan.Pan as PanDecrypted')
+                ->first();
         } catch (Exception $e) {
             return $card;
         }
