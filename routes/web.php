@@ -23,7 +23,7 @@ $router->group(['prefix' => 'dev'], function () use ($router) {
     $router->get('/decrypt', 'Security\Decrypt@decrypt');
     $router->post('/create_usr', 'Security\Dev@create_user');
     $router->post('/encrypt', 'Security\Dev@encrypt_data');
-    $router->get('/pin/{card_id}', 'CardsController@getPin');
+    $router->get('/pin/{card_id}', 'CardsManagement\CardsController@getPin');
 });
 
 $router->group(['prefix' => 'card'], function () use ($router) {
