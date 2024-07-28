@@ -73,7 +73,7 @@ class AccountCardController extends Controller
                     'cards.Brand as brand',
                     DB::raw("SUBSTRING(card_pan.Pan, -8) as bin"),
                     'card_pan.Pan as pan',
-                    DB::raw("CONCAT(cards.CustomerPrefix, LPAD(cards.CustomerId, 7 - LENGTH(cards.CustomerPrefix), '0')) as client_id"),
+                    DB::raw("CONCAT(cards.CustomerPrefix, LPAD(cards.CustomerId, 7, '0')) as client_id"),
                     'cards.MaskedPan as masked_pan',
                     'cards.Balance as balance',
                     'cards.STPAccount as clabe',

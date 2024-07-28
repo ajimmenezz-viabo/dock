@@ -634,8 +634,7 @@ class CardsController extends Controller
 
     private function cardObject(string $uuid)
     {
-        $card = Card::where('UUID', $uuid)->first();
-        $card = self::fillSensitiveData($card);
+        $card = self::fillSensitiveData(Card::where('UUID', $uuid)->first());
         $person = PersonController::getPersonObjectShort($card->PersonId);
         $alias = PersonAccountAlias::where('CardId', $card->Id)->first();
         if (!$alias) {
@@ -842,11 +841,10 @@ class CardsController extends Controller
                     'Pan' => $pan
                 ]);
             } else {
-                $pan = Pan::where('CardId', $card->Id)->first();
-                if (!$pan) {
+                if (!Pan::where('CardId', $card->Id)->first()) {
                     Pan::create([
                         'CardId' => $card->Id,
-                        'Pan' => $card->Pan
+                        'Pan' => self::decrypt($card->Pan)
                     ]);
                 }
             }
