@@ -388,6 +388,7 @@ class MainCardController extends Controller
         }
 
         foreach ($card as $c) {
+            if ($c->SubaccountUUID == null) continue;
             if (self::decrypt($c->Pan) != substr($request->card, 0, -8)) {
                 if (self::decrypt($c->Pin) == $request->pin) {
                     $expiration = substr(self::decrypt($c->ExpirationDate), 5, 2) . substr(self::decrypt($c->ExpirationDate), 2, 2);
@@ -406,6 +407,6 @@ class MainCardController extends Controller
             continue;
         }
 
-        return self::error('Card not found', 404, new \Exception('Card not found'));
+        return self::error('Card not found or there is no subaccount assigned to it', 404, new \Exception('Card not found or there is no subaccount assigned to it'));
     }
 }
