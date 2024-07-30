@@ -379,7 +379,10 @@ class MainCardController extends Controller
             'moye.required' => 'Expiration Date (MMYY) is required'
         ]);
 
-        $card = Card::where('MaskedPan', 'like', '%' . substr($request->card, -4))->get();
+        $card = Card::where('MaskedPan', 'like', '%' . substr($request->card, -4))
+            ->leftJoin('subaccounts', 'cards.SubAccountId', '=', 'subaccounts.Id')
+            ->select('cards.*', 'subaccounts.UUID as SubaccountUUID')
+            ->get();
         if (count($card) == 0) {
             return response()->json(['message' => 'Card not found.'], 404);
         }
@@ -391,6 +394,7 @@ class MainCardController extends Controller
                     if ($expiration == $request->moye) {
                         return response()->json([
                             'card_id' => $c->UUID,
+                            'subaccount_id' => $c->SubaccountUUID
                         ], 200);
                     } else {
                         return self::error('Invalid expiration date', 400, new \Exception('Invalid expiration date'));
