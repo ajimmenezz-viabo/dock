@@ -65,7 +65,7 @@ class WalletController extends Controller
             'card' => [
                 'card_id' => $card->UUID ?? null,
                 'masked_pan' => $card->MaskedPan ?? null,
-                'bin' => substr($card->Pan, 0, -8) ?? null
+                'bin' => isset($card->Pan) ?  substr($card->Pan, 0, -8) : null
             ]
         ];
     }
