@@ -50,7 +50,9 @@ class WalletController extends Controller
 
     public static function movement_object($movement)
     {
-        $card = Card::where('Id', $movement->CardId)->first();
+        $card = Card::leftJoin('card_pan', 'card_pan.CardId', '=', 'card.Id')
+            ->select('card.UUID', 'card_pan.Pan')
+            ->where('Id', $movement->CardId)->first();
 
         return [
             'movement_id' => $movement->UUID,
@@ -62,7 +64,7 @@ class WalletController extends Controller
             'date' => self::toUnixTime($movement->created_at),
             'card' => [
                 'card_id' => $card->UUID ?? null,
-                'masked_pan' => $card->MaskedPan ?? null
+                'bin' => substr($card->Pan, 0, -8) ?? null
             ]
         ];
     }

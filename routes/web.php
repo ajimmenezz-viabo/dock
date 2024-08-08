@@ -137,6 +137,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->get('/movements', 'Accounts\AccountController@movements');
             $router->get('/cards', 'Accounts\AccountCardController@index');
             $router->post('/cards/assign', 'Accounts\AccountCardController@assign');
+            $router->post('/cards/assign_bulk', 'Accounts\AccountCardController@assign_bulk');
         });
 
         $router->group(['prefix' => 'subaccounts'], function () use ($router) {

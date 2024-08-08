@@ -417,11 +417,17 @@ class SubaccountController extends Controller
      *              @OA\Property(property="movements", type="array", description="Movements",
      *                  @OA\Items(
      *                      @OA\Property(property="movement_id", type="string", example="123456", description="Movement UUID"),
-     *                      @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
      *                      @OA\Property(property="type", type="string", example="deposit", description="Movement Type"),
-     *                      @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
-     *                      @OA\Property(property="authorization_code", type="string", example="123456", description="Authorization Code"),
      *                      @OA\Property(property="description", type="string", example="Deposit", description="Movement Description"),
+     *                      @OA\Property(property="reference", type="string", example="123456", description="Movement Reference"),
+     *                      @OA\Property(property="amount", type="string", example="100.00", description="Movement Amount"),
+     *                      @OA\Property(property="balance", type="string", example="100.00", description="Movement Balance"),
+     *                      @OA\Property(property="authorization_code", type="string", example="123456", description="Authorization Code"),
+     *                      @OA\Property(property="date", type="string", example="1716611739", description="Movement Date / Unix Timestamp"),
+     *                      @OA\Property(property="card", type="object",
+     *                          @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),
+     *                          @OA\Property(property="bin", type="string", example="123456", description="Card BIN")
+     *                     )
      *                 )
      *              ),
      *              @OA\Property(property="total_records", type="integer", example="1", description="Total records"),

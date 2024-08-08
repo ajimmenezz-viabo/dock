@@ -63,26 +63,7 @@ class AccountCardController extends Controller
         try {
             $account_id = auth()->user()->Id;
 
-            $cards = Card::where('CreatorId', $account_id)
-                ->join('card_pan', 'card_pan.CardId', '=', 'cards.Id')
-                ->join('card_setup', 'card_setup.CardId', '=', 'cards.Id')
-                ->select(
-                    'cards.UUID as card_id',
-                    'cards.ExternalId as card_external_id',
-                    'cards.Type as card_type',
-                    'cards.Brand as brand',
-                    DB::raw("SUBSTRING(card_pan.Pan, -8) as bin"),
-                    'card_pan.Pan as pan',
-                    DB::raw("CONCAT(cards.CustomerPrefix, LPAD(cards.CustomerId, 7, '0')) as client_id"),
-                    'cards.MaskedPan as masked_pan',
-                    'cards.Balance as balance',
-                    'cards.STPAccount as clabe',
-                    'card_setup.Status as status'
-                )->get();
-
-            foreach ($cards as $card) {
-                $card->balance = self::decrypt($card->balance);
-            }
+            $cards = self::getAccountCards($account_id);
 
             return response()->json([
                 'cards' => $cards,
@@ -93,6 +74,32 @@ class AccountCardController extends Controller
         } catch (Exception $e) {
             return self::error('Error getting cards', 400, $e);
         }
+    }
+
+    public static function getAccountCards($account_id)
+    {
+        $cards = Card::where('CreatorId', $account_id)
+            ->join('card_pan', 'card_pan.CardId', '=', 'cards.Id')
+            ->join('card_setup', 'card_setup.CardId', '=', 'cards.Id')
+            ->select(
+                'cards.UUID as card_id',
+                'cards.ExternalId as card_external_id',
+                'cards.Type as card_type',
+                'cards.Brand as brand',
+                DB::raw("SUBSTRING(card_pan.Pan, -8) as bin"),
+                'card_pan.Pan as pan',
+                DB::raw("CONCAT(cards.CustomerPrefix, LPAD(cards.CustomerId, 7, '0')) as client_id"),
+                'cards.MaskedPan as masked_pan',
+                'cards.Balance as balance',
+                'cards.STPAccount as clabe',
+                'card_setup.Status as status'
+            )->get();
+
+        foreach ($cards as $card) {
+            $card->balance = self::decrypt($card->balance);
+        }
+
+        return $cards;
     }
 
     /** 
@@ -202,5 +209,90 @@ class AccountCardController extends Controller
         }
 
         return true;
+    }
+
+    /**
+    * @OA\Post(
+    *   path="/api/v1/account/cards/assign_bulk",
+    *   tags={"Account Cards"},
+    *   summary="Assign multiple cards to a subaccount",
+    *   description="Assigns multiple cards to a subaccount",
+    *   security={{"bearerAuth":{}}},
+    *   
+    *   @OA\RequestBody(
+    *       required=true,
+    *       @OA\JsonContent(
+    *           @OA\Property(property="subaccount_id", type="string", example="123456", description="Subaccount UUID"),
+    *           @OA\Property(property="cards", type="array", @OA\Items(type="string", example="123456"), description="Array of card UUIDs")
+    *       )
+    *   ),
+    *
+    *   @OA\Response(
+    *       response="200",
+    *       description="Cards assigned successfully",
+    *       @OA\JsonContent(
+    *           @OA\Property(property="cards", type="array",
+    *               @OA\Items(
+    *                   @OA\Property(property="card_id", type="string", example="123456", description="Card UUID"),
+    *                   @OA\Property(property="card_type", type="string", example="credit", description="Card Type"),
+    *                   @OA\Property(property="brand", type="string", example="master", description="Card Brand"),
+    *                   @OA\Property(property="masked_pan", type="string", example="1234xxxxxxxx9876", description="Masked Pan"),
+    *                   @OA\Property(property="bin", type="string", example="12345678", description="Card BIN"),
+    *                   @OA\Property(property="balance", type="string", example="100.00", description="Card Balance"),
+    *                   @OA\Property(property="clabe", type="string", example="123456", description="Card CLABE"),
+    *                   @OA\Property(property="status", type="string", example="active", description="Card Status")
+    *               )
+    *           ),
+    *           @OA\Property(property="page", type="integer", example="1", description="Current page"),
+    *           @OA\Property(property="total_pages", type="integer", example="1", description="Total pages"),
+    *           @OA\Property(property="total_records", type="integer", example="1", description="Total records")
+    *       )
+    *   ),
+    *)
+    *
+    *
+
+    */
+
+    public function assign_bulk(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $account_id = auth()->user()->Id;
+
+            $this->validate($request, [
+                'subaccount_id' => 'required|string',
+                'cards' => 'required|array'
+            ]);
+
+            $subaccount = Subaccount::where('UUID', $request->subaccount_id)->where('AccountId', $account_id)->first();
+            if (!$subaccount) {
+                return self::error('Subaccount not found or you do not have permission to access it', 404, new Exception('Subaccount not found or you do not have permission to access it'));
+            }
+
+            foreach ($request->cards as $c) {
+                $card = Card::where('UUID', $c)->where('CreatorId', $account_id)->whereNull('SubaccountId')->first();
+
+                if (!$card) {
+                    return self::error('Card ' . $c . ' not found or already assigned', 400, new Exception('Card ' . $c . ' not found or already assigned'));
+                }
+            }
+
+            Card::whereIn('UUID', $request->cards)->update(['SubaccountId' => $subaccount->Id]);
+
+            DB::commit();
+
+            $cards = self::getAccountCards($account_id);
+
+            return response()->json([
+                'cards' => $cards,
+                'page' => 1,
+                'total_pages' => 1,
+                'total_records' => count($cards)
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return self::error('Error assigning card. ' . $e->getMessage(), 400, $e);
+        }
     }
 }

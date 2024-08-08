@@ -35,7 +35,7 @@ class BeoneAuthMiddleware
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if ($this->auth->guard($guard)->guest() || $this->auth->guard($guard)->user()->profile !== 'beone') {
+        if ($this->auth->guard($guard)->guest() || !in_array($this->auth->guard($guard)->user()->profile, ['beone', 'admin_account'])) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
