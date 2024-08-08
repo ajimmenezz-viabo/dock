@@ -50,9 +50,9 @@ class WalletController extends Controller
 
     public static function movement_object($movement)
     {
-        $card = Card::leftJoin('card_pan', 'card_pan.CardId', '=', 'card.Id')
-            ->select('card.UUID', 'card_pan.Pan')
-            ->where('Id', $movement->CardId)->first();
+        $card = Card::leftJoin('card_pan', 'card_pan.CardId', '=', 'cards.Id')
+            ->select('cards.UUID', 'card_pan.Pan')
+            ->where('cards.Id', $movement->CardId)->first();
 
         return [
             'movement_id' => $movement->UUID,
