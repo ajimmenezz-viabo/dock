@@ -64,6 +64,7 @@ class WalletController extends Controller
             'date' => self::toUnixTime($movement->created_at),
             'card' => [
                 'card_id' => $card->UUID ?? null,
+                'masked_pan' => $card->MaskedPan ?? null,
                 'bin' => substr($card->Pan, 0, -8) ?? null
             ]
         ];
