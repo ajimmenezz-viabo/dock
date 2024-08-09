@@ -373,20 +373,26 @@ class SubaccountCardController extends Controller
         try {
             $actions = [];
             $total = 0;
-
+            $cardBalance = [];
             foreach ($request->cards as $card) {
                 $cardO = Card::where('UUID', $card['card_id'])->where('SubAccountId', $subaccount->Id)->first();
                 if (!$cardO) {
                     return self::error('Card ' . $card['card_id'] . ' not found or you do not have permission to access it', 404, new Exception("Card " . $card['card_id'] . " not found or you do not have permission to access it"));
                 }
 
+                if (!isset($cardBalance[$cardO->Id])) {
+                    $cardBalance[$cardO->Id] = self::decrypt($cardO->Balance);
+                }
+
                 $actions[] = [
                     'card' => $cardO,
-                    'balance' => self::decrypt($cardO->Balance),
+                    'balance' => $cardBalance[$cardO->Id],
                     'amount' => floatval($card['amount']),
-                    'new_balance' => self::decrypt($cardO->Balance) + floatval($card['amount']),
+                    'new_balance' => floatval($cardBalance[$cardO->Id]) + floatval($card['amount']),
                     'description' => $card['description'] ?? 'Funding'
                 ];
+
+                $cardBalance[$cardO->Id] += floatval($card['amount']);
 
                 $total += floatval($card['amount']);
             }
@@ -403,7 +409,6 @@ class SubaccountCardController extends Controller
                 return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
             }
         } catch (Exception $e) {
-            DB::rollBack();
             return self::error('Error funding cards', 400, $e);
         }
     }
