@@ -404,13 +404,15 @@ class SubaccountCardController extends Controller
                 return self::error('Insufficient funds in the subaccount', 400, new Exception("Insufficient funds in the subaccount"));
             }
 
-            $resultActions = $this->callActions($wallet, $actions);
+            //$resultActions = $this->callActions($wallet, $actions);
 
-            if ($resultActions['result']) {
-                return response()->json(SubaccountController::subaccountObject($subaccount->Id), 200);
-            } else {
-                return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
-            }
+            return response()->json($actions, 200);
+
+            // if ($resultActions['result']) {
+            //     return response()->json(SubaccountController::subaccountObject($subaccount->Id), 200);
+            // } else {
+            //     return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
+            // }
         } catch (Exception $e) {
             return self::error('Error funding cards', 400, $e);
         }
@@ -439,11 +441,7 @@ class SubaccountCardController extends Controller
                     'Reference' => null
                 ]);
 
-                $cardBalance = self::decrypt($action['card']->Balance);
-
-                $newBalance = floatval($cardBalance) + floatval($action['amount']);
-
-                $action['card']->Balance = self::encrypt($newBalance);
+                $action['card']->Balance = self::encrypt($action['new_balance']);
                 $action['card']->save();
 
                 $authorization = AuthorizationRequest::create([
@@ -466,7 +464,7 @@ class SubaccountCardController extends Controller
                     'Type' => 'TRANSFER',
                     'Description' => 'Transfer from Subaccount. ' . $action['description'] ?? 'Layout Movement',
                     'Amount' => floatval($action['amount']),
-                    'Balance' => floatval($newBalance)
+                    'Balance' => floatval($action['new_balance']),
                 ]);
             }
 
