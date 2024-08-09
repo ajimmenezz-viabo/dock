@@ -51,7 +51,7 @@ class WalletController extends Controller
     public static function movement_object($movement)
     {
         $card = Card::leftJoin('card_pan', 'card_pan.CardId', '=', 'cards.Id')
-            ->select('cards.UUID', 'card_pan.Pan')
+            ->select('cards.UUID', 'card_pan.Pan', 'cards.MaskedPan')
             ->where('cards.Id', $movement->CardId)->first();
 
         return [
@@ -65,7 +65,7 @@ class WalletController extends Controller
             'card' => [
                 'card_id' => $card->UUID ?? null,
                 'masked_pan' => $card->MaskedPan ?? null,
-                'bin' => isset($card->Pan) ?  substr($card->Pan, 0, -8) : null
+                'bin' => isset($card->Pan) ?  substr($card->Pan, -8) : null
             ]
         ];
     }
