@@ -404,15 +404,15 @@ class SubaccountCardController extends Controller
                 return self::error('Insufficient funds in the subaccount', 400, new Exception("Insufficient funds in the subaccount"));
             }
 
-            //$resultActions = $this->callActions($wallet, $actions);
+            $resultActions = $this->callActions($wallet, $actions);
 
-            return response()->json($actions, 200);
+            // return response()->json($actions, 200);
 
-            // if ($resultActions['result']) {
-            //     return response()->json(SubaccountController::subaccountObject($subaccount->Id), 200);
-            // } else {
-            //     return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
-            // }
+            if ($resultActions['result']) {
+                return response()->json(SubaccountController::subaccountObject($subaccount->Id), 200);
+            } else {
+                return self::error('Error funding cards. ' . $resultActions['message'], 400, new Exception('Error funding cards. ' . $resultActions['message']));
+            }
         } catch (Exception $e) {
             return self::error('Error funding cards', 400, $e);
         }
