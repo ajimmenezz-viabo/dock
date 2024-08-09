@@ -18,6 +18,9 @@ use App\Models\Shared\AuthorizationRequest;
 use Ramsey\Uuid\Uuid;
 use App\Models\CardMovements\CardMovements;
 use Illuminate\Support\Facades\Log;
+use App\Services\DockApiService;
+use App\Models\CardSetups\CardSetups;
+use App\Models\CardSetups\CardSetupsChange;
 
 class SubaccountCardController extends Controller
 {
@@ -480,6 +483,73 @@ class SubaccountCardController extends Controller
                 'result' => false,
                 'message' => $e->getMessage()
             ];
+        }
+    }
+
+    public function onall($uuid)
+    {
+        try {
+            $account_id = auth()->user()->Id;
+
+            $subaccount = Subaccount::where('UUID', $uuid)->where('AccountId', $account_id)->first();
+
+            if (!$subaccount) {
+                return response()->json([
+                    'message' => 'Subaccount not found or you do not have permission to access it'
+                ], 404);
+            }
+
+            $errors = [];
+
+            $dockRaw = [
+                'status' => 'NORMAL',
+                'status_reason' => null
+            ];
+            $cards = Card::where('CreatorId', $account_id)->where('SubAccountId', $subaccount->Id)->get();
+            foreach ($cards as $card) {
+                try {
+                    $response = DockApiService::request(
+                        ((env('APP_ENV') === 'production') ? env('PRODUCTION_URL') : env('STAGING_URL')) . 'cards/v1/cards/' . $card->ExternalId . '/status',
+                        'PUT',
+                        [],
+                        [],
+                        'bearer',
+                        $dockRaw
+                    );
+        
+                    DB::beginTransaction();
+        
+                    $card_setup = CardSetups::where('CardId', $card->Id)->first();
+        
+                    CardSetupsChange::create([
+                        'UserId' => auth()->user()->Id,
+                        'CardId' => $card->Id,
+                        'Field' => 'Status',
+                        'OldValue' => $card_setup->Status,
+                        'NewValue' => $response->status,
+                        'StatusReason' => $response->status_reason
+                    ]);
+        
+                    CardSetups::where('CardId', $card->Id)->update([
+                        'Status' => $response->status,
+                        'StatusReason' => $response->status_reason ?? ""
+                    ]);
+        
+                    DB::commit();
+                } catch (Exception $e) {
+                    DB::rollBack();
+                    $errors[] = [
+                        'card_id' => $card->UUID,
+                        'message' => $e->getMessage()
+                    ];
+                }
+            }
+
+            return response()->json([
+                'errors' => $errors
+            ], 200);
+        } catch (Exception $e) {
+            return self::error('Error getting cards', 400, $e);
         }
     }
 }

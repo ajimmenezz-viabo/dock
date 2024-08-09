@@ -149,6 +149,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
 
             $router->get('/{uuid}/cards', 'Subaccounts\SubaccountCardController@index');
             $router->post('/{uuid}/fund', 'Subaccounts\SubaccountCardController@fund');
+            $router->post('/{uuid}/onall', 'Subaccounts\SubaccountCardController@onall');
         });
 
         $router->group(['prefix' => 'card'], function () use ($router) {
